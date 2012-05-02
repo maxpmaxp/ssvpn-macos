@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>tblk</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>SurfSafeVPN_32x32_active.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>SurfSafe VPN Configuration</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>SurfSafeVPN</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>Tunnelblick Help</string>
+	<key>CFBundleIconFile</key>
+	<string>SurfSafeVPN_32x32_active.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>net.tunnelblick.tunnelblick</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>SurfSafeVPN</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0 (build TBBUILDNUMBER)</string>
+	<key>CFBundleSignature</key>
+	<string>OVPN</string>
+	<key>CFBundleVersion</key>
+	<string>TBBUILDNUMBER</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSUIElement</key>
+	<string>1</string>
+	<key>OSAScriptingDefinition</key>
+	<string>SurfSafeVPN.sdef</string>
+	<key>SUEnableSystemProfiling</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>http://tunnelblick.net/appcast.rss</string>
+	<key>SUPublicDSAKeyFile</key>
+	<string>dsa_pub.pem</string>
+	<key>SUServerListURL</key>
+	<string>http://serfsafevpn.com/servers-dev.xml</string>
+</dict>
+</plist>
