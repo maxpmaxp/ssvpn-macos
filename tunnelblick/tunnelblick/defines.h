@@ -24,9 +24,8 @@
 // Note: The standard up script refers to the log directory without using this header file
 #define LOG_DIR   @"/Library/Application Support/Tunnelblick/Logs"
 #define CONFIGURATION_UPDATES_BUNDLE_PATH  @"/Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle"
-#define CONFIGURATION_UPDATES_PATH @"/Library/Application Support/SurfSafe/ConfigurationUpdates"
-#define CONFIGURATION_FILE @"server-dev.xml"
-
+#define CONFIGURATION_UPDATES_PATH @"/Library/Application Support/ConfigurationUpdates"
+#define CONFIGURATION_PATH @"Library/Application Support/Tunnelblick/Configurations"
 //*************************************************************************************************
 // Extensions that require 640 permissions and ownership by Admin group
 #define KEY_AND_CRT_EXTENSIONS [NSArray arrayWithObjects: @"cer", @"crt", @"der", @"key", @"p12", @"p7b", @"p7c", @"pem", @"pfx", nil]

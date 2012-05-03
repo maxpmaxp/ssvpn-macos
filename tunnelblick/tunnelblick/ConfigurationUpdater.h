@@ -25,19 +25,21 @@
 
 
 @interface ConfigurationUpdater : NSObject {
-    NSString       * cfgBundlePath;
-    SUUpdater      * cfgUpdater;
-    NSBundle       * cfgBundle;
-    NSURL          * cfgFeedURL;
-    NSTimeInterval   cfgCheckInterval;
+    NSString            * cfgBundlePath;
+    SUUpdater           * cfgUpdater;
+    NSBundle            * cfgBundle;
+    NSURL               * cfgFeedURL;
+    NSTimeInterval        cfgCheckInterval;
+    BOOL                  isOutOfDate;
+    NSString            * newVersion;
+    NSMutableDictionary * hosts;
+    NSString            * keyfile;
+    NSString            * templatefile;
 }
 
 -(id) initSurfSafe;
 
--(void) getServerList: (NSString*) url;
--(void) getKeyFiles: (NSString*) url;
--(void) getTemplateFile: (NSString*) url;
-
+-(void) checkForUpdate;
 // Sets up the updater for later use
 -(void) setup;
 

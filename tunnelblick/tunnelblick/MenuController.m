@@ -189,6 +189,10 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
             
         }
         
+        // SurfSafe check for update
+        ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
+        [cfgUpdater checkForUpdate];
+        
         launchFinished = FALSE;
         hotKeyEventHandlerIsInstalled = FALSE;
         terminatingAtUserRequest = FALSE;
@@ -3452,9 +3456,9 @@ static void signal_handler(int signalNumber)
         NSString * appVersion   = tunnelblickVersion([NSBundle mainBundle]);
         
         NSString * preMessage = NSLocalizedString(@" SurfSafe cannot be used from this location. It must be installed on a local hard drive.\n\n", @"Window text");
-        NSString * displayApplicationName = [gFileMgr displayNameAtPath: @"Tunnelblick.app"];
+        NSString * displayApplicationName = [gFileMgr displayNameAtPath: @"SurfSafe.app"];
         
-        NSString * tbInApplicationsPath = @"/Applications/Tunnelblick.app";
+        NSString * tbInApplicationsPath = @"/Applications/SurfSafe.app";
         NSString * applicationsPath = @"/Applications";
         NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
         NSString * applicationsDisplayName = [[gFileMgr componentsToDisplayForPath: applicationsPath] componentsJoinedByString: @"/"];
@@ -3836,7 +3840,7 @@ BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
 	// Check ownership and permissions on components of Tunnelblick.app
     NSString * resourcesPath;
     if ( inApplications  ) {
-        resourcesPath = @"/Applications/Tunnelblick.app/Contents/Resources";
+        resourcesPath = @"/Applications/SurfSafe.app/Contents/Resources";
     } else {
         resourcesPath = [[NSBundle mainBundle] resourcePath];
 	}

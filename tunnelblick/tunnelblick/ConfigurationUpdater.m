@@ -26,15 +26,22 @@
 #import "MenuController.h"
 #import "NSFileManager+TB.h"
 #import "helper.h"
+#import "SSZipArchive.h"
 
 extern NSFileManager        * gFileMgr;
+
+@interface ConfigurationUpdater(Private)
+-(void) getKeyFiles: (NSString*) url;
+-(void) getTemplateFile: (NSString*) url;
+-(void) updateVersion: (NSString*) version;
+@end
 
 @implementation ConfigurationUpdater
 
 -(ConfigurationUpdater *) init
 {
     // Returns nil if no bundle to be updated, or no valid Info.plist in the bundle, or no valid feedURL or no CFBundleVersion in the Info.plist
-    
+
     NSBundle * bundle = [NSBundle bundleWithPath: CONFIGURATION_UPDATES_BUNDLE_PATH];
 	if (  bundle  ) {
         NSString * plistPath = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Info.plist"];
@@ -112,28 +119,86 @@ extern NSFileManager        * gFileMgr;
     return nil;
 }
 
--(ConfigurationUpdater *) initSurfSafe
-{
-    // Returns nil if no bundle to be updated, or no valid Info.plist in the bundle, or no valid feedURL or no CFBundleVersion in the Info.plist
-    
-    NSString *updatePath = CONFIGURATION_UPDATES_PATH;
-    
-    return nil;
+-(id) initSurfSafe{
+    if (  self = [super init]  ) {
+        isOutOfDate = NO;
+        hosts = [[NSMutableDictionary alloc] init];
+        //[self getServerList: @""];
+    }
+    return self;
 }
 
--(void) getServerList:(NSString *)url
-{
-    
+-(void) checkForUpdate
+{    
+    NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+    if (infoPlist)
+    {
+        NSString *serverListUrl = [infoPlist objectForKey:@"SUServerListURL"];
+        
+        NSXMLParser *parser = [[[NSXMLParser alloc] initWithContentsOfURL:[NSURL URLWithString:serverListUrl]] autorelease];
+        [parser setDelegate:(id)self];
+        [parser parse];
+    }
+
 }
 
--(void) getKeyFiles:(NSString *)url
+
+-(void) getKeyFiles:(NSString *)file
 {
-    
+    NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSString *url = [infoPlist objectForKey:@"SurfSafeURL"];
+   
+    url = [NSString stringWithFormat:@"%@/%@", url, file];
+    NSData *data = [NSData dataWithContentsOfURL: [NSURL URLWithString:url]];
+    if (data){
+        NSString *tempDir = NSTemporaryDirectory();
+        NSString *filePath = [NSString stringWithFormat:@"%@/%@", tempDir, file];
+        [data writeToFile:filePath atomically:YES];
+                
+        NSString * dest = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+
+        [SSZipArchive unzipFileAtPath:filePath toDestination:dest];
+    }
 }
 
--(void) getTemplateFile:(NSString *)url
+-(void) getTemplateFile:(NSString *)file
 {
+    NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSString *url = [infoPlist objectForKey:@"SurfSafeURL"];
     
+    NSArray *arr = [file componentsSeparatedByString:@"."];
+    NSString *ext = [arr lastObject]; 
+    NSString * dest = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+    
+    url = [NSString stringWithFormat:@"%@/%@", url, file];
+    NSError *error;
+    NSString *contents = [NSString stringWithContentsOfURL:[NSURL URLWithString:url] encoding:NSUTF8StringEncoding error:&error];
+    if (contents){
+        NSArray * keys = [hosts allKeys];
+        for (int i = 0; i < [keys count]; i++) {
+            NSString *host = [keys objectAtIndex:i];
+            NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
+            //NSArray *values = [hosts objectForKey:host];
+            //NSString *displayName = [values objectAtIndex:0];
+            //NSString *location = [values objectAtIndex:1];
+            
+            NSString *filename = [NSString stringWithFormat:@"%@.%@", name, ext];
+            NSString *filePath = [dest stringByAppendingPathComponent:filename];
+            
+            NSString *hostContents = [contents stringByReplacingOccurrencesOfString:@"\%ADDRESS\%" withString:host];
+            
+            [hostContents writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:&error];
+        }
+    }
+}
+
+-(void) updateVersion:(NSString *)version{
+    NSString *path = [[NSBundle mainBundle] bundlePath];
+    NSString *finalPath = [path stringByAppendingPathComponent:@"Contents/Info.plist"];
+    NSMutableDictionary *plistData = [NSMutableDictionary dictionaryWithContentsOfFile:finalPath];
+    NSLog(@"Info plist = %@", finalPath);
+    [plistData setObject:version forKey:@"CFBundleVersion"];
+    [plistData writeToFile:finalPath atomically:YES];
 }
 
 -(void) dealloc
@@ -142,6 +207,7 @@ extern NSFileManager        * gFileMgr;
     [cfgUpdater release];
     [cfgBundle release];
     [cfgFeedURL release];
+    [hosts release];
     [super dealloc];
 }
 
@@ -238,5 +304,48 @@ extern NSFileManager        * gFileMgr;
     NSLog(@"cfgUpdater: updaterWillRelaunchApplication");
 }
 // */
+
+
+
+-(void) parser: (NSXMLParser *) parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+{
+    if ([elementName isEqualToString:@"software"]){
+        NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+        NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
+        NSLog(@"bundle version %@", version);
+        if (![version isEqualToString: [attributeDict objectForKey:@"version"]]){
+            isOutOfDate = YES;
+            newVersion = version;
+        }
+    }
+    if (isOutOfDate){
+        if ([elementName isEqualToString:@"host"]){
+            
+            NSString *hostname, *displayname, *location;
+            
+            hostname    = [attributeDict objectForKey:@"hostname"];
+            displayname = [attributeDict objectForKey:@"name"];
+            location    = [attributeDict objectForKey:@"location"];
+            NSArray *arr = [[NSMutableArray alloc] initWithObjects:displayname, location, nil];
+            [hosts setObject:arr forKey:hostname];
+        }
+        else if ([elementName isEqualToString:@"keys"]){
+            keyfile = [attributeDict objectForKey:@"file"];
+        }
+        else if ([elementName isEqualToString:@"template"]){
+            templatefile = [attributeDict objectForKey:@"file"];
+        }
+    }
+    
+}
+
+-(void) parserDidEndDocument:(NSXMLParser *) parser
+{
+    if (isOutOfDate){
+        [self updateVersion: newVersion];
+        [self getKeyFiles: keyfile];
+        [self getTemplateFile: templatefile];
+    }
+}
 
 @end
