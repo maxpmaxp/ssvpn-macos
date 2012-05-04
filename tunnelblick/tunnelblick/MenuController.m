@@ -189,10 +189,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
             
         }
         
-        // SurfSafe check for update
-        ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
-        [cfgUpdater checkForUpdate];
-        
+               
         launchFinished = FALSE;
         hotKeyEventHandlerIsInstalled = FALSE;
         terminatingAtUserRequest = FALSE;
@@ -451,7 +448,11 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
             text = NSLocalizedString(@"SurfSafe has been secured successfully.", @"Window text");
             [splashScreen setMessage: text];
         }
-                
+        
+        // SurfSafe check for update
+        ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
+        [cfgUpdater checkForUpdate];
+        
         // If this is the first time we are using the new CFBundleIdentifier
         //    Rename the old preferences so we can access them with the new CFBundleIdentifier
         //    And create a link to the new preferences from the old preferences (make the link read-only)

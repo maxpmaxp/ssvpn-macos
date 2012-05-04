@@ -197,36 +197,35 @@ int main(int argc, char *argv[])
         }
         if (   ( ! bundleVersion )
             || ( ! bundleShortVersionString )  ) {
-            NSLog(@"Tunnelblick Installer: Both a CFBundleVersion and a CFBundleShortVersionString are required to set the bundle version");
+            NSLog(@"SurfSafe Installer: Both a CFBundleVersion and a CFBundleShortVersionString are required to set the bundle version");
         }
     }
     //**************************************************************************************************************************
     // (1)
     // If INSTALLER_COPY_APP is set:
-    //    Move /Applications/Tunnelblick.app to the Trash, then copy this app to /Applications/Tunnelblick.app
-    
+    //    Move /Applications/Tunnelblick.app to the Trash, then copy this app to /Applications/Tunnelblick.app    
     if (  copyApp  ) {
         NSString * currentPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-        NSString * targetPath = @"/Applications/Tunnelblick.app";
+        NSString * targetPath = @"/Applications/SurfSafe.app";
         if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
             errorExitIfAnySymlinkInPath(targetPath, 1);
             if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
                                                                source: @"/Applications"
                                                           destination: @""
-                                                                files: [NSArray arrayWithObject:@"Tunnelblick.app"]
+                                                                files: [NSArray arrayWithObject:@"SurfSafe.app"]
                                                                   tag: nil]  ) {
-                NSLog(@"Tunnelblick Installer: Moved %@ to the Trash", targetPath);
+                NSLog(@"SurfSafe Installer: Moved %@ to the Trash", targetPath);
             } else {
-                NSLog(@"Tunnelblick Installer: Unable to move %@ to the Trash", targetPath);
+                NSLog(@"SurfSafe Installer: Unable to move %@ to the Trash", targetPath);
                 errorExit();
             }
         }
         
         if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
-            NSLog(@"Tunnelblick Installer: Unable to copy %@ to %@", currentPath, targetPath);
+            NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
             errorExit();
         } else {
-            NSLog(@"Tunnelblick Installer: Copied %@ to %@", currentPath, targetPath);
+            NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
         }
     }
         
@@ -239,11 +238,11 @@ int main(int argc, char *argv[])
         if (  ! (   [gFileMgr fileExistsAtPath: gDeployPath isDirectory: &isDir]
                  && isDir  )  ) {
             if (  ! [gFileMgr tbCopyPath: deployBackupPath toPath: gDeployPath handler: nil]  ) {
-                NSLog(@"Tunnelblick Installer: Unable to restore %@ from backup", gDeployPath);
+                NSLog(@"SurfSafe Installer: Unable to restore %@ from backup", gDeployPath);
                 errorExit();
             }
 
-            NSLog(@"Tunnelblick Installer: Restored %@ from backup", gDeployPath);
+            NSLog(@"SurfSafe Installer: Restored %@ from backup", gDeployPath);
         }
     }
     
@@ -264,7 +263,7 @@ int main(int argc, char *argv[])
                     if (  isDir  ) {
                         // Move old configurations folder's contents to the new configurations folder and delete the old folder
                         if (  moveContents(oldConfigDirPath, newConfigDirPath)  ) {
-                            NSLog(@"Tunnelblick Installer: Moved contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
+                            NSLog(@"SurfSafe Installer: Moved contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
                             secureTblks = TRUE; // We may have moved some .tblks, so we should secure them
                             // Delete the old configuration folder
                             if (  ! [gFileMgr tbRemoveFileAtPath:oldConfigDirPath handler: nil]  ) {
@@ -272,23 +271,23 @@ int main(int argc, char *argv[])
                                 errorExit();
                             }
                         } else {
-                            NSLog(@"Tunnelblick Installer: Unable to move all contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
+                            NSLog(@"SurfSafe Installer: Unable to move all contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
                             errorExit();
                         }
                     } else {
-                        NSLog(@"Tunnelblick Installer: %@ is not a symbolic link or a folder", oldConfigDirPath);
+                        NSLog(@"SurfSafe Installer: %@ is not a symbolic link or a folder", oldConfigDirPath);
                         errorExit();
                     }
                 }
             }
         } else {
-            NSLog(@"Tunnelblick Installer: Warning: %@ exists but is not a folder", newConfigDirPath);
+            NSLog(@"SurfSafe Installer: Warning: %@ exists but is not a folder", newConfigDirPath);
             if ( secureTblks ) {
                 errorExit();
             }
         }
     } else {
-        NSLog(@"Tunnelblick Installer: Warning: Private configuration folder %@ does not exist", newConfigDirPath);
+        NSLog(@"SurfSafe Installer: Warning: Private configuration folder %@ does not exist", newConfigDirPath);
         if ( secureTblks ) {
             errorExit();
         }
@@ -342,7 +341,7 @@ int main(int argc, char *argv[])
                         doCopy = TRUE;  // No version info in library copy
                     }
                 } else {
-                    NSLog(@"Tunnelblick Installer: No CFBundleVersion in %@", gAppConfigurationsBundlePath);
+                    NSLog(@"SurfSafe Installer: No CFBundleVersion in %@", gAppConfigurationsBundlePath);
                     errorExit();
                 }
             } else {
@@ -363,15 +362,15 @@ int main(int argc, char *argv[])
                 }
                 if (  [gFileMgr fileExistsAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH]  ) {
                     if (  ! [gFileMgr tbRemoveFileAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH handler: nil]  ) {
-                        NSLog(@"Tunnelblick Installer: Unable to delete %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
+                        NSLog(@"SurfSafe Installer: Unable to delete %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
                         errorExit();
                     }
                 }
                 if (  ! [gFileMgr tbCopyPath: gAppConfigurationsBundlePath toPath: CONFIGURATION_UPDATES_BUNDLE_PATH handler: nil]  ) {
-                    NSLog(@"Tunnelblick Installer: Unable to copy %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
+                    NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
                     errorExit();
                 } else {
-                    NSLog(@"Tunnelblick Installer: Copied %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
+                    NSLog(@"SurfSafe Installer: Copied %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
                 }
                 
                 // Set ownership and permissions
@@ -476,7 +475,7 @@ int main(int argc, char *argv[])
         }
         
         if (  ! okSoFar  ) {
-            NSLog(@"Tunnelblick Installer: Unable to secure Tunnelblick.app");
+            NSLog(@"SurfSafe Installer: Unable to secure SurfSafe.app");
             errorExit();
         }
     }
@@ -528,7 +527,7 @@ int main(int argc, char *argv[])
                 if (  ! (   [gFileMgr fileExistsAtPath: deployOrigBackupPath isDirectory: &isDir]
                          && isDir  )  ) {
                     if (  ! [gFileMgr tbCopyPath: gDeployPath toPath: deployOrigBackupPath handler: nil]  ) {
-                        NSLog(@"Tunnelblick Installer: Unable to make original backup of %@", gDeployPath);
+                        NSLog(@"SurfSafe Installer: Unable to make original backup of %@", gDeployPath);
                         errorExit();
                     }
                     NSLog(@"Made original backup of %@", gDeployPath);
@@ -541,16 +540,16 @@ int main(int argc, char *argv[])
                 [gFileMgr tbMovePath: deployBackupPath toPath: deployPrevBackupPath handler: nil];    // Make backup of previous backup. Ignore errors -- previous backup may not exist yet
                 
                 if (  ! [gFileMgr tbCopyPath: gDeployPath toPath: deployBackupPath handler: nil]  ) {  // Make backup of current
-                    NSLog(@"Tunnelblick Installer: Unable to make backup of %@", gDeployPath);
+                    NSLog(@"SurfSafe Installer: Unable to make backup of %@", gDeployPath);
                     errorExit();
                 }
-                NSLog(@"Tunnelblick Installer: Made backup of %@", gDeployPath);
+                NSLog(@"SurfSafe Installer: Made backup of %@", gDeployPath);
                 
                 if ( ! secureOneFolder(deployBackupPath)  ) {
-                    NSLog(@"Tunnelblick Installer: Unable to secure backup at %@", deployBackupPath);
+                    NSLog(@"SurfSafe Installer: Unable to secure backup at %@", deployBackupPath);
                     errorExit();
                 }
-                NSLog(@"Tunnelblick Installer: Secured backup at %@", deployBackupPath);
+                NSLog(@"SurfSafe Installer: Secured backup at %@", deployBackupPath);
             }
         }
     }
@@ -590,7 +589,7 @@ int main(int argc, char *argv[])
         }
         
         if (  ! okSoFar  ) {
-            NSLog(@"Tunnelblick Installer: Warning: Unable to secure all .tblk packages");
+            NSLog(@"SurfSafe Installer: Warning: Unable to secure all .tblk packages");
         }
     }
     
@@ -676,11 +675,11 @@ int main(int argc, char *argv[])
             okSoFar = okSoFar && checkSetPermissions(firstPath, @"755", YES);
             okSoFar = okSoFar && secureOneFolder(firstPath);
         } else {
-            NSLog(@"Tunnelblick Installer: trying to secure unknown item at %@", firstPath);
+            NSLog(@"SurfSafe Installer: trying to secure unknown item at %@", firstPath);
             errorExit();
         }
         if (  ! okSoFar  ) {
-            NSLog(@"Tunnelblick Installer: unable to secure %@", firstPath);
+            NSLog(@"SurfSafe Installer: unable to secure %@", firstPath);
             errorExit();
         }
     }
@@ -698,9 +697,9 @@ int main(int argc, char *argv[])
             if (  [gFileMgr fileExistsAtPath: firstPath]  ) {
                 errorExitIfAnySymlinkInPath(firstPath, 6);
                 if (  ! [gFileMgr tbRemoveFileAtPath: firstPath handler: nil]  ) {
-                    NSLog(@"Tunnelblick Installer: unable to remove %@", firstPath);
+                    NSLog(@"SurfSafe Installer: unable to remove %@", firstPath);
                 } else {
-                    NSLog(@"Tunnelblick Installer: removed %@", firstPath);
+                    NSLog(@"SurfSafe Installer: removed %@", firstPath);
                 }
                 
                 // Delete shadow copy, too, if it exists
@@ -711,15 +710,15 @@ int main(int argc, char *argv[])
                     if (  [gFileMgr fileExistsAtPath: shadowCopyPath]  ) {
                         errorExitIfAnySymlinkInPath(shadowCopyPath, 7);
                         if (  ! [gFileMgr tbRemoveFileAtPath: shadowCopyPath handler: nil]  ) {
-                            NSLog(@"Tunnelblick Installer: unable to remove %@", shadowCopyPath);
+                            NSLog(@"SurfSafe Installer: unable to remove %@", shadowCopyPath);
                         } else {
-                            NSLog(@"Tunnelblick Installer: removed %@", shadowCopyPath);
+                            NSLog(@"SurfSafe Installer: removed %@", shadowCopyPath);
                         }
                     }
                 }
             }
         } else {
-            NSLog(@"Tunnelblick Installer: trying to remove unknown item at %@", firstPath);
+            NSLog(@"SurfSafe Installer: trying to remove unknown item at %@", firstPath);
             errorExit();
         }
     }
@@ -1057,8 +1056,10 @@ BOOL checkSetPermissions(NSString * path, NSString * permsShouldHave, BOOL fileM
 {
     if (  ! [gFileMgr fileExistsAtPath: path]  ) {
         if (  fileMustExist  ) {
+            NSLog(@"Don't have path %@", path);
             return NO;
         }
+        NSLog(@"Set permission path %@ success", path);
         return YES;
     }
 

@@ -134,7 +134,7 @@ extern NSFileManager        * gFileMgr;
     if (infoPlist)
     {
         NSString *serverListUrl = [infoPlist objectForKey:@"SUServerListURL"];
-        
+        NSLog(@"Check for surfsafe update %@ ", serverListUrl);
         NSXMLParser *parser = [[[NSXMLParser alloc] initWithContentsOfURL:[NSURL URLWithString:serverListUrl]] autorelease];
         [parser setDelegate:(id)self];
         [parser parse];
@@ -193,12 +193,34 @@ extern NSFileManager        * gFileMgr;
 }
 
 -(void) updateVersion:(NSString *)version{
-    NSString *path = [[NSBundle mainBundle] bundlePath];
-    NSString *finalPath = [path stringByAppendingPathComponent:@"Contents/Info.plist"];
-    NSMutableDictionary *plistData = [NSMutableDictionary dictionaryWithContentsOfFile:finalPath];
-    NSLog(@"Info plist = %@", finalPath);
-    [plistData setObject:version forKey:@"CFBundleVersion"];
-    [plistData writeToFile:finalPath atomically:YES];
+    
+    //NSString* plistPath = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
+    
+    NSString* plistPath = [CONFIGURATION_PATH stringByAppendingPathComponent:@"SurfSafe-Info.plist"];
+    plistPath = [NSHomeDirectory() stringByAppendingPathComponent:plistPath];
+    
+    //NSString* plistPath = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
+    NSMutableDictionary *infoPlist = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
+    
+    if (infoPlist == nil){   
+        NSString* path = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
+        infoPlist = [NSMutableDictionary dictionaryWithContentsOfFile:path];
+        [infoPlist writeToFile:plistPath atomically:YES];
+    }
+    //NSString *path = [[NSBundle mainBundle] bundlePath];
+    //NSString *finalPath = [path stringByAppendingPathComponent:@"Contents/Info.plist"];
+    //NSMutableDictionary *plistData = [NSMutableDictionary dictionaryWithContentsOfFile:finalPath];
+    if (infoPlist){
+        NSLog(@"Info plist = %@", plistPath);
+        NSLog(@"Info plist save = %@", plistPath);
+        [infoPlist setObject:version forKey:@"CFBundleVersion"];
+        if ([infoPlist writeToFile:plistPath atomically:YES]){
+            NSLog(@"update version finished");
+        }
+        else{
+            NSLog(@"update version fail");
+        }
+    }
 }
 
 -(void) dealloc
@@ -310,12 +332,26 @@ extern NSFileManager        * gFileMgr;
 -(void) parser: (NSXMLParser *) parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     if ([elementName isEqualToString:@"software"]){
-        NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+        
+        NSString* plistPath = [CONFIGURATION_PATH stringByAppendingPathComponent:@"SurfSafe-Info.plist"];
+        plistPath = [NSHomeDirectory() stringByAppendingPathComponent:plistPath];
+        
+        //NSString* plistPath = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
+        NSMutableDictionary *infoPlist = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
+        
+        if (infoPlist == nil){        
+        
+        
+            NSString* path = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
+            infoPlist = [NSDictionary dictionaryWithContentsOfFile:path];
+            [infoPlist writeToFile:plistPath atomically:YES];
+            //NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];;
+        }
         NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
-        NSLog(@"bundle version %@", version);
+        NSLog(@"Current version %@", version);
         if (![version isEqualToString: [attributeDict objectForKey:@"version"]]){
             isOutOfDate = YES;
-            newVersion = version;
+            newVersion = [attributeDict objectForKey:@"version"];
         }
     }
     if (isOutOfDate){
