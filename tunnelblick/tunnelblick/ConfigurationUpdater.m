@@ -133,13 +133,26 @@ extern NSFileManager        * gFileMgr;
     NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
     if (infoPlist)
     {
+        NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
+        NSString *os = @"mac";
+        
         NSString *serverListUrl = [infoPlist objectForKey:@"SUServerListURL"];
-        NSLog(@"Check for surfsafe update %@ ", serverListUrl);
-        NSXMLParser *parser = [[[NSXMLParser alloc] initWithContentsOfURL:[NSURL URLWithString:serverListUrl]] autorelease];
-        [parser setDelegate:(id)self];
-        [parser parse];
+        
+        NSString *requestURL = [NSString stringWithFormat:@"%@?v=\"%@\"&os=\"%@\"", serverListUrl, version, os];
+        
+        NSLog(@"Check for surfsafe update %@ ", requestURL);
+        
+        //NSError *error;
+        
+        NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:serverListUrl]];
+        if (data){
+            NSString *path = [CONFIGURATION_UPDATES_PATH stringByAppendingPathComponent:@"servers.xml"];
+            [data writeToFile:path atomically:YES];
+            NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:data] autorelease];
+            [parser setDelegate:(id)self];
+            [parser parse];
+        }
     }
-
 }
 
 
@@ -330,30 +343,18 @@ extern NSFileManager        * gFileMgr;
 
 
 -(void) parser: (NSXMLParser *) parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
-{
-    if ([elementName isEqualToString:@"software"]){
-        
-        NSString* plistPath = [CONFIGURATION_PATH stringByAppendingPathComponent:@"SurfSafe-Info.plist"];
-        plistPath = [NSHomeDirectory() stringByAppendingPathComponent:plistPath];
-        
-        //NSString* plistPath = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
-        NSMutableDictionary *infoPlist = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
-        
-        if (infoPlist == nil){        
-        
-        
-            NSString* path = [[NSBundle mainBundle] pathForResource:@"SurfSafe-Info" ofType:@"plist"];
-            infoPlist = [NSDictionary dictionaryWithContentsOfFile:path];
-            [infoPlist writeToFile:plistPath atomically:YES];
-            //NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];;
-        }
-        NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
-        NSLog(@"Current version %@", version);
-        if (![version isEqualToString: [attributeDict objectForKey:@"version"]]){
-            isOutOfDate = YES;
-            newVersion = [attributeDict objectForKey:@"version"];
-        }
+{    
+    if ([elementName isEqualToString:@"application"]){
+        NSString *os = [attributeDict objectForKey:@"os"];
+        if ([os isEqualToString:@"mac"]){
+            NSString *appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+            NSString *serverVersion = [attributeDict objectForKey:@"version"];
+            if ([appVersion compare:serverVersion]){                
+                isOutOfDate = YES;
+            }
+        }        
     }
+    /*
     if (isOutOfDate){
         if ([elementName isEqualToString:@"host"]){
             
@@ -372,7 +373,7 @@ extern NSFileManager        * gFileMgr;
             templatefile = [attributeDict objectForKey:@"file"];
         }
     }
-    
+    */
 }
 
 -(void) parserDidEndDocument:(NSXMLParser *) parser

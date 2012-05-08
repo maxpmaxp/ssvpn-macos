@@ -170,7 +170,7 @@ enum state_t {                      // These are the "states" of the guideState 
                     if (  [ext isEqualToString: @"tblk"]  ) {
                         NSString * tbPath = tblkPathFromConfigPath(fullPath);
                         if (  ! tbPath  ) {
-                            NSLog(@"Tunnelblick VPN Configuration ignored: No .conf or .ovpn file in %@", fullPath);
+                            NSLog(@"SurfsafeVPN VPN Configuration ignored: No .conf or .ovpn file in %@", fullPath);
                              ignored = TRUE;
                         } else {
                             addIt = TRUE;
@@ -187,7 +187,7 @@ enum state_t {                      // These are the "states" of the guideState 
             
             if (  addIt  ) {
                 if (  [dict objectForKey: dispName]  ) {
-                    NSLog(@"Tunnelblick Configuration ignored: The name is already being used: %@", fullPath);
+                    NSLog(@"SurfsafeVPN Configuration ignored: The name is already being used: %@", fullPath);
                      ignored = TRUE;
                 } else {
                     [dict setObject: fullPath forKey: dispName];
@@ -207,7 +207,7 @@ enum state_t {                      // These are the "states" of the guideState 
                     if (  [ext isEqualToString: @"tblk"]  ) {
                         NSString * tbPath = configPathFromTblkPath(fullPath);
                         if (  ! tbPath  ) {
-                            NSLog(@"Tunnelblick VPN Configuration ignored: No .conf or .ovpn file. Try reinstalling %@", fullPath);
+                            NSLog(@"SurfsafeVPN VPN Configuration ignored: No .conf or .ovpn file. Try reinstalling %@", fullPath);
                              ignored = TRUE;
                         } else {
                             addIt = TRUE;
@@ -220,14 +220,14 @@ enum state_t {                      // These are the "states" of the guideState 
                 }
                 if (   [folderPath isEqualToString: gSharedPath]
                     && ([ext isEqualToString: @"ovpn"] || [ext isEqualToString: @"conf"])  ) {
-                    NSLog(@"Tunnelblick VPN Configuration ignored: Only Tunnelblick VPN Configurations (.tblk packages) may be shared %@", fullPath);
+                    NSLog(@"SurfsafeVPN VPN Configuration ignored: Only SurfsafeVPN VPN Configurations (.tblk packages) may be shared %@", fullPath);
                      ignored = TRUE;
                 }
             }
             
             if (  addIt  ) {
                 if (  [dict objectForKey: dispName]  ) {
-                    NSLog(@"Tunnelblick Configuration ignored: The name is already being used: %@", fullPath);
+                    NSLog(@"SurfsafeVPN Configuration ignored: The name is already being used: %@", fullPath);
                      ignored = TRUE;
                 } else {
                     [dict setObject: fullPath forKey: dispName];
@@ -764,7 +764,7 @@ enum state_t {                      // These are the "states" of the guideState 
     }
     
     if (  ! localAuth  ) {
-        NSLog(@"Configuration installer: The Tunnelblick VPN Configuration installation was cancelled by the user.");
+        NSLog(@"Configuration installer: The SurfsafeVPN VPN Configuration installation was cancelled by the user.");
         [NSApp replyToOpenOrPrint: NSApplicationDelegateReplyCancel];
         return;
     }
@@ -861,7 +861,7 @@ enum state_t {                      // These are the "states" of the guideState 
     if (   [filePath hasPrefix: gPrivatePath]
         || [filePath hasPrefix: gSharedPath]
         || [filePath hasPrefix: gDeployPath]  ) {
-        NSLog(@"Configuration installer: Tunnelblick VPN Configuration is already installed: %@", filePath);
+        NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration is already installed: %@", filePath);
         TBRunAlertPanel(NSLocalizedString(@"Configuration Installation Error", @"Window title"),
                         NSLocalizedString(@"You cannot install a SurfSafe VPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.", @"Window text"),
                         nil, nil, nil);
@@ -1033,7 +1033,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSString * oldIdentifier = [self getLowerCaseStringForKey: @"CFBundleIdentifier" inDictionary: oldInfo defaultTo: nil];
                 if (  [oldIdentifier isEqualToString: pkgId]) {
                     if (  [pkgReplaceIdentical isEqualToString: @"no"]  ) {
-                        NSLog(@"Configuration installer: Tunnelblick VPN Configuration %@ has NOT been %@installed: TBReplaceOption=NO.",
+                        NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ has NOT been %@installed: TBReplaceOption=NO.",
                               tryDisplayName, (pkgDoUninstall ? @"un" : @""));
                         if (  pkgUninstallFailOK  ) {
                             return [NSArray array];
@@ -1044,7 +1044,7 @@ enum state_t {                      // These are the "states" of the guideState 
                         // Fall through to install
                     } else if (  [pkgReplaceIdentical isEqualToString: @"yes"]  ) {
                         if (  [oldVersion compare: pkgVersion options: NSNumericSearch] == NSOrderedDescending  ) {
-                            NSLog(@"Configuration installer: Tunnelblick VPN Configuration %@ has NOT been %@installed: it has a lower version number.",
+                            NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ has NOT been %@installed: it has a lower version number.",
                                   tryDisplayName, (pkgDoUninstall ? @"un" : @""));
                             if (  pkgUninstallFailOK  ) {
                                 return [NSArray array];
@@ -1098,7 +1098,7 @@ enum state_t {                      // These are the "states" of the guideState 
                                                      NSLocalizedString(@"Cancel", @"Button"),   // Alternate
                                                      nil);
                         if (  result == NSAlertAlternateReturn  ) {
-                            NSLog(@"Configuration installer: Tunnelblick VPN Configuration %@ (un)installation declined by user.", tryDisplayName);
+                            NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ (un)installation declined by user.", tryDisplayName);
                             return [NSArray array];
                         }
                     }
@@ -1148,13 +1148,13 @@ enum state_t {                      // These are the "states" of the guideState 
             
             if((error) || (CFUserNotificationReceiveResponse(notification, 0, &response))) {
                 CFRelease(notification);    // Couldn't receive a response
-                NSLog(@"Configuration installer: The Tunnelblick VPN Package has NOT been installed.\n\nAn unknown error occured.");
+                NSLog(@"Configuration installer: The SurfsafeVPN VPN Package has NOT been installed.\n\nAn unknown error occured.");
                 return nil;
             }
             
             if((response & 0x3) != kCFUserNotificationDefaultResponse) {
                 CFRelease(notification);    // User clicked "Cancel"
-                NSLog(@"Configuration installer: Installation of Tunnelblick VPN Package %@ has been cancelled.", tryDisplayName);
+                NSLog(@"Configuration installer: Installation of SurfsafeVPN VPN Package %@ has been cancelled.", tryDisplayName);
                 return [NSArray array];
             }
             
@@ -1208,7 +1208,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 } else if (  result == NSAlertAlternateReturn  ) {
                     pkgSharePackage = @"shared";
                 } else {
-                    NSLog(@"Configuration installer: Installation of Tunnelblick VPN Package %@ has been cancelled.", tryDisplayName);
+                    NSLog(@"Configuration installer: Installation of SurfsafeVPN VPN Package %@ has been cancelled.", tryDisplayName);
                     return [NSArray array];
                 }
             }
@@ -1435,8 +1435,8 @@ enum state_t {                      // These are the "states" of the guideState 
 }
 
 // Given paths to a configuration (either a .conf or .ovpn file, or a .tblk package) in one of the gConfigDirs
-// (~/Library/Application Support/Tunnelblick/Configurations, /Library/Application Support/Tunnelblick/Shared, or /Resources/Deploy,
-// and an alternate config in /Library/Application Support/Tunnelblick/Users/<username>/
+// (~/Library/Application Support/SurfsafeVPN/Configurations, /Library/Application Support/SurfsafeVPN/Shared, or /Resources/Deploy,
+// and an alternate config in /Library/Application Support/SurfsafeVPN/Users/<username>/
 // Returns the path to use, or nil if can't use either one
 -(NSString *) getConfigurationToUse:(NSString *)cfgPath orAlt:(NSString *)altCfgPath
 {
@@ -1540,11 +1540,11 @@ enum state_t {                      // These are the "states" of the guideState 
             // Alt config doesn't exist. We must create it (and maybe the folders that contain it)
             NSLog(@"Creating shadow copy of configuration file %@", cfgPath);
             
-            // Folder creation code below needs alt config to be in /Library/Application Support/Tunnelblick/Users/<username>/xxx.conf
+            // Folder creation code below needs alt config to be in /Library/Application Support/SurfsafeVPN/Users/<username>/xxx.conf
             NSString * altCfgFolderPath  = [altCfgPath stringByDeletingLastPathComponent]; // Strip off xxx.conf to get path to folder that holds it
             //                                                                             // (But leave any subfolders) 
-            if (  ! [altCfgFolderPath hasPrefix: [NSString stringWithFormat: @"/Library/Application Support/Tunnelblick/Users", NSUserName()]]  ) {
-                NSLog(@"Internal Tunnelblick error: altCfgPath\n%@\nmust be in\n/Library/Application Support/Tunnelblick/Users/<username>", altCfgFolderPath);
+            if (  ! [altCfgFolderPath hasPrefix: [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users", NSUserName()]]  ) {
+                NSLog(@"Internal SurfsafeVPN error: altCfgPath\n%@\nmust be in\n/Library/Application Support/SurfsafeVPN/Users/<username>", altCfgFolderPath);
                 return nil;
             }
             
@@ -1897,7 +1897,7 @@ enum state_t {                      // These are the "states" of the guideState 
         return TRUE;
     }
     
-    NSLog(@"Tunnelblick could not create folder %@ for the alternate configuration.", folderPath);
+    NSLog(@"SurfsafeVPN could not create folder %@ for the alternate configuration.", folderPath);
     TBRunAlertPanel(NSLocalizedString(@"Not connecting", @"Window title"),
                     NSLocalizedString(@"SurfSafe could not create a folder for the alternate local configuration. See the Console Log for details.", @"Window text"),
                     nil,

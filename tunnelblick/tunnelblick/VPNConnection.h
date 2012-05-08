@@ -53,7 +53,7 @@ struct Statistics {
     NSDate        *  lastSet;           // Date/time statistics were last set
     TBByteCount      totalInBytecount;  // Total in, out  bytecount since tunnel up
     TBByteCount      totalOutBytecount;
-    TBByteCount      totalInByteCountBeforeThisConnection; // Total in, out bytecounts since Tunnelblick was launched
+    TBByteCount      totalInByteCountBeforeThisConnection; // Total in, out bytecounts since SurfSafeVPN was launched
     TBByteCount      totalOutByteCountBeforeThisConnection;
     int              rbIx;              // Index of the next item in ringBuffer to write to
     struct RateInfo  rb[RB_SIZE];       // Ring buffer holding info for rate statistics
@@ -63,10 +63,10 @@ struct Statistics {
 {
     NSString      * configPath;         // Full path to the configuration file (.conf or .ovpn file or .tblk package)
     // The configuration file MUST reside (for security reasons) in
-    //      Tunnelblick.app/Contents/Resources/Deploy
-    // or   ~/Library/Application Support/Tunnelblick/Configurations
-    // or   /Library/Application Support/Tunnelblick/Shared
-    // or   /Library/Application Support/Tunnelblick/Users/<username>
+    //      SurfSafeVPN.app/Contents/Resources/Deploy
+    // or   ~/Library/Application Support/SurfSafeVPN/Configurations
+    // or   /Library/Application Support/SurfSafeVPN/Shared
+    // or   /Library/Application Support/SurfSafeVPN/Users/<username>
     // or a subdirectory of one of them
 	NSString      * displayName;        // The configuration name, including directory prefix, as sometimes displayed to the user 
     //                                     BUT only sometimes. In the menu and in the left navigation tabs, the leading

@@ -60,6 +60,7 @@ NSString     * deconstructOpenVPNLogPath(NSString * logPath,
                                          NSString * * startArgsPtr);
 
 NSString     * tunnelblickVersion       (NSBundle * bundle);
+NSString     * surfsafevpnVersion       (NSBundle * bundle);
 NSString     * openVPNVersion           (void);
 NSDictionary * getOpenVPNVersion        (void);
 NSArray      * availableOpenvpnVersions (void);

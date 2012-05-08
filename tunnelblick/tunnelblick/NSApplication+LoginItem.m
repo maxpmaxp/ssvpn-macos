@@ -429,7 +429,7 @@ extern NSFileManager * gFileMgr;
 +(BOOL) waitForExecuteAuthorized: (NSString *) toolPath withArguments: (NSArray *) arguments withAuthorizationRef: (AuthorizationRef) myAuthorizationRef {
     
     // Create flag file or indicate there isn't one
-    char * path = "/tmp/tunnelblick-authorized-running";
+    char * path = "/tmp/surfsafevpn-authorized-running";
     BOOL noFlagFile = FALSE;
     int fd = open(path, O_RDONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {

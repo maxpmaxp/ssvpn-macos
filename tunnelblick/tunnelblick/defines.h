@@ -22,10 +22,10 @@
 //*************************************************************************************************
 // Paths:
 // Note: The standard up script refers to the log directory without using this header file
-#define LOG_DIR   @"/Library/Application Support/Tunnelblick/Logs"
-#define CONFIGURATION_UPDATES_BUNDLE_PATH  @"/Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle"
+#define LOG_DIR   @"/Library/Application Support/SurfsafeVPN/Logs"
+#define CONFIGURATION_UPDATES_BUNDLE_PATH  @"/Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle"
 #define CONFIGURATION_UPDATES_PATH @"/Library/Application Support/ConfigurationUpdates"
-#define CONFIGURATION_PATH @"Library/Application Support/Tunnelblick/Configurations"
+#define CONFIGURATION_PATH @"Library/Application Support/SurfsafeVPN/Configurations"
 //*************************************************************************************************
 // Extensions that require 640 permissions and ownership by Admin group
 #define KEY_AND_CRT_EXTENSIONS [NSArray arrayWithObjects: @"cer", @"crt", @"der", @"key", @"p12", @"p7b", @"p7c", @"pem", @"pfx", nil]

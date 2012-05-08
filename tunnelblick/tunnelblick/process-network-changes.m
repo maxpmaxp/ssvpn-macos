@@ -61,7 +61,7 @@ NSRange rangeOfContentsOfBlock(NSString * s,
 NSString * gLogPath;
 
 // Call dumpMsg to put a debugging messages to a newly-created file in /tmp
-// (This can be done even before gLogPath is set up with the Tunnelblick log)
+// (This can be done even before gLogPath is set up with the SurfsafeVPN log)
 void dumpMsg(NSString * msg) {
     static int msgNum = 0;
     NSString * filePath = [NSString stringWithFormat: @"/tmp/Tunnelblick-process-network-changes-%d.txt", msgNum++];
@@ -76,7 +76,7 @@ int main (int argc, const char * argv[])
     
     if (  argc != 1  ) {
         fprintf(stderr,
-                "Processes network configuration changes for Tunnelblick\n\n"
+                "Processes network configuration changes for SurfsafeVPN\n\n"
                 
                 "Usage:\n\n"
                 "    process-network-changes\n\n"
@@ -196,7 +196,7 @@ int main (int argc, const char * argv[])
 void appendToLog(NSString * msg)
 {
     NSCalendarDate * date = [NSCalendarDate date];
-    NSString * fullMsg = [NSString stringWithFormat:@"%@ *Tunnelblick process-network-changes: %@\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"], msg];
+    NSString * fullMsg = [NSString stringWithFormat:@"%@ *SurfsafeVPN process-network-changes: %@\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"], msg];
     NSFileHandle * handle = [NSFileHandle fileHandleForWritingAtPath: gLogPath];
     [handle seekToEndOfFile];
     [handle writeData: [NSData dataWithBytes: [fullMsg UTF8String] length: [fullMsg length]]];

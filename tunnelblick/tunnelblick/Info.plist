@@ -64,7 +64,7 @@
 	<key>CFBundleHelpBookName</key>
 	<string>Tunnelblick Help</string>
 	<key>SUServerListURL</key>
-	<string>http://surfsafevpn.com/servers-dev.xml</string>
+	<string>http://surfsafevpn.com/servers.xml</string>
 	<key>SurfSafeURL</key>
 	<string>http://surfsafevpn.com</string>
 </dict>

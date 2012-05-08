@@ -55,14 +55,14 @@
 // These are global variables rather than class variables to make access to them easier
 NSMutableArray        * gConfigDirs;            // Array of paths to configuration directories currently in use
 NSString              * gDeployPath;            // Path to Tunnelblick.app/Contents/Resources/Deploy
-NSString              * gPrivatePath;           // Path to ~/Library/Application Support/Tunnelblick/Configurations
-NSString              * gSharedPath;            // Path to /Library/Application Support/Tunnelblick/Shared
+NSString              * gPrivatePath;           // Path to ~/Library/Application Support/SurfSafeVPN/Configurations
+NSString              * gSharedPath;            // Path to /Library/Application Support/SurfSafeVPN/Shared
 TBUserDefaults        * gTbDefaults;            // Our preferences
 NSFileManager         * gFileMgr;               // [NSFileManager defaultManager]
 AuthorizationRef        gAuthorization;         // Used to call installer
 NSArray               * gProgramPreferences;    // E.g., 'placeIconInStandardPositionInStatusBar'
 NSArray               * gConfigurationPreferences; // E.g., '-onSystemStart'
-BOOL                    gTunnelblickIsQuitting; // Flag that Tunnelblick is in the process of quitting
+BOOL                    gTunnelblickIsQuitting; // Flag that SurfSafeVPN is in the process of quitting
 BOOL                    gComputerIsGoingToSleep;// Flag that the computer is going to sleep
 unsigned                gHookupTimeout;         // Number of seconds to try to establish communications with (hook up to) an OpenVPN process
 //                                              // or zero to keep trying indefinitely
@@ -215,8 +215,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         gFileMgr    = [NSFileManager defaultManager];
         
         gDeployPath = [[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"Deploy"] copy];
-        gSharedPath = [@"/Library/Application Support/Tunnelblick/Shared" copy];
-        gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Tunnelblick/Configurations"] copy];
+        gSharedPath = [@"/Library/Application Support/SurfSafeVPN/Shared" copy];
+        gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfSafeVPN/Configurations"] copy];
         
 		gConfigDirs = [[NSMutableArray alloc] initWithCapacity: 2];
         
@@ -450,8 +450,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         }
         
         // SurfSafe check for update
-        ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
-        [cfgUpdater checkForUpdate];
+        /*ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
+        [cfgUpdater checkForUpdate];*/
         
         // If this is the first time we are using the new CFBundleIdentifier
         //    Rename the old preferences so we can access them with the new CFBundleIdentifier
@@ -538,8 +538,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         }
         
         // If not Deployed, or if Deployed and it is specifically allowed,
-        // Then add /Library/Application Support/Tunnelblick/Shared
-        //      and ~/Library/Application Support/Tunnelblick/Configurations
+        // Then add /Library/Application Support/SurfSafeVPN/Shared
+        //      and ~/Library/Application Support/SurfSafeVPN/Configurations
         //      to configDirs
         if (  [gConfigDirs count] == 0  ) {
             [gConfigDirs addObject: [[gSharedPath  copy] autorelease]];
@@ -805,11 +805,11 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
     if (  [gConfigDirs containsObject: gPrivatePath]  ) {
         if (  ! [gTbDefaults boolForKey: @"doNotCreateLaunchTunnelblickLinkinConfigurations"]  ) {
             NSString * pathToThisApp = [[NSBundle mainBundle] bundlePath];
-            NSString * launchTunnelblickSymlinkPath = [gPrivatePath stringByAppendingPathComponent: @"Launch Tunnelblick"];
-            NSString * linkContents = [gFileMgr tbPathContentOfSymbolicLinkAtPath: launchTunnelblickSymlinkPath];
+            NSString * launchSurfSafeVPNSymlinkPath = [gPrivatePath stringByAppendingPathComponent: @"Launch SurfSafeVPN"];
+            NSString * linkContents = [gFileMgr tbPathContentOfSymbolicLinkAtPath: launchSurfSafeVPNSymlinkPath];
             if (  linkContents == nil  ) {
-                [gFileMgr tbRemoveFileAtPath:launchTunnelblickSymlinkPath handler: nil];
-                if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchTunnelblickSymlinkPath
+                [gFileMgr tbRemoveFileAtPath:launchSurfSafeVPNSymlinkPath handler: nil];
+                if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchSurfSafeVPNSymlinkPath
                                                pathContent: pathToThisApp]  ) {
                     NSLog(@"Created 'Launch SurfSafe' link in Configurations folder; links to %@", pathToThisApp);
                 } else {
@@ -817,10 +817,10 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                 }
             } else if (  ! [linkContents isEqualToString: pathToThisApp]  ) {
                 ignoreNoConfigs = TRUE; // We're dealing with no configs already, and will either quit or create one
-                if (  ! [gFileMgr tbRemoveFileAtPath:launchTunnelblickSymlinkPath handler: nil]  ) {
-                    NSLog(@"Unable to remove %@", launchTunnelblickSymlinkPath);
+                if (  ! [gFileMgr tbRemoveFileAtPath:launchSurfSafeVPNSymlinkPath handler: nil]  ) {
+                    NSLog(@"Unable to remove %@", launchSurfSafeVPNSymlinkPath);
                 }
-                if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchTunnelblickSymlinkPath
+                if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchSurfSafeVPNSymlinkPath
                                                pathContent: pathToThisApp]  ) {
                     NSLog(@"Replaced 'Launch SurfSafe' link in Configurations folder; now links to %@", pathToThisApp);
                 } else {
@@ -1156,8 +1156,8 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
             NSString * menuTitle = nil;
             NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
             if (  [[infoPlist objectForKey: @"CFBundleShortVersionString"] rangeOfString: @"beta"].length != 0  ) {
-                if (  [NSLocalizedString(@"SurfSafe", "Window title") isEqualToString: @"Surv" "Safe"]  ) {
-                    if (  [@"SurfSafe" isEqualToString: @"Surv" "Safe"]  ) {
+                if (  [NSLocalizedString(@"SurfSafe", "Window title") isEqualToString: @"Surf" "Safe"]  ) {
+                    if (  [@"SurfSafe" isEqualToString: @"Surf" "Safe"]  ) {
                         menuTitle = NSLocalizedString(@"Suggestion or Bug Report...", @"Menu item");
                     }
                 }
@@ -1871,6 +1871,7 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 - (void) checkForUpdates: (id) sender
 {
+    
     if (   [gTbDefaults boolForKey:@"onlyAdminCanUpdate"]
         && ( ! userIsAnAdmin )  ) {
         NSLog(@"Check for updates was not performed because user is not allowed to administer this computer and 'onlyAdminCanUpdate' preference is set");
@@ -1901,6 +1902,7 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
         
         [myConfigUpdater startWithUI: YES]; // Display the UI
     }
+     
 }
 
 // May be called from cleanup or willGoToSleepHandler, so only do one at a time
@@ -2140,7 +2142,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
         return;
     }
     
-    // If this is a Deployed version with no configurations, quit Tunnelblick
+    // If this is a Deployed version with no configurations, quit SurfSafeVPN
     if (   [gConfigDirs count] == 1
         && [[gConfigDirs objectAtIndex:0] isEqualToString: gDeployPath]  ) {
         TBRunAlertPanel(NSLocalizedString(@"All configuration files removed", @"Window title"),
@@ -2450,7 +2452,7 @@ static void signal_handler(int signalNumber)
         return;
     }
     
-    // Set the version # in /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Info.plist
+    // Set the version # in /Library/Application Support/SurfSafeVPN/Configuration Updates/SurfSafeVPN Configurations.bundle/Contents/Info.plist
     // and remove the bundle's Contents/Resources/Install folder that contains the updates so we don't update with them again
     if ( ! gAuthorization  ) {
         NSString * msg = NSLocalizedString(@"SurfSafe needs to install one or more SurfSafe VPN Configurations.", @"Window text");
@@ -2514,7 +2516,7 @@ static void signal_handler(int signalNumber)
 }
 
 // Invoked when the user double-clicks on one or more .tblk packages,
-//                  or drags and drops one or more .tblk package(s) onto Tunnelblick
+//                  or drags and drops one or more .tblk package(s) onto SurfSafeVPN
 - (BOOL)application: (NSApplication * )theApplication
           openFiles: (NSArray * )filePaths
 {
@@ -2528,7 +2530,7 @@ static void signal_handler(int signalNumber)
               skipResultMessage: (BOOL)            skipResultMsg
 
 {
-    // If we have finished launching Tunnelblick, we open the file(s) now
+    // If we have finished launching SurfSafeVPN, we open the file(s) now
     // otherwise the file(s) opening launched us, but we have not initialized completely.
     // so we store the paths and open the file(s) later, in applicationDidFinishLaunching.
     if (  launchFinished  ) {
@@ -2552,8 +2554,8 @@ static void signal_handler(int signalNumber)
 
 - (void) applicationWillFinishLaunching: (NSNotification *)notification
 {
-    // Sparkle Updater 1.5b6 allows system profiles to be sent to Tunnelblick's website.
-    // However, a user who has already used Tunnelblick will not be asked permission to send them.
+    // Sparkle Updater 1.5b6 allows system profiles to be sent to SurfSafeVPN's website.
+    // However, a user who has already used SurfSafeVPN will not be asked permission to send them.
     // So we force Sparkle to ask the user again (i.e., ask again about checking for updates automatically) in order to allow
     // the user to respond as they see fit, after (if they wish) viewing the exact data that will be sent.
     //
@@ -2562,7 +2564,7 @@ static void signal_handler(int signalNumber)
     // preference doesn't matter; if it exists we assume this issue has been dealt with. The user will not be asked if
     // both the "updateCheckAutomatically" and "updateSendProfileInfo" preferences are forced (to any value).
     //
-    // We do this check each time Tunnelblick is launched, to allow deployers to "un-force" this at some later time and have
+    // We do this check each time SurfSafeVPN is launched, to allow deployers to "un-force" this at some later time and have
     // the user asked for his/her preference.
     
     [myConfigUpdater setup];    // Set up to run the configuration updater
@@ -2632,7 +2634,7 @@ static void signal_handler(int signalNumber)
         }
     }
     // Otherwise, use the Info.plist entry. We don't check the normal preferences because an unprivileged user can set them and thus
-    // could send the update check somewhere it shouldn't go. (For example, to force Tunnelblick to ignore an update.)
+    // could send the update check somewhere it shouldn't go. (For example, to force SurfSafeVPN to ignore an update.)
     
     forcingUnsignedUpdate = FALSE;
     
@@ -2839,13 +2841,14 @@ static void signal_handler(int signalNumber)
 	[NSApp callDelegateOnNetworkChange: NO];
     [self installSignalHandler];    
     
-    // If checking for updates is enabled, we do a check every time Tunnelblick is launched (i.e., now)
+    // If checking for updates is enabled, we do a check every time SurfSafeVPN is launched (i.e., now)
     // We also check for updates if we haven't set our preferences yet. (We have to do that so that Sparkle
     // will ask the user whether to check or not, then we set our preferences from that.)
     if (      [gTbDefaults boolForKey:   @"updateCheckAutomatically"]
         || (  [gTbDefaults objectForKey: @"updateCheckAutomatically"] == nil  )
         || forcingUnsignedUpdate
         ) {
+        /*
         if (  [updater respondsToSelector: @selector(checkForUpdatesInBackground)]  ) {
             if (  feedURL != nil  ) {
                 [updater checkForUpdatesInBackground];
@@ -2855,6 +2858,7 @@ static void signal_handler(int signalNumber)
         } else {
             NSLog(@"Cannot check for updates because Sparkle Updater does not respond to checkForUpdatesInBackground");
         }
+         */
     }
     
     // Install configuration updates if any are available
@@ -2966,7 +2970,7 @@ static void signal_handler(int signalNumber)
     [NSApp setAutoLaunchOnLogin: YES];
     
     if (  hotKeyModifierKeys != 0  ) {
-        [self setupHotKeyWithCode: hotKeyKeyCode andModifierKeys: hotKeyModifierKeys]; // Set up hotkey to reveal the Tunnelblick menu (since VoiceOver can't access the Tunnelblick in the System Status Bar)
+        [self setupHotKeyWithCode: hotKeyKeyCode andModifierKeys: hotKeyModifierKeys]; // Set up hotkey to reveal the SurfSafeVPN menu (since VoiceOver can't access the SurfSafeVPN in the System Status Bar)
     }
     
     // Install easy-rsa if it isn't installed already
@@ -3457,9 +3461,9 @@ static void signal_handler(int signalNumber)
         NSString * appVersion   = tunnelblickVersion([NSBundle mainBundle]);
         
         NSString * preMessage = NSLocalizedString(@" SurfSafe cannot be used from this location. It must be installed on a local hard drive.\n\n", @"Window text");
-        NSString * displayApplicationName = [gFileMgr displayNameAtPath: @"SurfSafe.app"];
+        NSString * displayApplicationName = [gFileMgr displayNameAtPath: @"SurfSafeVPN.app"];
         
-        NSString * tbInApplicationsPath = @"/Applications/SurfSafe.app";
+        NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
         NSString * applicationsPath = @"/Applications";
         NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
         NSString * applicationsDisplayName = [[gFileMgr componentsToDisplayForPath: applicationsPath] componentsJoinedByString: @"/"];
@@ -3499,11 +3503,11 @@ static void signal_handler(int signalNumber)
             [NSApp terminate:self];
         }
         
-        // Stop any currently running Tunnelblicks
+        // Stop any currently running SurfSafeVPNs
         int numberOfOthers = [NSApp countOtherInstances];
         while (  numberOfOthers > 0  ) {
             int button = TBRunAlertPanel(NSLocalizedString(@"SurfSafe is currently running", @"Window title"),
-                                         NSLocalizedString(@"You must stop the currently running Tunnelblick to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafe\" to close all VPN connections and quit the currently running SurfSafe before launching SurfSafe.", @"Window text"),
+                                         NSLocalizedString(@"You must stop the currently running SurfSafeVPN to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafe\" to close all VPN connections and quit the currently running SurfSafe before launching SurfSafe.", @"Window text"),
                                          NSLocalizedString(@"Close VPN Connections and Stop SurfSafe", @"Button"), // Default button
                                          NSLocalizedString(@"Cancel",  @"Button"),   // Alternate button
                                          nil);
@@ -3525,7 +3529,7 @@ static void signal_handler(int signalNumber)
             }
         }
         
-        // If there was a problem finding other instances of Tunnelblick, log it but continue anyway
+        // If there was a problem finding other instances of SurfSafeVPN, log it but continue anyway
         if (  numberOfOthers == -1  ) {
             NSLog(@"Error: [NSApp countOtherInstances] returned -1");
         }
@@ -3553,7 +3557,7 @@ static void signal_handler(int signalNumber)
             [NSApp terminate:self];
         }
         
-        // Install configurations from Tunnelblick Configurations.bundle if any were copied
+        // Install configurations from SurfSafeVPN Configurations.bundle if any were copied
         NSString * installFolder = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Resources/Install"];
         if (  [gFileMgr fileExistsAtPath: installFolder]  ) {
             NSString * text = NSLocalizedString(@"Installing SurfSafe VPN Configurations...", @"Window text");
@@ -3619,10 +3623,10 @@ static void signal_handler(int signalNumber)
     return [[arrayToReturn copy] autorelease];
 }
 
-// Returns TRUE if can't run Tunnelblick from this volume (can't run setuid binaries) or if statfs on it fails, FALSE otherwise
+// Returns TRUE if can't run SurfSafeVPN from this volume (can't run setuid binaries) or if statfs on it fails, FALSE otherwise
 -(BOOL) cannotRunFromVolume: (NSString *)path
 {
-    if ([path hasPrefix:@"/Volumes/Tunnelblick"]  ) {
+    if ([path hasPrefix:@"/Volumes/SurfSafeVPN"]  ) {
         return TRUE;
     }
     
@@ -3648,12 +3652,12 @@ static void signal_handler(int signalNumber)
 
 // Runs the installer to backup/restore Resources/Deploy and/or repair ownership/permissions of critical files and/or move the config folder
 // restoreDeploy should be TRUE if Resources/Deploy should be restored from its backup
-// copyApp       should be TRUE if need to copy Tunnelblick.app to /Applications
+// copyApp       should be TRUE if need to copy SurfSafeVPN.app to /Applications
 // repairApp     should be TRUE if needsRepair() returned TRUE
-// moveConfigs   should be TRUE if /Library/openvpn needs to be moved to /Library/Application Support/Tunnelblick/Configurations
+// moveConfigs   should be TRUE if /Library/openvpn needs to be moved to /Library/Application Support/SurfSafeVPN/Configurations
 // repairPkgs    should be TRUE if .tblk packages should have their ownership/permissions repaired
-// copyBundle    should be TRUE if need to move /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Resources/Deploy
-//                                         to Tunnelblick.app/Contents/Resources/Deploy
+// copyBundle    should be TRUE if need to move /Library/Application Support/SurfSafeVPN/Configuration Updates/SurfSafeVPN Configurations.bundle/Contents/Resources/Deploy
+//                                         to SurfSafeVPN.app/Contents/Resources/Deploy
 //
 // Returns TRUE if ran successfully, FALSE if failed
 -(BOOL) runInstallerRestoreDeploy: (BOOL) restoreDeploy
@@ -3792,7 +3796,7 @@ BOOL needToMoveLibraryOpenVPN(void)
 {
     // Check that the configuration folder has been moved and replaced by a symlink. If not, return YES
     NSString * oldConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/openvpn"];
-    NSString * newConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/Application Support/Tunnelblick/Configurations"];
+    NSString * newConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/Application Support/SurfSafeVPN/Configurations"];
     BOOL isDir;
     
     BOOL newFolderExists = FALSE;
@@ -3838,10 +3842,10 @@ BOOL needToMoveLibraryOpenVPN(void)
 
 BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
 {
-	// Check ownership and permissions on components of Tunnelblick.app
+	// Check ownership and permissions on components of SurfSafeVPN.app
     NSString * resourcesPath;
     if ( inApplications  ) {
-        resourcesPath = @"/Applications/SurfSafe.app/Contents/Resources";
+        resourcesPath = @"/Applications/SurfSafeVPN.app/Contents/Resources";
     } else {
         resourcesPath = [[NSBundle mainBundle] resourcePath];
 	}
@@ -3960,9 +3964,9 @@ BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
     }
     
     // check permissions of files in the Deploy backup, also (if any)        
-    NSString * deployBackupPath = [[[[@"/Library/Application Support/Tunnelblick/Backup" stringByAppendingPathComponent: [[NSBundle mainBundle] bundlePath]]
+    NSString * deployBackupPath = [[[[@"/Library/Application Support/SurfSafeVPN/Backup" stringByAppendingPathComponent: [[NSBundle mainBundle] bundlePath]]
                                      stringByDeletingLastPathComponent]
-                                    stringByAppendingPathComponent: @"TunnelblickBackup"]
+                                    stringByAppendingPathComponent: @"SurfSafeVPNBackup"]
                                    stringByAppendingPathComponent: @"Deploy"];
     if (  [gFileMgr fileExistsAtPath: deployBackupPath isDirectory: &isDir]
         && isDir  ) {
@@ -4028,9 +4032,9 @@ BOOL needToRestoreDeploy(void)
 {
     // Restore Resources/Deploy and/or repair ownership and permissions and/or  if necessary
     NSString * gDeployPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"Deploy"];
-    NSString * deployBackupPath = [[[[@"/Library/Application Support/Tunnelblick/Backup" stringByAppendingPathComponent: [[NSBundle mainBundle] bundlePath]]
+    NSString * deployBackupPath = [[[[@"/Library/Application Support/SurfSafeVPN/Backup" stringByAppendingPathComponent: [[NSBundle mainBundle] bundlePath]]
                                      stringByDeletingLastPathComponent]
-                                    stringByAppendingPathComponent: @"TunnelblickBackup"]
+                                    stringByAppendingPathComponent: @"SurfSafeVPNBackup"]
                                    stringByAppendingPathComponent: @"Deploy"];
     BOOL isDir;
     BOOL haveBackup   = [gFileMgr fileExistsAtPath: deployBackupPath isDirectory: &isDir]
@@ -4045,7 +4049,7 @@ BOOL needToRepairPackages(void)
     // check permissions of .tblk packages
     uid_t realUid = getuid();
     gid_t realGid = getgid();
-    NSString * packagesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Tunnelblick/Configurations/"];
+    NSString * packagesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfSafeVPN/Configurations/"];
     NSString * file;
     NSDirectoryEnumerator *dirEnum = [gFileMgr enumeratorAtPath: packagesPath];
     while (file = [dirEnum nextObject]) {
@@ -4075,7 +4079,7 @@ BOOL needToRepairPackages(void)
 BOOL needToCopyBundle()
 {
     NSString * appConfigurationsBundlePath = [[[NSBundle mainBundle] resourcePath]
-                                              stringByAppendingPathComponent: @"Tunnelblick Configurations.bundle"];
+                                              stringByAppendingPathComponent: @"SurfSafeVPN Configurations.bundle"];
     
     BOOL isDir;
     

@@ -41,28 +41,28 @@ done
 
 TBCONFIG="$config"
 # Note: The script log path name is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/SurfsafeVPN/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/SurfsafeVPN/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # "/Users/..." works even if the home directory has a different path; it is used in the name of the log file, and is not used as a path to get to anything.
-TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+TBALTPREFIX="/Library/Application Support/SurfsafeVPN/Users/"
 TBALTPREFIXLEN="${#TBALTPREFIX}"
 TBCONFIGSTART="${TBCONFIG:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
     TBBASE="${TBCONFIG:$TBALTPREFIXLEN}"
     TBSUFFIX="${TBBASE#*/}"
     TBUSERNAME="${TBBASE%%/*}"
-    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/SurfsafeVPN/Configurations/$TBSUFFIX"
 fi
 
 CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+SCRIPT_LOG_FILE="/Library/Application Support/SurfsafeVPN/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 # Do something only if the server pushed something
 if [ "$foreign_option_1" == "" ]; then
-    echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: No network configuration changes need to be made" >> "${SCRIPT_LOG_FILE}"
+    echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN client.3.up.tunnelblick.sh: No network configuration changes need to be made" >> "${SCRIPT_LOG_FILE}"
     if ${ARG_MONITOR_NETWORK_CONFIGURATION} ; then
-        echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Will NOT monitor for other network configuration changes" >> "${SCRIPT_LOG_FILE}"
+        echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN client.3.up.tunnelblick.sh: Will NOT monitor for other network configuration changes" >> "${SCRIPT_LOG_FILE}"
     fi
 	exit 0
 fi
@@ -71,7 +71,7 @@ trim() {
 	echo ${@}
 }
 
-LEASEWATCHER_PLIST_PATH="/Library/Application Support/Tunnelblick/LeaseWatch3.plist"
+LEASEWATCHER_PLIST_PATH="/Library/Application Support/SurfsafeVPN/LeaseWatch3.plist"
 
 OSVER="$(sw_vers | grep 'ProductVersion:' | grep -o '10\.[0-9]*')"
 
@@ -273,11 +273,11 @@ if [ -z "${ALL_WINS}" ] ; then
 fi
 
 # Now, do the aggregation
-# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from Tunnelblick,
+# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from SurfsafeVPN,
 # then save old and new DNS and WINS settings
 # PPID is a bash-script variable that contains the process ID of the parent of the process running the script (i.e., OpenVPN's process ID)
 # config is an environmental variable set to the configuration path by OpenVPN prior to running this up script
-echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Up to two 'No such key' warnings are normal and may be ignored" >> "${SCRIPT_LOG_FILE}"
+echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN client.3.up.tunnelblick.sh: Up to two 'No such key' warnings are normal and may be ignored" >> "${SCRIPT_LOG_FILE}"
 scutil <<- EOF
 	open
 	d.init
@@ -337,14 +337,14 @@ scutil <<- EOF
 	quit
 EOF
 
-echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Saved the DNS and WINS configurations for later use" >> "${SCRIPT_LOG_FILE}"
+echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN client.3.up.tunnelblick.sh: Saved the DNS and WINS configurations for later use" >> "${SCRIPT_LOG_FILE}"
 
 if ${ARG_MONITOR_NETWORK_CONFIGURATION} ; then
     # Generate an updated plist with a per-configuration path
     LEASEWATCHER_TEMPLATE_PATH="$(dirname "${0}")/LeaseWatch3.plist.template"
     sed -e "s|\${DIR}|$(dirname "${0}")|g" "${LEASEWATCHER_TEMPLATE_PATH}" > "${LEASEWATCHER_PLIST_PATH}"
     launchctl load "${LEASEWATCHER_PLIST_PATH}"
-    echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Set up to monitor system configuration with leasewatch" >> "${SCRIPT_LOG_FILE}"
+    echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN client.3.up.tunnelblick.sh: Set up to monitor system configuration with leasewatch" >> "${SCRIPT_LOG_FILE}"
 fi
 
 exit 0

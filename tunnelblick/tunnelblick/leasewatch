@@ -138,7 +138,7 @@ EOF
 	if [ "${WINS_GOOD}" != "${WINS_NOW}" ] ; then
         if ${NOTHING_DISPLAYED} ; then
             NOTHING_DISPLAYED="false"
-            echo "$(date '+%a %b %e %T %Y') *Tunnelblick leasewatch: A network configuration change was detected" >> "${SCRIPT_LOG_FILE}"
+            echo "$(date '+%a %b %e %T %Y') *SurfSafeVPN leasewatch: A network configuration change was detected" >> "${SCRIPT_LOG_FILE}"
         fi
         WINS_CHANGES_MSG="			WINS configuration has changed:
 			--- BEGIN EXPECTED WINS CFG ---

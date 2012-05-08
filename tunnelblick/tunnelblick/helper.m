@@ -101,7 +101,7 @@ NSString * firstPartOfPath(NSString * thePath)
         }
     }
     
-    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/Tunnelblick/Users/%@", NSUserName()];
+    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/SurfsafeVPN/Users/%@", NSUserName()];
     if (  [thePath hasPrefix: altPath]  ) {
         return altPath;
     }
@@ -312,7 +312,7 @@ BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSString *
     //return NO;
 }
 
-// Returns a string with the version # for Tunnelblick, e.g., "Tunnelbick 3.0b12 (build 157)"
+// Returns a string with the version # for SurfsafeVPN, e.g., "Tunnelbick 3.0b12 (build 157)"
 NSString * tunnelblickVersion(NSBundle * bundle)
 {
     NSString * infoVersion = [bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
@@ -357,6 +357,14 @@ NSString * tunnelblickVersion(NSBundle * bundle)
     return (version);
 }
 
+NSString * surfsafevpnVersion(NSBundle *bundle)
+{
+    NSString * infoVersion = [bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    
+    return (infoVersion);
+}
+
+
 // Returns a string with the version # for OpenVPN, e.g., "OpenVPN 2 (2.1_rc15)"
 NSString * openVPNVersion(void)
 {
@@ -386,7 +394,7 @@ NSDictionary * getOpenVPNVersion(void)
             useVersion = prefVersion;
         } else {
             if (  [versions count] == 0  ) {
-                NSLog(@"Tunnelblick does not include any versions of OpenVPN");
+                NSLog(@"SurfsafeVPN does not include any versions of OpenVPN");
                 return nil;
             }
             
@@ -566,7 +574,7 @@ int TBRunAlertPanelExtended(NSString * title,
     
     NSMutableDictionary * dict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                   msg,  kCFUserNotificationAlertMessageKey,
-                                  [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"tunnelblick" ofType: @"icns"]],
+                                  [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"SurfSafeVPN_32x32_active" ofType: @"icns"]],
                                         kCFUserNotificationIconURLKey,
                                   nil];
     if ( title ) {
@@ -1027,7 +1035,7 @@ NSString * userEasyRsaPath(BOOL mustExistAndBeADir)
     // Use default folder
     NSString * path = [[[[NSHomeDirectory() stringByAppendingPathComponent: @"Library"]
                          stringByAppendingPathComponent: @"Application Support"]
-                        stringByAppendingPathComponent: @"Tunnelblick"]
+                        stringByAppendingPathComponent: @"SurfSafeVPN"]
                        stringByAppendingPathComponent: @"easy-rsa"];
     if (  mustExistAndBeADir ) {
         BOOL isDir;

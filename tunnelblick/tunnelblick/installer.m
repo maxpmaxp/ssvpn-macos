@@ -41,18 +41,18 @@
 // where
 //   bitMask (See defines.h for bit assignments) -- DETERMINES WHAT THE INSTALLER WILL DO:
 //
-//     INSTALLER_COPY_APP:      set to copy this app to /Applications/Tunnelblick.app
-//                                  (Any existing /Applications/Tunnelblick.app will be moved to the Trash)
+//     INSTALLER_COPY_APP:      set to copy this app to /Applications/SurfsafeVPN.app
+//                                  (Any existing /Applications/SurfsafeVPN.app will be moved to the Trash)
 //
-//     INSTALLER_COPY_BUNDLE:   set to copy this app's Resources/Tunnelblick Configurations.bundle to /Library/Application Support/Tunnelblick/Configuration Updates
-//                                  (Will only be done if this app's Tunnelblick Configurations.bundle's version # is higher, or INSTALLER_COPY_APP is set)
+//     INSTALLER_COPY_BUNDLE:   set to copy this app's Resources/SurfsafeVPN Configurations.bundle to /Library/Application Support/SurfsafeVPN/Configuration Updates
+//                                  (Will only be done if this app's SurfsafeVPN Configurations.bundle's version # is higher, or INSTALLER_COPY_APP is set)
 //
 //     INSTALLER_SET_VERSION:   set to store bundleVersion as a new value for CFBundleVersion 
 //                                       and bundleVersionString as a new value for CFBundleShortVersionString
-//                                     in /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Into.plist
+//                                     in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
 //                                     and remove Contents/Installer of the bundle
 //
-//     INSTALLER_SECURE_APP:    set to secure Tunnelblick.app and all of its contents
+//     INSTALLER_SECURE_APP:    set to secure SurfsafeVPN.app and all of its contents
 //                                  (also set if INSTALLER_COPY_APP)
 //
 //     INSTALLER_SECURE_TBLKS:  set to secure all .tblk packages in Configurations, Shared, and the alternate configuration path
@@ -64,7 +64,7 @@
 //
 // bundleVersion       is a string to replace the CFBundleVersion
 // bundleVersionString is a string to replace the CFBundleShortVersionString
-//                                    in /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Into.plist
+//                                    in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
 //
 // targetPath          is the path to a configuration (.ovpn or .conf file, or .tblk package) to be secured
 // sourcePath          is the path to be copied or moved to targetPath before securing targetPath
@@ -72,17 +72,17 @@
 // It does the following:
 //      (1) If INSTALLER_COPY_APP, copies this app to /Applications
 //      (2) Restores the /Deploy folder from the backup copy if it does not exist and a backup copy does
-//      (3) Moves the contents of the old configuration folder at ~/Library/openvpn to ~/Library/Application Support/Tunnelblick/Configurations
-//      (4) Creates /Library/Application Support/Tunnelblick/Shared if it doesn't exist and makes sure it is secured
+//      (3) Moves the contents of the old configuration folder at ~/Library/openvpn to ~/Library/Application Support/SurfsafeVPN/Configurations
+//      (4) Creates /Library/Application Support/SurfsafeVPN/Shared if it doesn't exist and makes sure it is secured
 //      (5) Creates the log directory if it doesn't exist and makes sure it is secured
-//      (6) If INSTALLER_COPY_BUNDLE, if /Resources/Tunnelblick Configurations.bundle exists, copies it to /Library/Application Support/T/Configuration Updates
-//      (7) If INSTALLER_SECURE_APP, secures Tunnelblick.app by setting the ownership and permissions of its components.
+//      (6) If INSTALLER_COPY_BUNDLE, if /Resources/SurfsafeVPN Configurations.bundle exists, copies it to /Library/Application Support/T/Configuration Updates
+//      (7) If INSTALLER_SECURE_APP, secures SurfsafeVPN.app by setting the ownership and permissions of its components.
 //      (8) If INSTALLER_SECURE_APP, makes a backup of the /Deploy folder if it exists and is not empty.
 //          If it exists and is empty (except for invisible files), all existing backups for the /Deploy folder for this application's location are deleted.
 //      (9) If INSTALLER_SECURE_TBLKS, secures all .tblk packages in the following folders:
-//           /Library/Application Support/Tunnelblick/Shared
-//           /Library/Application Support/Tunnelblick/Users/<username>
-//           ~/Library/Application Support/Tunnelblick/Configurations
+//           /Library/Application Support/SurfsafeVPN/Shared
+//           /Library/Application Support/SurfsafeVPN/Users/<username>
+//           ~/Library/Application Support/SurfsafeVPN/Configurations
 //     (10) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and sourcePath is given,
 //             copies or moves sourcePath to targetPath. Copies unless INSTALLER_MOVE_NOT_COPY is set.  (Also copies or moves the shadow copy if deleting a private configuration)
 //     (11) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and targetPath is given,
@@ -90,9 +90,9 @@
 //     (12) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is set and targetPath is given,
 //             deletes the .ovpn or .conf file or .tblk package at targetPath (also deletes the shadow copy if deleting a private configuration)
 //     (13) If INSTALLER_SET_VERSION is set, copies the bundleVersion into the CFBundleVersion entry and bundleShortVersionString into the CFBundleShortVersionString entry
-//                                           in /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Into.plist
+//                                           in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
 //
-// When finished (or if an error occurs), the file /tmp/tunnelblick-authorized-running is deleted to indicate the program has finished
+// When finished (or if an error occurs), the file /tmp/surfsafevpn-authorized-running is deleted to indicate the program has finished
 //
 // Notes: (2), (3), (4), and (5) are done each time this command is invoked if they are needed (self-repair).
 //        (10) is done when creating a shadow configuration file
@@ -102,10 +102,10 @@
 
 NSArray       * gKeyAndCrtExtensions;
 NSFileManager * gFileMgr;                     // [NSFileManager defaultManager]
-NSString      * gPrivatePath;                 // Path to ~/Library/Application Support/Tunnelblick/Configurations
-NSString      * gSharedPath;                  // Path to /Library/Application Support/Tunnelblick/Shared
-NSString      * gDeployPath;                  // Path to Tunnelblick.app/Contents/Resources/Deploy (after copy if INSTALLER_COPY_APP is set)
-NSString      * gAppConfigurationsBundlePath; // Path to Tunnelblick.app/Contents/Resources/Tunnelblick Configurations.bundle (after copy if INSTALLER_COPY_APP is set)
+NSString      * gPrivatePath;                 // Path to ~/Library/Application Support/SurfsafeVPN/Configurations
+NSString      * gSharedPath;                  // Path to /Library/Application Support/SurfsafeVPN/Shared
+NSString      * gDeployPath;                  // Path to SurfsafeVPN.app/Contents/Resources/Deploy (after copy if INSTALLER_COPY_APP is set)
+NSString      * gAppConfigurationsBundlePath; // Path to SurfsafeVPN.app/Contents/Resources/SurfsafeVPN Configurations.bundle (after copy if INSTALLER_COPY_APP is set)
 uid_t           gRealUserID;                  // User ID & Group ID for the real user (i.e., not "root:wheel", which is what we are running as)
 gid_t           gRealGroupID;
 NSAutoreleasePool * pool;
@@ -129,15 +129,16 @@ BOOL deleteThingAtPath(NSString * path);
 
 int main(int argc, char *argv[]) 
 {
+    NSLog(@"Install running .............................");
 	pool = [NSAutoreleasePool new];
     
     gKeyAndCrtExtensions = KEY_AND_CRT_EXTENSIONS;
     gFileMgr = [NSFileManager defaultManager];
-    gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Tunnelblick/Configurations/"] copy];
-    gSharedPath = [@"/Library/Application Support/Tunnelblick/Shared" copy];
+    gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfsafeVPN/Configurations/"] copy];
+    gSharedPath = [@"/Library/Application Support/SurfsafeVPN/Shared" copy];
     
     if (  (argc < 2)  || (argc > 4)  ) {
-        NSLog(@"Tunnelblick Installer: Wrong number of arguments -- expected 1 to 3, given %d", argc-1);
+        NSLog(@"Surfsafe Installer: Wrong number of arguments -- expected 1 to 3, given %d", argc-1);
         errorExit();
     }
     
@@ -155,19 +156,19 @@ int main(int argc, char *argv[])
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
     if (  copyApp  ) {
-        appResourcesPath = @"/Applications/Tunnelblick.app/Contents/Resources";
+        appResourcesPath = @"/Applications/SurfSafeVPN.app/Contents/Resources";
     } else {
         appResourcesPath = [[gFileMgr stringWithFileSystemRepresentation: argv[0] length: strlen(argv[0])] stringByDeletingLastPathComponent];
     }
     
-    gAppConfigurationsBundlePath    = [appResourcesPath stringByAppendingPathComponent:@"Tunnelblick Configurations.bundle"];
+    gAppConfigurationsBundlePath    = [appResourcesPath stringByAppendingPathComponent:@"SurfsafeVPN Configurations.bundle"];
 
 	gDeployPath                     = [appResourcesPath stringByAppendingPathComponent:@"Deploy"];
-    NSString * deployBkupHolderPath = [[[[[@"/Library/Application Support/Tunnelblick/Backup" stringByAppendingPathComponent: appResourcesPath]
+    NSString * deployBkupHolderPath = [[[[[@"/Library/Application Support/SurfsafeVPN/Backup" stringByAppendingPathComponent: appResourcesPath]
                                           stringByDeletingLastPathComponent]
                                          stringByDeletingLastPathComponent]
                                         stringByDeletingLastPathComponent]
-                                       stringByAppendingPathComponent: @"TunnelblickBackup"];
+                                       stringByAppendingPathComponent: @"SurfsafeVPNBackup"];
     NSString * deployBackupPath     = [deployBkupHolderPath stringByAppendingPathComponent: @"Deploy"];
     NSString * deployOrigBackupPath = [deployBkupHolderPath stringByAppendingPathComponent: @"OriginalDeploy"];
     NSString * deployPrevBackupPath = [deployBkupHolderPath stringByAppendingPathComponent: @"PreviousDeploy"];
@@ -203,16 +204,16 @@ int main(int argc, char *argv[])
     //**************************************************************************************************************************
     // (1)
     // If INSTALLER_COPY_APP is set:
-    //    Move /Applications/Tunnelblick.app to the Trash, then copy this app to /Applications/Tunnelblick.app    
+    //    Move /Applications/SurfsafeVPN.app to the Trash, then copy this app to /Applications/SurfsafeVPN.app    
     if (  copyApp  ) {
         NSString * currentPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-        NSString * targetPath = @"/Applications/SurfSafe.app";
+        NSString * targetPath = @"/Applications/SurfSafeVPN.app";
         if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
             errorExitIfAnySymlinkInPath(targetPath, 1);
             if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
                                                                source: @"/Applications"
                                                           destination: @""
-                                                                files: [NSArray arrayWithObject:@"SurfSafe.app"]
+                                                                files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
                                                                   tag: nil]  ) {
                 NSLog(@"SurfSafe Installer: Moved %@ to the Trash", targetPath);
             } else {
@@ -231,7 +232,7 @@ int main(int argc, char *argv[])
         
     //**************************************************************************************************************************
     // (2)
-    // If Resources/Deploy does not exist, but a backup of it does exist (happens when Tunnelblick.app has been updated)
+    // If Resources/Deploy does not exist, but a backup of it does exist (happens when SurfsafeVPN.app has been updated)
     // Then restore it from the backup
     if (   [gFileMgr fileExistsAtPath: deployBackupPath isDirectory: &isDir]
         && isDir  ) {
@@ -250,7 +251,7 @@ int main(int argc, char *argv[])
     // (3)
     // Deal with migration to new configuration path
     NSString * oldConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/openvpn"];
-    NSString * newConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/Application Support/Tunnelblick/Configurations"];
+    NSString * newConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/Application Support/SurfsafeVPN/Configurations"];
     
     // Verify that new configuration folder exists
     if (  [gFileMgr fileExistsAtPath: newConfigDirPath isDirectory: &isDir]  ) {
@@ -267,27 +268,27 @@ int main(int argc, char *argv[])
                             secureTblks = TRUE; // We may have moved some .tblks, so we should secure them
                             // Delete the old configuration folder
                             if (  ! [gFileMgr tbRemoveFileAtPath:oldConfigDirPath handler: nil]  ) {
-                                NSLog(@"Tunnelblick Installer: Unable to remove %@", oldConfigDirPath);
+                                NSLog(@"SurfsafeVPN Installer: Unable to remove %@", oldConfigDirPath);
                                 errorExit();
                             }
                         } else {
-                            NSLog(@"SurfSafe Installer: Unable to move all contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
+                            NSLog(@"SurfsafeVPN Installer: Unable to move all contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
                             errorExit();
                         }
                     } else {
-                        NSLog(@"SurfSafe Installer: %@ is not a symbolic link or a folder", oldConfigDirPath);
+                        NSLog(@"SurfsafeVPN Installer: %@ is not a symbolic link or a folder", oldConfigDirPath);
                         errorExit();
                     }
                 }
             }
         } else {
-            NSLog(@"SurfSafe Installer: Warning: %@ exists but is not a folder", newConfigDirPath);
+            NSLog(@"SurfsafeVPN Installer: Warning: %@ exists but is not a folder", newConfigDirPath);
             if ( secureTblks ) {
                 errorExit();
             }
         }
     } else {
-        NSLog(@"SurfSafe Installer: Warning: Private configuration folder %@ does not exist", newConfigDirPath);
+        NSLog(@"SurfsafeVPN Installer: Warning: Private configuration folder %@ does not exist", newConfigDirPath);
         if ( secureTblks ) {
             errorExit();
         }
@@ -295,7 +296,7 @@ int main(int argc, char *argv[])
     
     //**************************************************************************************************************************
     // (4)
-    // Create /Library/Application Support/Tunnelblick/Shared if it does not already exist, and make sure it is owned by root with 755 permissions
+    // Create /Library/Application Support/SurfsafeVPN/Shared if it does not already exist, and make sure it is owned by root with 755 permissions
     
     if (  ! createDirWithPermissionAndOwnership(gSharedPath, 0755, 0, 0)  ) {
         errorExit();
@@ -313,7 +314,7 @@ int main(int argc, char *argv[])
     // (6)
     // If INSTALLER_COPY_BUNDLE is set and the bundle exists and INSTALLER_COPY_APP is set
     //                                                           or the application's bundleVersion is a higher version number
-    //    Copy Resources/Tunnelblick Configurations.bundle to /Library/Application Support/Tunnelblick/Configuration Updates
+    //    Copy Resources/SurfsafeVPN Configurations.bundle to /Library/Application Support/SurfsafeVPN/Configuration Updates
     if (  copyBundle  ) {
         if (   [gFileMgr fileExistsAtPath: gAppConfigurationsBundlePath isDirectory: &isDir]
             && isDir  ) {
@@ -345,18 +346,18 @@ int main(int argc, char *argv[])
                     errorExit();
                 }
             } else {
-                doCopy = TRUE;  // No existing Tunnelblick Configurations.bundle in /Library...
+                doCopy = TRUE;  // No existing SurfsafeVPN Configurations.bundle in /Library...
             }
             
             if (  doCopy  ) {
-                // Create the folder that holds Tunnelblick Configurations.bundle if it doesn't already exist
+                // Create the folder that holds SurfsafeVPN Configurations.bundle if it doesn't already exist
                 // This must be writable by all users so Sparkle can store the update there
                 NSString * configurationBundleHolderPath = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByDeletingLastPathComponent];
                 if (  ! createDirWithPermissionAndOwnership(configurationBundleHolderPath, 0755, 0, 0)  ) {
                     errorExit();
                 }
                 
-                // Copy Tunnelblick Configurations.bundle, overwriting any existing one
+                // Copy SurfsafeVPN Configurations.bundle, overwriting any existing one
                 if (  ! makeFileUnlockedAtPath(CONFIGURATION_UPDATES_BUNDLE_PATH)  ) {
                     errorExit();
                 }
@@ -386,7 +387,7 @@ int main(int argc, char *argv[])
     
     //**************************************************************************************************************************
     // (7)
-    // If requested, secure Tunnelblick.app by setting ownership of Info.plist and Resources and its contents to root:wheel,
+    // If requested, secure SurfsafeVPN.app by setting ownership of Info.plist and Resources and its contents to root:wheel,
     // and setting permissions as follows:
     //        Info.plist is set to 0644
     //        openvpnstart is set to 04555 (SUID)
@@ -475,7 +476,7 @@ int main(int argc, char *argv[])
         }
         
         if (  ! okSoFar  ) {
-            NSLog(@"SurfSafe Installer: Unable to secure SurfSafe.app");
+            NSLog(@"SurfSafe Installer: Unable to secure SurfSafeVPN.app");
             errorExit();
         }
     }
@@ -558,9 +559,9 @@ int main(int argc, char *argv[])
     // (9)
     // If requested, secure all .tblk packages
     if (  secureTblks  ) {
-        NSString * sharedPath  = @"/Library/Application Support/Tunnelblick/Shared";
-        NSString * libraryPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Tunnelblick/Configurations/"];
-        NSString * altPath     = [NSString stringWithFormat:@"/Library/Application Support/Tunnelblick/Users/%@", NSUserName()];
+        NSString * sharedPath  = @"/Library/Application Support/SurfsafeVPN/Shared";
+        NSString * libraryPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfsafeVPN/Configurations/"];
+        NSString * altPath     = [NSString stringWithFormat:@"/Library/Application Support/SurfsafeVPN/Users/%@", NSUserName()];
         
         NSArray * foldersToSecure = [NSArray arrayWithObjects: libraryPath, sharedPath, altPath, nil];
         
@@ -629,10 +630,10 @@ int main(int argc, char *argv[])
         if (   [firstPartOfSource isEqualToString: gPrivatePath]  ) {
             NSString * lastPartOfSource = lastPartOfPath(secondPath);
             NSString * lastPartOfTarget = lastPartOfPath(firstPath);
-            NSString * shadowFromPath = [NSString stringWithFormat: @"/Library/Application Support/Tunnelblick/Users/%@/%@",
+            NSString * shadowFromPath = [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users/%@/%@",
                                          NSUserName(),
                                          lastPartOfSource];
-            NSString * shadowToPath   = [NSString stringWithFormat: @"/Library/Application Support/Tunnelblick/Users/%@/%@",
+            NSString * shadowToPath   = [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users/%@/%@",
                                          NSUserName(),
                                          lastPartOfTarget];
             if (  [firstPartOfTarget isEqualToString: gPrivatePath]  ) {
@@ -704,7 +705,7 @@ int main(int argc, char *argv[])
                 
                 // Delete shadow copy, too, if it exists
                 if (  [firstPartOfPath(firstPath) isEqualToString: gPrivatePath]  ) {
-                    NSString * shadowCopyPath = [NSString stringWithFormat: @"/Library/Application Support/Tunnelblick/Users/%@/%@",
+                    NSString * shadowCopyPath = [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users/%@/%@",
                                                  NSUserName(),
                                                  lastPartOfPath(firstPath)];
                     if (  [gFileMgr fileExistsAtPath: shadowCopyPath]  ) {
@@ -726,8 +727,8 @@ int main(int argc, char *argv[])
     //**************************************************************************************************************************
     // (13) If requested, copies the bundleVersion into the CFBundleVersion entry
     //                           and bundleShortVersionString into the CFBundleShortVersionString
-    //                               in /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Into.plist
-    //                    and removes /Library/Application Support/Tunnelblick/Configuration Updates/Tunnelblick Configurations.bundle/Contents/Resources/Install
+    //                               in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
+    //                    and removes /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Resources/Install
     //
     //                    This is done after installing updated .tblks so that Sparkle will not try to update again and we won't try to install the updates again
     
@@ -744,12 +745,12 @@ int main(int argc, char *argv[])
                     [libDict removeObjectForKey: @"CFBundleVersion"];
                     [libDict setObject: bundleVersion forKey: @"CFBundleVersion"];
                     changed = TRUE;
-                    NSLog(@"Tunnelblick Installer: Tunnelblick Configurations.bundle CFBundleVersion has been set to %@", bundleVersion);
+                    NSLog(@"SurfsafeVPN Installer: SurfsafeVPN Configurations.bundle CFBundleVersion has been set to %@", bundleVersion);
                 } else {
-                    NSLog(@"Tunnelblick Installer: Tunnelblick Configurations.bundle CFBundleVersion is %@", bundleVersion);
+                    NSLog(@"SurfsafeVPN Installer: SurfsafeVPN Configurations.bundle CFBundleVersion is %@", bundleVersion);
                 }
             } else {
-                NSLog(@"Tunnelblick Installer: no CFBundleVersion in %@", libPlistPath);
+                NSLog(@"SurfsafeVPN Installer: no CFBundleVersion in %@", libPlistPath);
             }
             
             libVersion = [libDict objectForKey: @"CFBundleShortVersionString"];
@@ -758,12 +759,12 @@ int main(int argc, char *argv[])
                     [libDict removeObjectForKey: @"CFBundleShortVersionString"];
                     [libDict setObject: bundleShortVersionString forKey: @"CFBundleShortVersionString"];
                     changed = TRUE;
-                    NSLog(@"Tunnelblick Installer: Tunnelblick Configurations.bundle CFBundleShortVersionString has been set to %@", bundleShortVersionString);
+                    NSLog(@"SurfsafeVPN Installer: SurfsafeVPN Configurations.bundle CFBundleShortVersionString has been set to %@", bundleShortVersionString);
                 } else {
-                    NSLog(@"Tunnelblick Installer: Tunnelblick Configurations.bundle CFBundleShortVersionString is %@", bundleShortVersionString);
+                    NSLog(@"SurfsafeVPN Installer: SurfsafeVPN Configurations.bundle CFBundleShortVersionString is %@", bundleShortVersionString);
                 }
             } else {
-                NSLog(@"Tunnelblick Installer: no CFBundleShortVersionString in %@", libPlistPath);
+                NSLog(@"SurfsafeVPN Installer: no CFBundleShortVersionString in %@", libPlistPath);
             }
             
             if (  changed  ) {
@@ -773,14 +774,14 @@ int main(int argc, char *argv[])
             NSString * installFolderPath = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Resources/Install"];
             if (  [gFileMgr fileExistsAtPath: installFolderPath]  ) {
                 if (  ! [gFileMgr tbRemoveFileAtPath: installFolderPath handler: nil]  ) {
-                    NSLog(@"Tunnelblick Installer: unable to remove %@", installFolderPath);
+                    NSLog(@"SurfsafeVPN Installer: unable to remove %@", installFolderPath);
                 } else {
-                    NSLog(@"Tunnelblick Installer: removed %@", installFolderPath);
+                    NSLog(@"SurfsafeVPN Installer: removed %@", installFolderPath);
                 }
             }
                 
         } else {
-            NSLog(@"Tunnelblick Installer: could not find %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
+            NSLog(@"SurfsafeVPN Installer: could not find %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
         }
     }
     
@@ -798,18 +799,18 @@ int main(int argc, char *argv[])
 
 void deleteFlagFile(void)
 {
-    char * path = "/tmp/tunnelblick-authorized-running";
+    char * path = "/tmp/surfsafevpn-authorized-running";
     struct stat sb;
 	if (  0 == stat(path, &sb)  ) {
         if (  (sb.st_mode & S_IFMT) == S_IFREG  ) {
             if (  0 != unlink(path)  ) {
-                NSLog(@"Tunnelblick Installer: Unable to delete %s", path);
+                NSLog(@"SurfsafeVPN Installer: Unable to delete %s", path);
             }
         } else {
-            NSLog(@"Tunnelblick Installer: %s is not a regular file; st_mode = 0%lo", path, (unsigned long) sb.st_mode);
+            NSLog(@"SurfsafeVPN Installer: %s is not a regular file; st_mode = 0%lo", path, (unsigned long) sb.st_mode);
         }
     } else {
-        NSLog(@"Tunnelblick Installer: stat of %s failed\nError was '%s'", path, strerror(errno));
+        NSLog(@"SurfsafeVPN Installer: stat of %s failed\nError was '%s'", path, strerror(errno));
     }
 }
 
@@ -833,7 +834,7 @@ void safeCopyOrMovePathToPath(NSString * fromPath, NSString * toPath, BOOL moveN
     errorExitIfAnySymlinkInPath(dotPartialPath, 3);
     [gFileMgr tbRemoveFileAtPath:dotPartialPath handler: nil];
     if (  ! [gFileMgr tbCopyPath: fromPath toPath: dotPartialPath handler: nil]  ) {
-        NSLog(@"Tunnelblick Installer: Failed to copy %@ to %@", fromPath, dotPartialPath);
+        NSLog(@"SurfsafeVPN Installer: Failed to copy %@ to %@", fromPath, dotPartialPath);
         [gFileMgr tbRemoveFileAtPath:dotPartialPath handler: nil];
         errorExit();
     }
@@ -850,7 +851,7 @@ void safeCopyOrMovePathToPath(NSString * fromPath, NSString * toPath, BOOL moveN
     errorExitIfAnySymlinkInPath(toPath, 5);
     [gFileMgr tbRemoveFileAtPath:toPath handler: nil];
     if (  ! [gFileMgr tbMovePath: dotPartialPath toPath: toPath handler: nil]  ) {
-        NSLog(@"Tunnelblick Installer: Failed to rename %@ to %@", dotPartialPath, toPath);
+        NSLog(@"SurfsafeVPN Installer: Failed to rename %@ to %@", dotPartialPath, toPath);
         [gFileMgr tbRemoveFileAtPath:dotPartialPath handler: nil];
         errorExit();
     }
@@ -861,7 +862,7 @@ BOOL deleteThingAtPath(NSString * path)
 {
     errorExitIfAnySymlinkInPath(path, 8);
     if (  ! [gFileMgr tbRemoveFileAtPath: path handler: nil]  ) {
-        NSLog(@"Tunnelblick Installer: Failed to delete %@", path);
+        NSLog(@"SurfsafeVPN Installer: Failed to delete %@", path);
         return FALSE;
     }
     
@@ -880,11 +881,11 @@ BOOL moveContents(NSString * fromPath, NSString * toPath)
             NSString * fullFromPath = [fromPath stringByAppendingPathComponent: file];
             NSString * fullToPath   = [toPath   stringByAppendingPathComponent: file];
             if (  [gFileMgr fileExistsAtPath: fullToPath]  ) {
-                NSLog(@"Tunnelblick Installer: Unable to move %@ to %@ because the destination already exists", fullFromPath, fullToPath);
+                NSLog(@"SurfsafeVPN Installer: Unable to move %@ to %@ because the destination already exists", fullFromPath, fullToPath);
                 return NO;
             } else {
                 if (  ! [gFileMgr tbMovePath: fullFromPath toPath: fullToPath handler: nil]  ) {
-                    NSLog(@"Tunnelblick Installer: Unable to move %@ to %@", fullFromPath, fullToPath);
+                    NSLog(@"SurfsafeVPN Installer: Unable to move %@ to %@", fullFromPath, fullToPath);
                     return NO;
                 }
             }
@@ -900,15 +901,15 @@ BOOL createSymLink(NSString * fromPath, NSString * toPath)
     if (  [gFileMgr tbCreateSymbolicLinkAtPath: fromPath pathContent: toPath]  ) {
         // Since we're running as root, owner of symbolic link is root:wheel. Try to change to real user:group
         if (  0 != lchown([gFileMgr fileSystemRepresentationWithPath: fromPath], gRealUserID, gRealGroupID)  ) {
-            NSLog(@"Tunnelblick Installer: Error: Unable to change ownership of symbolic link %@\nError was '%s'", fromPath, strerror(errno));
+            NSLog(@"SurfsafeVPN Installer: Error: Unable to change ownership of symbolic link %@\nError was '%s'", fromPath, strerror(errno));
             return NO;
         } else {
-            NSLog(@"Tunnelblick Installer: Successfully created a symbolic link from %@ to %@", fromPath, toPath);
+            NSLog(@"SurfsafeVPN Installer: Successfully created a symbolic link from %@ to %@", fromPath, toPath);
             return YES;
         }
     }
 
-    NSLog(@"Tunnelblick Installer: Error: Unable to create symbolic link from %@ to %@", fromPath, toPath);
+    NSLog(@"SurfsafeVPN Installer: Error: Unable to create symbolic link from %@ to %@", fromPath, toPath);
     return NO;
 }
 
@@ -931,7 +932,7 @@ BOOL makeFileUnlockedAtPath(NSString * path)
     }
     
     if (  [curAttributes fileIsImmutable]  ) {
-        NSLog(@"Tunnelblick Installer: Failed to unlock %@ in %d attempts", path, maxTries);
+        NSLog(@"SurfsafeVPN Installer: Failed to unlock %@ in %d attempts", path, maxTries);
         return FALSE;
     }
     return TRUE;
@@ -950,7 +951,7 @@ BOOL checkSetOwnership(NSString * path, BOOL deeply, uid_t uid, gid_t gid)
     if (  ! (   [[atts fileOwnerAccountID]      isEqualToNumber: [NSNumber numberWithInt: uid]]
              && [[atts fileGroupOwnerAccountID] isEqualToNumber: [NSNumber numberWithInt: gid]]  )  ) {
         if (  [atts fileIsImmutable]  ) {
-            NSLog(@"Tunnelblick Installer: Unable to change ownership of %@ to %d:%d because it is locked",
+            NSLog(@"SurfsafeVPN Installer: Unable to change ownership of %@ to %d:%d because it is locked",
                   path,
                   (int) uid,
                   (int) gid);
@@ -958,7 +959,7 @@ BOOL checkSetOwnership(NSString * path, BOOL deeply, uid_t uid, gid_t gid)
         }
         
         if (  chown([gFileMgr fileSystemRepresentationWithPath: path], uid, gid) != 0  ) {
-            NSLog(@"Tunnelblick Installer: Unable to change ownership of %@ to %d:%d\nError was '%s'",
+            NSLog(@"SurfsafeVPN Installer: Unable to change ownership of %@ to %d:%d\nError was '%s'",
                   path,
                   (int) uid,
                   (int) gid,
@@ -987,19 +988,19 @@ BOOL checkSetOwnership(NSString * path, BOOL deeply, uid_t uid, gid_t gid)
     
     if (  changedBase ) {
         if (  changedDeep  ) {
-            NSLog(@"Tunnelblick Installer: Changed ownership of %@ and its contents to %d:%d",
+            NSLog(@"SurfsafeVPN Installer: Changed ownership of %@ and its contents to %d:%d",
                   path,
                   (int) uid,
                   (int) gid);
         } else {
-            NSLog(@"Tunnelblick Installer: Changed ownership of %@ to %d:%d",
+            NSLog(@"SurfsafeVPN Installer: Changed ownership of %@ to %d:%d",
                   path,
                   (int) uid,
                   (int) gid);
         }
     } else {
         if (  changedDeep  ) {
-            NSLog(@"Tunnelblick Installer: Changed ownership of the contents of %@ to %d:%d",
+            NSLog(@"SurfsafeVPN Installer: Changed ownership of the contents of %@ to %d:%d",
                   path,
                   (int) uid,
                   (int) gid);
@@ -1017,7 +1018,7 @@ BOOL checkSetItemOwnership(NSString * path, NSDictionary * atts, uid_t uid, gid_
 	if (  ! (   [[atts fileOwnerAccountID]      isEqualToNumber: [NSNumber numberWithInt: (int) uid]]
 			 && [[atts fileGroupOwnerAccountID] isEqualToNumber: [NSNumber numberWithInt: (int) gid]]  )  ) {
 		if (  [atts fileIsImmutable]  ) {
-			NSLog(@"Tunnelblick Installer: Unable to change ownership of %@ to %d:%d because it is locked",
+			NSLog(@"SurfsafeVPN Installer: Unable to change ownership of %@ to %d:%d because it is locked",
 				  path,
 				  (int) uid,
 				  (int) gid);
@@ -1034,7 +1035,7 @@ BOOL checkSetItemOwnership(NSString * path, NSDictionary * atts, uid_t uid, gid_
 		}
 
 		if (  result != 0  ) {
-			NSLog(@"Tunnelblick Installer: Unable to change ownership of %@ to %d:%d\nError was '%s'",
+			NSLog(@"SurfsafeVPN Installer: Unable to change ownership of %@ to %d:%d\nError was '%s'",
 				  path,
 				  (int) uid,
 				  (int) gid,
@@ -1072,7 +1073,7 @@ BOOL checkSetPermissions(NSString * path, NSString * permsShouldHave, BOOL fileM
     }
     
     if (  [atts fileIsImmutable]  ) {
-        NSLog(@"Tunnelblick Installer: Cannot change permissions because item is locked: %@", path);
+        NSLog(@"Surfsafe Installer: Cannot change permissions because item is locked: %@", path);
         return NO;
     }
     
@@ -1083,16 +1084,16 @@ BOOL checkSetPermissions(NSString * path, NSString * permsShouldHave, BOOL fileM
     else if (  [permsShouldHave isEqualToString:  @"640"]  ) permsMode =  0640;
     else if (  [permsShouldHave isEqualToString: @"4555"]  ) permsMode = 04555;
     else {
-        NSLog(@"Tunnelblick Installer: invalid permsShouldHave = '%@' in checkSetPermissions function", permsShouldHave);
+        NSLog(@"Surfsafe Installer: invalid permsShouldHave = '%@' in checkSetPermissions function", permsShouldHave);
         return NO;
     }
     
     if (  chmod([gFileMgr fileSystemRepresentationWithPath: path], permsMode) != 0  ) {
-        NSLog(@"Tunnelblick Installer: Unable to change permissions to 0%@ on %@", permsShouldHave, path);
+        NSLog(@"Surfsafe Installer: Unable to change permissions to 0%@ on %@", permsShouldHave, path);
         return NO;
     }
 
-    NSLog(@"Tunnelblick Installer: Changed permissions to 0%@ on %@", permsShouldHave, path);
+    NSLog(@"Surfsafe Installer: Changed permissions to 0%@ on %@", permsShouldHave, path);
     return YES;
 }
 
@@ -1104,7 +1105,7 @@ void errorExitIfAnySymlinkInPath(NSString * path, int testPoint)
         if (  [gFileMgr fileExistsAtPath: curPath]  ) {
             NSDictionary * fileAttributes = [gFileMgr tbFileAttributesAtPath: curPath traverseLink: NO];
             if (  [[fileAttributes objectForKey: NSFileType] isEqualToString: NSFileTypeSymbolicLink]  ) {
-                NSLog(@"Tunnelblick Installer: Apparent symlink attack detected at test point %d: Symlink is at %@, full path being tested is %@", testPoint, curPath, path);
+                NSLog(@"Surfsafe Installer: Apparent symlink attack detected at test point %d: Symlink is at %@, full path being tested is %@", testPoint, curPath, path);
                 errorExit();
             }
         }
@@ -1138,11 +1139,11 @@ BOOL createDirWithPermissionAndOwnership(NSString * dirPath, mode_t permissions,
         
         // Parent directory exists. Create the directory we want
         if (  mkdir([gFileMgr fileSystemRepresentationWithPath: dirPath], (mode_t) permissions) != 0  ) {
-            NSLog(@"Tunnelblick Installer: Unable to create directory %@", dirPath);
+            NSLog(@"Surfsafe Installer: Unable to create directory %@", dirPath);
             return NO;
         }
 
-        NSLog(@"Tunnelblick Installer: Created directory %@", dirPath);
+        NSLog(@"Surfsafe Installer: Created directory %@", dirPath);
     }
 
     

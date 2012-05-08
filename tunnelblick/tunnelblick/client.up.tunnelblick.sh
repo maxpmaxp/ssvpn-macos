@@ -48,7 +48,7 @@ while [ {$#} ] ; do
 		ARG_IGNORE_OPTION_FLAGS="${1}"
 		shift
 	else
-		if [ "${1:0:1}" = "-" ] ; then				# Shift out Tunnelblick arguments (they start with "-") that we don't understand
+		if [ "${1:0:1}" = "-" ] ; then				# Shift out SurfsafeVPN arguments (they start with "-") that we don't understand
 			shift									# so the rest of the script sees only the OpenVPN arguments
 		else
 			break
@@ -59,28 +59,28 @@ done
 readonly ARG_MONITOR_NETWORK_CONFIGURATION ARG_RESTORE_ON_DNS_RESET ARG_RESTORE_ON_WINS_RESET ARG_TAP ARG_IGNORE_OPTION_FLAGS
 
 # Note: The script log path name is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/SurfsafeVPN/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/SurfsafeVPN/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # Note: "/Users/..." works even if the home directory has a different path; it is used in the name of the log file, and is not used as a path to get to anything.
-readonly TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+readonly TBALTPREFIX="/Library/Application Support/SurfsafeVPN/Users/"
 readonly TBALTPREFIXLEN="${#TBALTPREFIX}"
 readonly TBCONFIGSTART="${config:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
 	readonly TBBASE="${config:$TBALTPREFIXLEN}"
 	readonly TBSUFFIX="${TBBASE#*/}"
 	readonly TBUSERNAME="${TBBASE%%/*}"
-	readonly TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+	readonly TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/SurfsafeVPN/Configurations/$TBSUFFIX"
 else
     readonly TBCONFIG="${config}"
 fi
 
 readonly CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-readonly SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+readonly SCRIPT_LOG_FILE="/Library/Application Support/SurfsafeVPN/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 readonly TB_RESOURCE_PATH=$(dirname "${0}")
 
-LEASEWATCHER_PLIST_PATH="/Library/Application Support/Tunnelblick/LeaseWatch.plist"
+LEASEWATCHER_PLIST_PATH="/Library/Application Support/SurfsafeVPN/LeaseWatch.plist"
 
 readonly OSVER="$(sw_vers | grep 'ProductVersion:' | grep -o '10\.[0-9]*')"
 
@@ -92,7 +92,7 @@ bRouteGatewayIsDhcp="false"
 readonly LOG_MESSAGE_COMMAND=$(basename "${0}")
 logMessage()
 {
-	echo "$(date '+%a %b %e %T %Y') *Tunnelblick $LOG_MESSAGE_COMMAND: "${@} >> "${SCRIPT_LOG_FILE}"
+	echo "$(date '+%a %b %e %T %Y') *SurfsafeVPN $LOG_MESSAGE_COMMAND: "${@} >> "${SCRIPT_LOG_FILE}"
 }
 
 # @param String string - Content to trim
@@ -270,7 +270,7 @@ EOF )"
 	fi
 	
 	# Now, do the aggregation
-	# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from Tunnelblick,
+	# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from SurfsafeVPN,
 	# then save old and new DNS and WINS settings
 	# PPID is a bash-script variable that contains the process ID of the parent of the process running the script (i.e., OpenVPN's process ID)
 	# config is an environmental variable set to the configuration path by OpenVPN prior to running this up script

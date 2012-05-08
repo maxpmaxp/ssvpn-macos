@@ -239,7 +239,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     pthread_mutex_unlock( &bytecountMutex );
 }
 
-// Reinitializes a connection -- as if we quit Tunnelblick and then relaunched
+// Reinitializes a connection -- as if we quit SurfSafeVPN and then relaunched
 -(void) reInitialize
 {
     [self disconnectFromManagmentSocket];
@@ -277,7 +277,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     [self setPort: inPortNumber];
     
     
-    // We set preferences of any configuration that we try to hookup, because this might be a new user who hasn't run Tunnelblick,
+    // We set preferences of any configuration that we try to hookup, because this might be a new user who hasn't run SurfSafeVPN,
     // and they may be hooking up to a configuration that started when the computer starts.
     [self setPreferencesFromOpenvnpstartArgString: inStartArgs];
 
@@ -463,7 +463,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
 -(void) didHookup
 {
     [[[NSApp delegate] logScreen] hookedUpOrStartedConnection: self];
-    [self addToLog: @"*Tunnelblick: Established communication with OpenVPN"];
+    [self addToLog: @"*SurfSafeVPN: Established communication with OpenVPN"];
     [[[NSApp delegate] logScreen] validateWhenConnectingForConnection: self];
 }
 
@@ -544,7 +544,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 // Returns TRUE if can and will connect, FALSE otherwise
 //
 // Needs and asks for administrator username/password to make a change if a change is necessary and authRef is nil.
-// (authRef is non-nil only when Tunnelblick is in the process of launching, and only when it was used for something else.)
+// (authRef is non-nil only when SurfSafeVPN is in the process of launching, and only when it was used for something else.)
 //
 // A change is necesary if changing connect/not connect status, or if preference changes would change
 // the .plist file used to connect when the system starts
@@ -574,7 +574,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     } else {
         if (  ! (   [configPath hasPrefix: gDeployPath]
                  || [configPath hasPrefix: gSharedPath]   )  ) {
-            NSLog(@"Tunnelblick will NOT connect '%@' when the computer starts because it is a private configuration", [self displayName]);
+            NSLog(@"SurfSafeVPN will NOT connect '%@' when the computer starts because it is a private configuration", [self displayName]);
             return NO;
         }
         
@@ -700,7 +700,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 -(BOOL) makeDictionary: (NSDictionary * *)  dict withLabel: (NSString *) daemonLabel openvpnstartArgs: (NSMutableArray * *) openvpnstartArgs
 {
     // Don't use the "Program" key, because we want the first argument to be the path to the program,
-    // so openvpnstart can know where it is, so it can find other Tunnelblick compenents.
+    // so openvpnstart can know where it is, so it can find other SurfSafeVPN compenents.
     NSString * openvpnstartPath = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
     *openvpnstartArgs = [[[self argumentsForOpenvpnstartForNow: NO] mutableCopy] autorelease];
     if (  ! (*openvpnstartArgs)  ) {
@@ -896,7 +896,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             [task waitUntilExit];
             int status = [task terminationStatus];
             if (  status != 0  ) {
-                NSLog(@"Tunnelblick runOnConnect item %@ returned %d; '%@' connect cancelled", path, status, displayName);
+                NSLog(@"SurfSafeVPN runOnConnect item %@ returned %d; '%@' connect cancelled", path, status, displayName);
                 if (  userKnows  ) {
                     TBRunAlertPanel(NSLocalizedString(@"Warning!", @"Window title"),
                                     [NSString
@@ -925,7 +925,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     
     [self addToLog: [[NSApp delegate] openVPNLogHeader]];
 
-    NSString * logText = [NSString stringWithFormat:@"*Tunnelblick: Attempting connection with %@%@; Set nameserver = %@%@",
+    NSString * logText = [NSString stringWithFormat:@"*SurfSafeVPN: Attempting connection with %@%@; Set nameserver = %@%@",
                           [self displayName],
                           (  [[arguments objectAtIndex: 5] isEqualToString:@"1"]
                            ? @" using shadow copy"
@@ -945,7 +945,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         [escapedArguments addObject: [[[arguments objectAtIndex: i] componentsSeparatedByString: @" "] componentsJoinedByString: @"\\ "]];
     }
     
-    [self addToLog: [NSString stringWithFormat: @"*Tunnelblick: %@ %@",
+    [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: %@ %@",
                      [[path componentsSeparatedByString: @" "] componentsJoinedByString: @"\\ "],
                      [escapedArguments componentsJoinedByString: @" "]]];
     
@@ -973,7 +973,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     NSString * openvpnstartOutput = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
     openvpnstartOutput = [openvpnstartOutput stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (  [openvpnstartOutput length] != 0  ) {
-        [self addToLog: [NSString stringWithFormat:@"*Tunnelblick: openvpnstart output:\n\n%@\n", openvpnstartOutput]];
+        [self addToLog: [NSString stringWithFormat:@"*SurfSafeVPN: openvpnstart output:\n\n%@\n", openvpnstartOutput]];
     }
 
     int status = [task terminationStatus];
@@ -992,7 +992,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             openvpnstartOutput = [NSString stringWithString: tempMutableString];
         }
         
-        [self addToLog: [NSString stringWithFormat: @"*Tunnelblick:\n\n"
+        [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN:\n\n"
                          "Could not start OpenVPN (openvpnstart returned with status #%d)\n\n"
                          "Contents of the openvpnstart log:\n"
                          "%@",
@@ -1014,7 +1014,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         if (  openvpnstartOutput  ) {
             openvpnstartOutput = [openvpnstartOutput stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             if (  [openvpnstartOutput length] != 0  ) {
-                [self addToLog: [NSString stringWithFormat: @"*Tunnelblick: openvpnstart message: %@", openvpnstartOutput]];
+                [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: openvpnstart message: %@", openvpnstartOutput]];
             }
         }
 //        [[[NSApp delegate] logScreen] hookedUpOrStartedConnection: self];
@@ -1028,7 +1028,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 -(NSArray *) argumentsForOpenvpnstartForNow: (BOOL) forNow
 {
     NSString *cfgPath = [self configPath];
-    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/Tunnelblick/Users/%@/%@",
+    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/SurfSafeVPN/Users/%@/%@",
                          NSUserName(), lastPartOfPath(configPath)];
     
     if ( ! (cfgPath = [[ConfigurationManager defaultManager] getConfigurationToUse: cfgPath orAlt: altPath]) ) {
@@ -1337,7 +1337,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 - (IBAction) toggle: (id) sender
 {
 	if (![self isDisconnected]) {
-        [self addToLog: @"*Tunnelblick: Disconnecting; 'Disconnect' menu command invoked"];
+        [self addToLog: @"*SurfSafeVPN: Disconnecting; 'Disconnect' menu command invoked"];
 		[self disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];
 	} else {
 		[self connect: sender userKnows: YES];
@@ -1575,16 +1575,16 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                 int status = [task terminationStatus];
                 [task release];
                 if (  status != 0) {
-                    [self addToLog: [NSString stringWithFormat: @"*Tunnelblick: Failed to flush the DNS cache; the command was: '%@ -flushcache'", path]];
+                    [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: Failed to flush the DNS cache; the command was: '%@ -flushcache'", path]];
                 } else {
-                    [self addToLog: @"*Tunnelblick: Flushed the DNS cache"];
+                    [self addToLog: @"*SurfSafeVPN: Flushed the DNS cache"];
                     break;
                 }
             }
         }
         
         if (  didNotTry  ) {
-            [self addToLog: @"* Tunnelblick: DNS cache not flushed; did not find needed executable"];
+            [self addToLog: @"* SurfSafeVPN: DNS cache not flushed; did not find needed executable"];
         }
     }
 }
@@ -1594,7 +1594,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     
     NSParameterAssert(socket == managementSocket);
     
-    if (NSDebugEnabled) NSLog(@"Tunnelblick connected to management interface on port %d.", [managementSocket remotePort]);
+    if (NSDebugEnabled) NSLog(@"SurfSafeVPN connected to management interface on port %d.", [managementSocket remotePort]);
     
     NS_DURING {
 		[managementSocket writeString: @"pid\r\n"           encoding: NSASCIIStringEncoding];
@@ -1746,7 +1746,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                     userWantsState = userWantsRetry;
                 } else {
                     userWantsState = userWantsAbandon;              // User wants to cancel or an error happened, so disconnect
-                    [self addToLog: @"*Tunnelblick: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
+                    [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
                     [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      // (User requested it by cancelling)
                 }
                 
@@ -1899,7 +1899,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         [myAuthAgent setAuthMode:@"privateKey"];
         [myAuthAgent performAuthentication];
         if (  [myAuthAgent authenticationWasFromKeychain]  ) {
-            [self addToLog: @"*Tunnelblick: Obtained VPN passphrase from the Keychain"];
+            [self addToLog: @"*SurfSafeVPN: Obtained VPN passphrase from the Keychain"];
         }
         NSString *myPassphrase = [myAuthAgent passphrase];
         NSRange tokenNameRange = NSMakeRange(pwrange_need.length, pwrange_password.location - 6 );
@@ -1908,7 +1908,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         if(  myPassphrase != nil  ){
             [managementSocket writeString: [NSString stringWithFormat: @"password \"%@\" \"%@\"\r\n", tokenName, escaped(myPassphrase)] encoding:NSISOLatin1StringEncoding];
         } else {
-            [self addToLog: @"*Tunnelblick: Disconnecting; user cancelled authorization"];
+            [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization"];
             [self disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];      // (User requested it by cancelling)
         }
         
@@ -1917,7 +1917,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         [myAuthAgent setAuthMode:@"password"];
         [myAuthAgent performAuthentication];
         if (  [myAuthAgent authenticationWasFromKeychain]  ) {
-            [self addToLog: @"*Tunnelblick: Obtained VPN username and password from the Keychain"];
+            [self addToLog: @"*SurfSafeVPN: Obtained VPN username and password from the Keychain"];
         }
         NSString *myPassword = [myAuthAgent password];
         NSString *myUsername = [myAuthAgent username];
@@ -1925,7 +1925,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             [managementSocket writeString:[NSString stringWithFormat:@"username \"Auth\" \"%@\"\r\n", escaped(myUsername)] encoding:NSISOLatin1StringEncoding];
             [managementSocket writeString:[NSString stringWithFormat:@"password \"Auth\" \"%@\"\r\n", escaped(myPassword)] encoding:NSISOLatin1StringEncoding];
         } else {
-            [self addToLog: @"*Tunnelblick: Disconnecting; user cancelled authorization"];
+            [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization"];
             [self disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];      // (User requested it by cancelling)
         }
         
@@ -2369,17 +2369,17 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                 [task setLaunchPath: path];
                 [task setArguments: arguments];
 
-                NSString * msg = [NSString stringWithFormat: @"*Tunnelblick: '%@.sh' executing…", scriptName];
+                NSString * msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' executing…", scriptName];
                 [self addToLog: msg];
                 [task launch];
                 [task waitUntilExit];
                 int status = [task terminationStatus];
-                msg = [NSString stringWithFormat: @"*Tunnelblick: '%@.sh' returned with status %d", scriptName, status];
+                msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' returned with status %d", scriptName, status];
                 [self addToLog: msg];
                 [task release];
                 if (   (status != 0)
                     && ( ! [scriptName isEqualToString: @"post-disconnect"] )  ) {
-                    [self addToLog: @"*Tunnelblick: Disconnecting; script failed"];
+                    [self addToLog: @"*SurfSafeVPN: Disconnecting; script failed"];
                     [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES]; // Disconnect because script failed
                 }
             }

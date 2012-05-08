@@ -109,22 +109,22 @@ done
 
 TBCONFIG="$config"
 # Note: The script log path is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/SurfsafeVPN/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/SurfsafeVPN/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # Note: "/Users/..." works even if the home directory has a different path; it is used in the name of the script log file, and is not used as a path to get to anything.
-TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+TBALTPREFIX="/Library/Application Support/SurfsafeVPN/Users/"
 TBALTPREFIXLEN="${#TBALTPREFIX}"
 TBCONFIGSTART="${TBCONFIG:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
     TBBASE="${TBCONFIG:$TBALTPREFIXLEN}"
     TBSUFFIX="${TBBASE#*/}"
     TBUSERNAME="${TBBASE%%/*}"
-    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/SurfsafeVPN/Configurations/$TBSUFFIX"
 fi
 
 CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+SCRIPT_LOG_FILE="/Library/Application Support/SurfsafeVPN/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 trim() {
 	echo ${@}
@@ -133,7 +133,7 @@ trim() {
 # ******************************************************************************************************************
 # END INSERTION FROM client.up.tunnelblick.sh
 #
-# BEGIN code from openvpn-tun-up-down.sh and openvpn-tap-up-down.sh (first line modified to echo to Tunnelblick log file)
+# BEGIN code from openvpn-tun-up-down.sh and openvpn-tap-up-down.sh (first line modified to echo to SurfsafeVPN log file)
 # ******************************************************************************************************************
 
 if [ -z "$dev" ]; then echo "$0: \$dev not defined, exiting" >> "${SCRIPT_LOG_FILE}"; exit 1; fi

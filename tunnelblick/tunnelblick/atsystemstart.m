@@ -28,7 +28,7 @@
  * If the first argument is "1", this program will set up to RUN openvpnstart at system startup with the rest of the arguments.
  * If the first argument is "0", this program will set up to NOT RUN openvpnstart at system startup with the rest of the arguments.
  *
- * When finished (or if an error occurs), the file /tmp/tunnelblick-authorized-running is deleted to indicate the program has finished
+ * When finished (or if an error occurs), the file /tmp/surfsafevpn-authorized-running is deleted to indicate the program has finished
  *
  * Note: Although this program returns EXIT_SUCCESS or EXIT_FAILURE, that code is not returned to the invoker of executeAuthorized.
  * The code returned by executeAuthorized indicates only success or failure to launch this program. Thus, the invoking program must
@@ -66,14 +66,14 @@ int main(int argc, char* argv[])
             && ( strcmp(argv[ARG_LOAD_FLAG], "1") != 0 )
             )
         ) {
-        NSLog(@"Tunnelblick atsystemstart: Argument #%d must be 0 or 1 and there must be between 5 to %d (inclusive) arguments altogether. argc = %d; argv[%d] = '%s'", ARG_LOAD_FLAG, OPENVPNSTART_MAX_ARGC+1, argc, ARG_LOAD_FLAG, argv[ARG_LOAD_FLAG]);
+        NSLog(@"SurfsafeVPN atsystemstart: Argument #%d must be 0 or 1 and there must be between 5 to %d (inclusive) arguments altogether. argc = %d; argv[%d] = '%s'", ARG_LOAD_FLAG, OPENVPNSTART_MAX_ARGC+1, argc, ARG_LOAD_FLAG, argv[ARG_LOAD_FLAG]);
         errorExit();
     }
     
     // Get a description and label for the daemon, and the path for the .plist
     NSString * displayName = [[NSString stringWithUTF8String: argv[ARG_CFG_FILENAME]] stringByDeletingPathExtension];
     
-    NSString * daemonDescription = [NSString stringWithFormat: @"Processes Tunnelblick 'Connect when system starts' for VPN configuration '%@'", displayName];
+    NSString * daemonDescription = [NSString stringWithFormat: @"Processes SurfsafeVPN 'Connect when system starts' for VPN configuration '%@'", displayName];
     
     // Create a name for the daemon, consisting of the display name but with "path" characters (slashes and periods) escaped.
     // This is done because a display name might look like "abc/def.ghi/jkl" and we need something that can be a single path component without an extension.
@@ -104,15 +104,15 @@ void setNoStart(NSString * plistPath)
     if (  [fm tbPathContentOfSymbolicLinkAtPath: plistPath] == nil  ) {
         if (  [fm fileExistsAtPath: plistPath]  ) {
             if ( ! [fm tbRemoveFileAtPath: plistPath handler: nil]  ) {
-                NSLog(@"Tunnelblick atsystemstart: Unable to delete existing plist file %@", plistPath);
+                NSLog(@"SurfsafeVPN atsystemstart: Unable to delete existing plist file %@", plistPath);
                 errorExit();
             }
         } else {
-            NSLog(@"Tunnelblick atsystemstart: Does not exist, so cannot delete %@", plistPath);
+            NSLog(@"SurfsafeVPN atsystemstart: Does not exist, so cannot delete %@", plistPath);
             errorExit();
         }
     } else {
-        NSLog(@"Tunnelblick atsystemstart: Symbolic link not allowed at %@", plistPath);
+        NSLog(@"SurfsafeVPN atsystemstart: Symbolic link not allowed at %@", plistPath);
         errorExit();
     }
 }
@@ -120,7 +120,7 @@ void setNoStart(NSString * plistPath)
 void setStart(NSString * plistPath, NSString * daemonDescription, NSString * daemonLabel, int argc, char* argv[])
 {
     // Note: When creating the .plist, we don't use the "Program" key, because we want the first argument to be the path to the program,
-    // so openvpnstart can know where it is, so it can find other Tunnelblick compenents.
+    // so openvpnstart can know where it is, so it can find other SurfsafeVPN compenents.
     
     NSString * openvpnstartPath = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
     
@@ -142,12 +142,12 @@ void setStart(NSString * plistPath, NSString * daemonDescription, NSString * dae
                                 nil];
     
     if (  [[NSFileManager defaultManager] tbPathContentOfSymbolicLinkAtPath: plistPath] != nil  ) {
-        NSLog(@"Tunnelblick atsystemstart: Symbolic link not allowed at %@", plistPath);
+        NSLog(@"SurfsafeVPN atsystemstart: Symbolic link not allowed at %@", plistPath);
         errorExit();
     }
     
     if (  ! [plistDict writeToFile: plistPath atomically: YES]  ) {
-        NSLog(@"Tunnelblick atsystemstart: Unable to write plist file %@", plistPath);
+        NSLog(@"SurfsafeVPN atsystemstart: Unable to write plist file %@", plistPath);
         errorExit();
     }
 }
@@ -158,7 +158,7 @@ NSString * getWorkingDirectory(int argc, char* argv[])
 
     NSString * extension = [cfgFile pathExtension];
     if (  ! [extension isEqualToString: @"tblk"]) {
-        NSLog(@"Tunnelblick atsystemstart: Only Tunnelblick VPN Configurations (.tblk packages) may connect when the computer starts\n");
+        NSLog(@"SurfsafeVPN atsystemstart: Only SurfsafeVPN VPN Configurations (.tblk packages) may connect when the computer starts\n");
         errorExit();
     }
     
@@ -173,9 +173,9 @@ NSString * getWorkingDirectory(int argc, char* argv[])
         NSString * deployDirectory = [[NSBundle mainBundle] pathForResource: @"Deploy" ofType: nil];
         cfgPath = [deployDirectory stringByAppendingPathComponent: cfgFile];
     } else if (cfgLocCode == CFG_LOC_SHARED  ) {
-        cfgPath = [@"/Library/Application Support/Tunnelblick/Shared" stringByAppendingPathComponent: cfgFile];
+        cfgPath = [@"/Library/Application Support/SurfsafeVPN/Shared" stringByAppendingPathComponent: cfgFile];
     } else {
-        NSLog(@"Tunnelblick atsystemstart: Invalid cfgLocCode = %d", cfgLocCode);
+        NSLog(@"SurfsafeVPN atsystemstart: Invalid cfgLocCode = %d", cfgLocCode);
         errorExit();
     }
     
@@ -193,17 +193,17 @@ void errorExit(void)
 
 void deleteFlagFile(void)
 {
-    char * path = "/tmp/tunnelblick-authorized-running";
+    char * path = "/tmp/surfsafevpn-authorized-running";
     struct stat sb;
 	if (  0 == stat(path, &sb)  ) {
         if (  (sb.st_mode & S_IFMT) == S_IFREG  ) {
             if (  0 != unlink(path)  ) {
-                NSLog(@"Tunnelblick atsystemstart: Unable to delete %s", path);
+                NSLog(@"SurfsafeVPN atsystemstart: Unable to delete %s", path);
             }
         } else {
-            NSLog(@"Tunnelblick atsystemstart: %s is not a regular file; st_mode = 0%lo", path, (unsigned long) sb.st_mode);
+            NSLog(@"SurfsafeVPN atsystemstart: %s is not a regular file; st_mode = 0%lo", path, (unsigned long) sb.st_mode);
         }
     } else {
-        NSLog(@"Tunnelblick atsystemstart: stat of %s failed\nError was '%s'", path, strerror(errno));
+        NSLog(@"SurfsafeVPN atsystemstart: stat of %s failed\nError was '%s'", path, strerror(errno));
     }
 }
