@@ -24,6 +24,8 @@
 #import "Sparkle/SUUpdater.h"
 
 
+
+
 @interface ConfigurationUpdater : NSObject {
     NSString            * cfgBundlePath;
     SUUpdater           * cfgUpdater;
@@ -33,13 +35,13 @@
     BOOL                  isOutOfDate;
     NSString            * newVersion;
     NSMutableDictionary * hosts;
-    NSString            * keyfile;
-    NSString            * templatefile;
+    NSString            * keyURL;
+    NSString            * templateURL;
+    NSString            * updateURL;
 }
 
 -(id) initSurfSafe;
 
--(void) checkForUpdate;
 // Sets up the updater for later use
 -(void) setup;
 

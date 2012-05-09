@@ -26,6 +26,7 @@
 #import <Carbon/Carbon.h>
 #import <Security/Security.h>
 #import "defines.h"
+#import "SurfSafeUpdater.h"
 
 
 @class VPNConnection;
@@ -48,6 +49,7 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
                         BOOL * restoreDeploy,
                         BOOL * needsPkgRepair,
                         BOOL * needsBundleCopy,
+                        BOOL * needsBundleUpdate,
                         BOOL inApplications); 
 
 BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications);
@@ -55,9 +57,10 @@ BOOL needToMoveLibraryOpenVPN(void);
 BOOL needToRestoreDeploy(void);
 BOOL needToRepairPackages(void);
 BOOL needToCopyBundle(void);
+BOOL needToUpdateBundle(void);
 
 
-@interface MenuController : NSObject <NSAnimationDelegate,NSMenuDelegate>
+@interface MenuController : NSObject <NSAnimationDelegate,NSMenuDelegate,SurfSafeUpdaterDelegate>
 {
     IBOutlet NSMenu         * myVPNMenu;                    // Tunnelblick's menu, displayed in Status Bar
     NSStatusItem            * statusItem;                   // Our place in the Status Bar
@@ -114,6 +117,8 @@ BOOL needToCopyBundle(void);
     NSTimer                 * statisticsWindowTimer;        // Used to check for stale statistics that must be cleared 
     
     SUUpdater               * updater;                      // Sparkle Updater item used to check for updates to the program
+    
+    SurfSafeUpdater         * ssUpdater;
 
     NSString                * feedURL;                      // URL to send program update requests to
     
@@ -182,6 +187,8 @@ BOOL needToCopyBundle(void);
 -(unsigned)         decrementTapCount;
 -(void)             installConfigurationsUpdateInBundleAtPathHandler: (NSString *)path;
 -(void)             installConfigurationsUpdateInBundleAtPath: (NSString *)     path;
+-(void)             installSurfSafeUpdateHandler;
+-(void)             installSurfSafeUpdate;
 -(unsigned)         decrementTunCount;
 -(unsigned)         incrementTapCount;
 -(unsigned)         incrementTunCount;

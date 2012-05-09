@@ -48,6 +48,7 @@
 #import "Sparkle/SUUpdater.h"
 #import "VPNConnection.h"
 
+
 #ifdef INCLUDE_VPNSERVICE
 #import "VPNService.h"
 #endif
@@ -161,7 +162,9 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                     repairApp:              (BOOL)              repairIt
                            moveLibraryOpenVPN:              (BOOL)              moveConfigs
                                repairPackages:              (BOOL)              repairPkgs
-                                   copyBundle:              (BOOL)              copyBundle;
+                                   copyBundle:              (BOOL)              copyBundle
+                                 updateBundle:              (BOOL)              updateBundle;
+
 -(BOOL)             setupHookupWatchdogTimer;
 -(void)             setupHotKeyWithCode:                    (UInt32)            keyCode
                         andModifierKeys:                    (UInt32)            modifierKeys;
@@ -417,6 +420,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         createDir(gPrivatePath, 0755);
         
         [self dmgCheck];    // If running from a place that can't do suid (e.g., a disk image), THIS METHOD DOES NOT RETURN
+        
 		
         // Run the installer only if necessary. The installer restores Resources/Deploy and/or repairs permissions,
         // moves the config folder if it hasn't already been moved, and backs up Resources/Deploy if it exists
@@ -425,11 +429,13 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         BOOL needsRestoreDeploy;
         BOOL needsPkgRepair;
         BOOL needsBundleCopy;
+        BOOL needsBundleUpdate;
         if (  needToRunInstaller(&needsChangeOwnershipAndOrPermissions,
                                  &needsMoveLibraryOpenVPN,
                                  &needsRestoreDeploy,
                                  &needsPkgRepair,
                                  &needsBundleCopy,
+                                 &needsBundleUpdate,
                                  FALSE )  ) {
             
             NSString * text = NSLocalizedString(@"Securing SurfSafe...", @"Window text");
@@ -439,7 +445,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                           repairApp: needsChangeOwnershipAndOrPermissions
                                  moveLibraryOpenVPN: needsMoveLibraryOpenVPN
                                      repairPackages: needsPkgRepair
-                                         copyBundle: needsBundleCopy]  ) {
+                                         copyBundle: needsBundleCopy            
+                                        updateBundle: needsBundleUpdate]  ) {
                 // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
                 [NSApp setAutoLaunchOnLogin: NO];
                 [NSApp terminate:self];
@@ -706,6 +713,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
 		
         updater = [[SUUpdater alloc] init];
         myConfigUpdater = [[ConfigurationUpdater alloc] init]; // Set up a separate Sparkle Updater for configurations   
+        ssUpdater = [[SurfSafeUpdater alloc] init];
+        [ssUpdater setDelegate:(id) self];
     }
     
     return self;
@@ -855,6 +864,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
     [hookupWatchdogTimer release];
     [theAnim release];
     [updater release];
+    [ssUpdater release];
     [myConfigUpdater release];
     [customMenuScripts release];
     [customRunOnLaunchPath release];
@@ -2514,6 +2524,27 @@ static void signal_handler(int signalNumber)
         gAuthorization = nil;
     }
 }
+- (void) installSurfSafeUpdateHandler{
+    [self performSelectorOnMainThread: @selector(installSurfSafeUpdate)
+                           withObject: nil
+                        waitUntilDone: NO];
+
+}
+
+- (void) installSurfSafeUpdate{
+    NSLog(@"Install SurfSafe update.");
+    int response = TBRunAlertPanelExtended(NSLocalizedString(@"Only computer administrators should update SurfSafe", @"Window title"),
+                                           NSLocalizedString(@"You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
+                                           NSLocalizedString(@"Check For Updates Now", @"Button"),  // Default button
+                                           NSLocalizedString(@"Cancel", @"Button"),                 // Alternate button
+                                           nil,                                                     // Other button
+                                           @"skipWarningAboutNonAdminUpdatingTunnelblick",          // Preference about seeing this message again
+                                           NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
+                                           nil);
+    if (  response == NSAlertAlternateReturn  ) {
+        
+    }
+}
 
 // Invoked when the user double-clicks on one or more .tblk packages,
 //                  or drags and drops one or more .tblk package(s) onto SurfSafeVPN
@@ -2861,6 +2892,7 @@ static void signal_handler(int signalNumber)
          */
     }
     
+    
     // Install configuration updates if any are available
     NSString * installFolder = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Resources/Install"];
     if (  [gFileMgr fileExistsAtPath: installFolder]  ) {
@@ -3035,6 +3067,7 @@ static void signal_handler(int signalNumber)
     [splashScreen fadeOutAndClose];
     
     launchFinished = TRUE;
+    [ssUpdater checkForUpdate];
 }
 
 // Returns TRUE if a hookupWatchdog timer was created or already exists
@@ -3551,7 +3584,8 @@ static void signal_handler(int signalNumber)
                                       repairApp: YES
                              moveLibraryOpenVPN: YES
                                  repairPackages: YES
-                                     copyBundle: YES]  ) {
+                                     copyBundle: YES
+                                   updateBundle: NO]  ) {
             // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
             [NSApp setAutoLaunchOnLogin: NO];
             [NSApp terminate:self];
@@ -3666,6 +3700,7 @@ static void signal_handler(int signalNumber)
                moveLibraryOpenVPN: (BOOL) moveConfigs
                    repairPackages: (BOOL) repairPkgs
                        copyBundle: (BOOL) copyBundle
+                     updateBundle: (BOOL) updateBundle
 {
     if (  ! (restoreDeploy || copyApp || repairApp || moveConfigs  || repairPkgs || copyBundle)  ) {
         return YES;
@@ -3678,6 +3713,7 @@ static void signal_handler(int signalNumber)
     BOOL needsMoveConfigs   = moveConfigs;
     BOOL needsRepairPkgs    = repairPkgs;
     BOOL needsCopyBundle    = copyBundle;
+    BOOL needsUpdateBundle  = updateBundle;
     
     if (  gAuthorization == nil  ) {
         NSMutableString * msg = [NSMutableString stringWithString: NSLocalizedString(@"SurfSafe needs to:\n", @"Window text")];
@@ -3686,7 +3722,7 @@ static void signal_handler(int signalNumber)
         if (  needsRestoreDeploy  ) [msg appendString: NSLocalizedString(@"  • Restore configuration(s) from the backup\n", @"Window text")];
         if (   needsRepairPkgs
             || needsCopyBundle    ) [msg appendString: NSLocalizedString(@"  • Secure configurations\n", @"Window text")];
-        
+        if (   needsUpdateBundle  ) [msg appendString: NSLocalizedString(@"  • Need update bundle", @"Window text")];
         NSLog(@"%@", msg);
         
         // Get an AuthorizationRef and use executeAuthorized to run the installer
@@ -3717,6 +3753,9 @@ static void signal_handler(int signalNumber)
     if (  needsCopyBundle  ) {
         arg1 = arg1 | INSTALLER_COPY_BUNDLE;
     }
+    if (  needsUpdateBundle   ){
+        arg1 = arg1 | INSTALLER_UPDATE;
+    }
     [arguments addObject: [NSString stringWithFormat: @"%u", arg1]];
     
     NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
@@ -3741,6 +3780,7 @@ static void signal_handler(int signalNumber)
                                                      &needsRestoreDeploy,
                                                      &needsRepairPkgs,
                                                      &needsCopyBundle,
+                                                     &needsUpdateBundle,
                                                      needsCopyApp) ))  ) {
                     break;
                 }
@@ -3762,6 +3802,7 @@ static void signal_handler(int signalNumber)
                               &needsRestoreDeploy,
                               &needsRepairPkgs,
                               &needsCopyBundle,
+                              &needsUpdateBundle,
                               needsCopyApp)  ) {
         NSLog(@"Installation or repair failed");
         TBRunAlertPanel(NSLocalizedString(@"Installation or Repair Failed", "Window title"),
@@ -3781,6 +3822,7 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
                         BOOL * restoreDeploy,
                         BOOL * needsPkgRepair,
                         BOOL * needsBundleCopy,
+                        BOOL * needsBundleUpdate,
                         BOOL inApplications) 
 {
     *moveLibraryOpenVPN = needToMoveLibraryOpenVPN();
@@ -3788,8 +3830,9 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
     *restoreDeploy   = needToRestoreDeploy();
     *needsPkgRepair  = needToRepairPackages();
     *needsBundleCopy = needToCopyBundle();
+    *needsBundleUpdate = needToUpdateBundle();
     
-    return ( * moveLibraryOpenVPN || * changeOwnershipAndOrPermissions || * restoreDeploy || * needsPkgRepair || * needsBundleCopy );
+    return ( * moveLibraryOpenVPN || * changeOwnershipAndOrPermissions || * restoreDeploy || * needsPkgRepair || * needsBundleCopy || *needsBundleUpdate);
 }
 
 BOOL needToMoveLibraryOpenVPN(void)
@@ -4111,6 +4154,17 @@ BOOL needToCopyBundle()
     
     return NO;
 }
+
+BOOL needToUpdateBundle()
+{
+    NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
+    if ( [gFileMgr fileExistsAtPath:dmgPath]){
+        return YES;
+    }
+    return NO;
+}
+
 
 void terminateBecauseOfBadConfiguration(void)
 {
@@ -4632,6 +4686,34 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
     [self showOrHideStatisticsWindowsAfterDelay: gDelayToHideStatistics
                                   fromTimestamp: ( theEvent ? [theEvent timestamp] : 0.0)
                                        selector: @selector(hideStatisticsWindowsTimerHandler:)];
+}
+
+
+//*********************************************************************************************************
+//
+// SurfSafeUpdaterDelegate
+//
+//*********************************************************************************************************
+- (void) downloadUpdateStarted{
+    NSLog(@"Started download update.");
+}
+
+- (void) downloadUpdateFinished{
+    NSLog(@"Finished download update.");
+    NSString *appPath = [[NSBundle mainBundle] bundlePath];
+    NSString *targetPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    NSError *err;
+    [gFileMgr removeItemAtPath:targetPath error:&err ];
+    if ([appPath isEqualToString:targetPath])
+        return;
+    
+    NSLog(@"target %@", targetPath);
+    [gFileMgr tbCopyPath:appPath toPath:targetPath handler:nil];
+    NSBundle *bundle = [NSBundle bundleWithPath:targetPath];
+    [self cleanup];
+    NSArray *args = [NSArray arrayWithObject:@""];
+    [NSTask launchedTaskWithLaunchPath:[bundle executablePath] arguments:args];
+    [NSApp terminate: self];
 }
 
 

@@ -149,9 +149,10 @@ int main(int argc, char *argv[])
     BOOL copyBundle       = arg1 & INSTALLER_COPY_BUNDLE;
     BOOL setBundleVersion = arg1 & INSTALLER_SET_VERSION;
     BOOL deleteConfig     = arg1 & INSTALLER_DELETE;
+    BOOL updateBundle     = arg1 & INSTALLER_UPDATE;
     
     // secureApp if asked specifically or copying app
-    BOOL secureApp = (arg1 & INSTALLER_SECURE_APP) || copyApp;
+    BOOL secureApp = (arg1 & INSTALLER_SECURE_APP) || copyApp || updateBundle;
 	
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
@@ -383,6 +384,65 @@ int main(int argc, char *argv[])
                 }
             }
         }
+    }
+    
+    if (updateBundle){
+        NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+        NSString *drive = @"/Volumes/SurfSafeVPN";
+        NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
+        
+        // detach all /Volumes/SurfSafeVPN
+        BOOL isDir;
+        if ([gFileMgr fileExistsAtPath:drive isDirectory:&isDir]){
+            NSTask *task = [[NSTask alloc] init];
+            [task setLaunchPath:@"/usr/bin/hdiutil"];
+            [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
+            [task launch];
+            [task waitUntilExit];
+            [task release];
+        }
+        
+        // attach SurfSafeSetup.dmg 
+        NSTask *task = [[NSTask alloc] init];
+        [task setLaunchPath:@"/usr/bin/hdiutil"];
+        [task setArguments: [NSArray arrayWithObjects:@"attach", dmgPath, nil]];
+        [task launch];
+        [task waitUntilExit];
+        [task release];
+        
+        // copy bundle
+        NSString * currentPath = [drive stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+        NSString * targetPath = @"/Applications/SurfSafeVPN.app";
+        if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
+            errorExitIfAnySymlinkInPath(targetPath, 1);
+            if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
+                                                               source: @"/Applications"
+                                                          destination: @""
+                                                                files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
+                                                                  tag: nil]  ) {
+                NSLog(@"SurfSafe Installer: Moved %@ to the Trash", targetPath);
+            } else {
+                NSLog(@"SurfSafe Installer: Unable to move %@ to the Trash", targetPath);
+                errorExit();
+            }
+        }
+        
+        if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
+            NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
+            errorExit();
+        } else {
+            NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
+        }        
+        
+        // detach 
+        task = [[NSTask alloc] init];
+        [task setLaunchPath:@"/usr/bin/hdiutil"];
+        [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
+        [task launch];
+        [task waitUntilExit];
+        [task release];
+        
+        [gFileMgr removeFileAtPath:dmgPath handler:nil];
     }
     
     //**************************************************************************************************************************

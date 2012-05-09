@@ -24,8 +24,11 @@
 // Note: The standard up script refers to the log directory without using this header file
 #define LOG_DIR   @"/Library/Application Support/SurfsafeVPN/Logs"
 #define CONFIGURATION_UPDATES_BUNDLE_PATH  @"/Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle"
-#define CONFIGURATION_UPDATES_PATH @"/Library/Application Support/ConfigurationUpdates"
+#define CONFIGURATION_UPDATES_PATH @"/Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN"
 #define CONFIGURATION_PATH @"Library/Application Support/SurfsafeVPN/Configurations"
+#define UPDATE_PATH @"Library/Application Support/SurfSafeVPN/Updates"
+
+
 //*************************************************************************************************
 // Extensions that require 640 permissions and ownership by Admin group
 #define KEY_AND_CRT_EXTENSIONS [NSArray arrayWithObjects: @"cer", @"crt", @"der", @"key", @"p12", @"p7b", @"p7c", @"pem", @"pfx", nil]
@@ -74,7 +77,7 @@
 #define INSTALLER_SET_VERSION   0x10
 #define INSTALLER_MOVE_NOT_COPY 0x20
 #define INSTALLER_DELETE        0x40
-
+#define INSTALLER_UPDATE        0x80
 
 //*************************************************************************************************
 // Size to use to minimize the left navigation area when it is inactive
