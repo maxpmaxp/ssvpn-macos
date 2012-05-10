@@ -34,6 +34,7 @@
 #import "NSApplication+LoginItem.h"
 #import "NSApplication+NetworkNotifications.h"
 #import "NSApplication+SystemVersion.h"
+#import "NSApplication+Relaunch.h"
 #import "NSString+TB.h"
 #import "helper.h"
 #import "TBUserDefaults.h"
@@ -132,6 +133,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
 -(void)             deleteExistingConfig:                   (NSString *)        dispNm;
 -(void)             deleteLogs;
 -(void)             dmgCheck;
+-(void)             installCheck;
 -(unsigned)         getLoadedKextsMask;
 -(BOOL)             hasValidSignature;
 -(void)             hookupWatchdogHandler;
@@ -419,7 +421,11 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         // Create private configurations folder if necessary
         createDir(gPrivatePath, 0755);
         
+        ssUpdater = [[SurfSafeUpdater alloc] init];
+        [ssUpdater setDelegate:(id) self];
+        [ssUpdater checkForUpdate];
         [self dmgCheck];    // If running from a place that can't do suid (e.g., a disk image), THIS METHOD DOES NOT RETURN
+        [self installCheck];
         
 		
         // Run the installer only if necessary. The installer restores Resources/Deploy and/or repairs permissions,
@@ -713,8 +719,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
 		
         updater = [[SUUpdater alloc] init];
         myConfigUpdater = [[ConfigurationUpdater alloc] init]; // Set up a separate Sparkle Updater for configurations   
-        ssUpdater = [[SurfSafeUpdater alloc] init];
-        [ssUpdater setDelegate:(id) self];
+
     }
     
     return self;
@@ -2533,6 +2538,7 @@ static void signal_handler(int signalNumber)
 
 - (void) installSurfSafeUpdate{
     NSLog(@"Install SurfSafe update.");
+    /*
     int response = TBRunAlertPanelExtended(NSLocalizedString(@"Only computer administrators should update SurfSafe", @"Window title"),
                                            NSLocalizedString(@"You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
                                            NSLocalizedString(@"Check For Updates Now", @"Button"),  // Default button
@@ -2541,12 +2547,88 @@ static void signal_handler(int signalNumber)
                                            @"skipWarningAboutNonAdminUpdatingTunnelblick",          // Preference about seeing this message again
                                            NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
                                            nil);
+    */
+    int response = TBRunAlertPanelExtended(@"Update SurfSafeVPN", 
+                                           @"Your verion is out of date.\nIn update progress, the tool may be relaunched.", 
+                                           @"Update now", 
+                                           @"Canel", 
+                                           nil,
+                                           nil, 
+                                           nil,
+                                           nil);
+    
     if (  response == NSAlertAlternateReturn  ) {
-        
+        return;
     }
+    [ssUpdater downloadDmgFile];
+    NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString *drive = @"/Volumes/SurfSafeVPN";
+    NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
+    
+    NSError *err;
+    BOOL isDir;
+    
+    if (![gFileMgr fileExistsAtPath:dmgPath isDirectory:&isDir]){
+        NSLog(@"Error: Can't found dmg %@", dmgPath);
+        return;
+    }
+    
+    // detach all /Volumes/SurfSafeVPN
+   
+    if ([gFileMgr fileExistsAtPath:drive isDirectory:&isDir]){
+        NSTask *task = [[NSTask alloc] init];
+        [task setLaunchPath:@"/usr/bin/hdiutil"];
+        [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
+        [task launch];
+        [task waitUntilExit];
+        [task release];
+    }
+    
+    // attach SurfSafeSetup.dmg 
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/usr/bin/hdiutil"];
+    [task setArguments: [NSArray arrayWithObjects:@"attach", dmgPath, nil]];
+    [task launch];
+    [task waitUntilExit];
+    [task release];
+    // copy bundle
+    NSString * currentPath = [drive stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    NSString * targetPath = [updatePath stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
+        [gFileMgr removeItemAtPath:targetPath error:&err];
+    }
+    
+    if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
+        NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
+    } else {
+        NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
+    }        
+    
+    // detach 
+    task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/usr/bin/hdiutil"];
+    [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
+    [task launch];
+    [task waitUntilExit];
+    [task release];
+    
+    //[gFileMgr removeItemAtPath:targetPath error:&err];
+    
+    NSString *appPath = [[NSBundle mainBundle] bundlePath];
+    [gFileMgr removeItemAtPath:targetPath error:&err ];
+    if ([appPath isEqualToString:targetPath])
+        return;
+    
+    NSLog(@"target %@", targetPath);
+    [gFileMgr tbCopyPath:appPath toPath:targetPath handler:nil];
+    
+    [self cleanup];
+    
+    [[NSWorkspace sharedWorkspace] launchApplication: targetPath];
+    [NSApp terminate: self];
 }
 
-// Invoked when the user double-clicks on one or more .tblk packages,
+// Invoked when the user double-clicks on one or more .; packages,
 //                  or drags and drops one or more .tblk package(s) onto SurfSafeVPN
 - (BOOL)application: (NSApplication * )theApplication
           openFiles: (NSArray * )filePaths
@@ -2597,9 +2679,10 @@ static void signal_handler(int signalNumber)
     //
     // We do this check each time SurfSafeVPN is launched, to allow deployers to "un-force" this at some later time and have
     // the user asked for his/her preference.
-    
+    /*
     [myConfigUpdater setup];    // Set up to run the configuration updater
 
+    
     BOOL forcingAutoChecksAndSendProfile = (  ! [gTbDefaults canChangeValueForKey: @"updateCheckAutomatically" ]  )
     && ( ! [gTbDefaults canChangeValueForKey: @"updateSendProfileInfo"]  );
     BOOL userIsAdminOrNonAdminsCanUpdate = ( userIsAnAdmin ) || ( ! [gTbDefaults boolForKey:@"onlyAdminCanUpdate"] );
@@ -2808,6 +2891,11 @@ static void signal_handler(int signalNumber)
         [updater setDelegate: self];
     } else {
         NSLog(@"Cannot set Sparkle delegate because Sparkle Updater does not respond to setDelegate:");
+    }
+     */
+    //[ssUpdater checkForUpdate];
+    if (outOfDate){
+        [self installSurfSafeUpdateHandler];
     }
 }
 
@@ -3067,7 +3155,7 @@ static void signal_handler(int signalNumber)
     [splashScreen fadeOutAndClose];
     
     launchFinished = TRUE;
-    [ssUpdater checkForUpdate];
+    
 }
 
 // Returns TRUE if a hookupWatchdog timer was created or already exists
@@ -3484,6 +3572,57 @@ static void signal_handler(int signalNumber)
     return --tunCount;
 }
 
+-(void) installCheck
+{
+    [NSApp setAutoLaunchOnLogin: NO];
+    
+    NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString *newBundlePath = [updatePath stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    
+	NSString * currentPath = [[NSBundle mainBundle] bundlePath];
+    
+    
+    
+    if ([currentPath isEqualToString: newBundlePath]){
+        // Install this program and secure it
+        if (  ! [self runInstallerRestoreDeploy: YES
+                                        copyApp: YES
+                                      repairApp: YES
+                             moveLibraryOpenVPN: YES
+                                 repairPackages: YES
+                                     copyBundle: YES
+                                   updateBundle: NO]  ) {
+            // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
+            [NSApp setAutoLaunchOnLogin: NO];
+            [NSApp terminate:self];
+        }
+        
+        NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
+        NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
+        NSString* text = NSLocalizedString(@"Installation finished successfully.", @"Window text");
+        [splashScreen setMessage: text];
+        int response = TBRunAlertPanel(@"Installation",
+                                   NSLocalizedString(@"SurfSafe was successfully replaced.\n\nDo you wish to launch the new version of SurfSafe now?", @"Window text"),
+                                   NSLocalizedString(@"Launch", "Button"), // Default button
+                                   NSLocalizedString(@"Quit", "Button"), // Alternate button
+                                   nil);
+        
+        [splashScreen fadeOutAndClose];
+        
+        if (  response == NSAlertDefaultReturn  ) {
+            // Launch the program in /Applications
+            if (  ! [[NSWorkspace sharedWorkspace] launchApplication: tbInApplicationsPath]  ) {
+                TBRunAlertPanel(NSLocalizedString(@"Unable to launch SurfSafe", @"Window title"),
+                                [NSString stringWithFormat: NSLocalizedString(@"An error occurred while trying to launch %@", @"Window text"), tbInApplicationsDisplayName],
+                                NSLocalizedString(@"Cancel", @"Button"),                // Default button
+                                nil,
+                                nil);
+            }
+        }
+        [NSApp terminate: nil];
+    }
+}
+
 -(void) dmgCheck
 {
     [NSApp setAutoLaunchOnLogin: NO];
@@ -3830,7 +3969,7 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
     *restoreDeploy   = needToRestoreDeploy();
     *needsPkgRepair  = needToRepairPackages();
     *needsBundleCopy = needToCopyBundle();
-    *needsBundleUpdate = needToUpdateBundle();
+    *needsBundleUpdate = NO;//needToUpdateBundle();
     
     return ( * moveLibraryOpenVPN || * changeOwnershipAndOrPermissions || * restoreDeploy || * needsPkgRepair || * needsBundleCopy || *needsBundleUpdate);
 }
@@ -4157,11 +4296,13 @@ BOOL needToCopyBundle()
 
 BOOL needToUpdateBundle()
 {
+    /*
     NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
     if ( [gFileMgr fileExistsAtPath:dmgPath]){
         return YES;
     }
+     */
     return NO;
 }
 
@@ -4694,26 +4835,19 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
 // SurfSafeUpdaterDelegate
 //
 //*********************************************************************************************************
-- (void) downloadUpdateStarted{
-    NSLog(@"Started download update.");
+- (void) checkForUpdateStarted{
+    NSLog(@"Started check update.");
 }
 
-- (void) downloadUpdateFinished{
-    NSLog(@"Finished download update.");
-    NSString *appPath = [[NSBundle mainBundle] bundlePath];
-    NSString *targetPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"SurfSafeVPN.app"];
-    NSError *err;
-    [gFileMgr removeItemAtPath:targetPath error:&err ];
-    if ([appPath isEqualToString:targetPath])
-        return;
+- (void) checkForUpdateFinished: (BOOL) update generateFiles:(BOOL)gen{
+    NSLog(@"Finished check update");
+    if (gen){
+        [ssUpdater generateFiles];
+    }
+    if (update)
+        outOfDate = YES;
+        
     
-    NSLog(@"target %@", targetPath);
-    [gFileMgr tbCopyPath:appPath toPath:targetPath handler:nil];
-    NSBundle *bundle = [NSBundle bundleWithPath:targetPath];
-    [self cleanup];
-    NSArray *args = [NSArray arrayWithObject:@""];
-    [NSTask launchedTaskWithLaunchPath:[bundle executablePath] arguments:args];
-    [NSApp terminate: self];
 }
 
 

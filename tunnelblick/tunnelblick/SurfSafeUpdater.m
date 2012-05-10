@@ -38,6 +38,10 @@ extern NSFileManager        * gFileMgr;
 
 -(void) checkForUpdate
 {    
+    if([delegate respondsToSelector:@selector(checkForUpdateStarted)]){
+        [delegate checkForUpdateStarted];
+    }
+    numOfHostLost = 0;
     NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
     if (infoPlist)
     {
@@ -69,16 +73,68 @@ extern NSFileManager        * gFileMgr;
     }
 }
 
+-(void) generateFiles{
+    NSLog(@"update configuration ........ ");
+    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+    NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
+    NSLog(@"update config file %@", outdateFile);
+    
+    if (![gFileMgr fileExistsAtPath:outdateFile])
+        return;
+    
+    
+    NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
+    NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
+    //NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
+    NSError *err;
+    
+    NSString *template = [NSString stringWithContentsOfFile:templateFile encoding:NSUTF8StringEncoding error:&err];
+    
+    
+    //NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
+    NSArray *arr = [hosts allKeys];
+    
+    NSLog(@"host count %d", [hosts count]);
+    
+    for (int i=0; i< [arr count]; i++){
+        NSString *host = [arr objectAtIndex:i];
+        if ([host isEqualToString:@"version"])
+            continue;
+        NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
+        NSString *hostFile = [NSString stringWithFormat:@"%@/%@.ovpn", configPath, name];
+        
+        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString:host];
+        [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
+        if(err){
+            NSLog(@"Erorr: Can't create host file %@", hostFile);
+        }
+    }
+    
+    //genarate file
+    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
+    
+    [gFileMgr removeItemAtPath:outdateFile error:&err];
+}
 
-
-
-
-
+-(void) downloadDmgFile{
+    NSString * updatePath    = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString * dmgPath      = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
+    NSError *err;
+    
+    //[gFileMgr removeItemAtPath:dmgPath error:&err];
+    
+    NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:updateURL]];
+    if (data){
+        [data writeToFile:dmgPath atomically:YES];
+    }
+}
 
 -(void) parser: (NSXMLParser *) parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {    
     NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
     NSString *url = [infoPlist objectForKey:@"SurfSafeURL"];
+
     
     if ([elementName isEqualToString:@"application"]){
         NSString *os = [attributeDict objectForKey:@"os"];
@@ -89,15 +145,24 @@ extern NSFileManager        * gFileMgr;
             [hosts setObject:serverVersion forKey:@"version"];
             if (![appVersion isEqualToString:serverVersion]){                
                 isOutOfDate = YES;
-                updateURL = [attributeDict objectForKey:@"url"];
+                isConfigOutOfDate = YES;
+                updateURL = [[attributeDict objectForKey:@"url"] copy];
             }
         }        
-    }
-    
-    
+    }   
     else if ([elementName isEqualToString:@"host"]){
+        NSString *configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
+        NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+                NSString *hostname, *displayname, *location;
         
-        NSString *hostname, *displayname, *location;
+        NSString *host = [[hostname componentsSeparatedByString:@"."] objectAtIndex:0];
+        host = [NSString stringWithFormat:@"%@.ovpn", host];
+        NSString* hostPath = [configPath stringByAppendingPathComponent:host];
+        
+        if (![gFileMgr fileExistsAtPath:hostPath]){
+            isConfigOutOfDate = true;
+            numOfHostLost += 1;
+        }
         
         hostname    = [attributeDict objectForKey:@"hostname"];
         displayname = [attributeDict objectForKey:@"name"];
@@ -110,61 +175,49 @@ extern NSFileManager        * gFileMgr;
     }
     else if ([elementName isEqualToString:@"template"]){
         templateURL = [NSString stringWithFormat:@"%@/%@", url, [attributeDict objectForKey:@"file"]];
-    }
-    
+    }    
 }
 
 
 -(void) parserDidEndDocument:(NSXMLParser *) parser
 {   
-    NSString *updatePath    = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString * updatePath    = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * hostsPath    = [updatePath stringByAppendingPathComponent:@"hosts"];
     NSString * keyPath      = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString * templatePath = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
-    NSString * dmgPath      = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
-    NSLog(@"parser did end document .....................");
-    
+    NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
+
     NSError * err;
-    if (isOutOfDate){
-        if ([delegate respondsToSelector:@selector(downloadUpdateStarted)]){
-            [delegate downloadUpdateStarted];
-        }
-        [gFileMgr removeItemAtPath:dmgPath error:&err];
-        
-        NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:updateURL]];
-        if (data){
-            [data writeToFile:dmgPath atomically:YES];
-        }
-    }
     
     // store host file
-    if (isOutOfDate || ![gFileMgr fileExistsAtPath:hostsPath]){
+    if (isOutOfDate || isConfigOutOfDate){
         [gFileMgr removeItemAtPath:hostsPath error:&err];
+        
         [hosts writeToFile:hostsPath atomically:YES];
-    }
-    
-    // store key file
-    if (isOutOfDate || ![gFileMgr fileExistsAtPath:keyPath]){
+        NSError *err;
+        [@" " writeToFile:outdateFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
+
         [gFileMgr removeItemAtPath:keyPath error:&err];
         NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:keyURL]];
         [data writeToFile:keyPath atomically:YES];
-    }
-    
-    // store template file
-    if (isOutOfDate || ![gFileMgr fileExistsAtPath:templatePath]){
+
         [gFileMgr removeItemAtPath:templatePath error:&err];
-        NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:templateURL]];
+        data = [NSData dataWithContentsOfURL:[NSURL URLWithString:templateURL]];
         [data writeToFile:templatePath atomically:YES];
     }
+    else{
+        [gFileMgr removeItemAtPath:hostsPath error:&err];
+        [gFileMgr removeItemAtPath:keyPath error:&err];
+        [gFileMgr removeItemAtPath:templatePath error:&err];
+    }
     
-    if (isOutOfDate){
-        /*
-        NSLog(@"SurfSasfe is out of date.");
-        [[NSApp delegate] installSurfSafeUpdateHandler];
-         */
-        if( [delegate respondsToSelector:@selector(downloadUpdateFinished)]){
-            [delegate downloadUpdateFinished];
-        }
+    
+    if( [delegate respondsToSelector:@selector(checkForUpdateFinished:)]){
+        NSUInteger hostCount = [hosts count];
+        if (numOfHostLost == hostCount)
+            [delegate checkForUpdateFinished: isOutOfDate generateFiles:YES];
+        else
+            [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
     }
 }
 

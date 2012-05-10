@@ -166,6 +166,7 @@ BOOL needToUpdateBundle(void);
     
     NSString                * vpnServiceConnectDisplayName; // Display name of connection that VPNService is trying to connect
 #endif
+    BOOL                      outOfDate;
 }
 
 // Menu actions

@@ -11,8 +11,9 @@
 @protocol SurfSafeUpdaterDelegate <NSObject>
 
 @optional
-- (void) downloadUpdateStarted;
-- (void) downloadUpdateFinished;
+- (void) checkForUpdateStarted;
+
+- (void) checkForUpdateFinished: (BOOL) outOfDate generateFiles: (BOOL) gen;
 
 @end
 
@@ -20,11 +21,13 @@
 
 @interface SurfSafeUpdater : NSObject{
     BOOL                  isOutOfDate;
+    BOOL                  isConfigOutOfDate;
     NSString            * newVersion;
     NSMutableDictionary * hosts;
     NSString            * keyURL;
     NSString            * templateURL;
     NSString            * updateURL;
+    NSUInteger            numOfHostLost;
     id<SurfSafeUpdaterDelegate> delegate;
 }
 
@@ -34,5 +37,12 @@
 
 -(void) checkForUpdate;
 
+-(void) checkForUpdateConfig;
+
+-(void) downloadDmgFile;
+
+-(void) checkHasConfig;
+
+-(void) generateFiles;
 
 @end

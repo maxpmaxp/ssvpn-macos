@@ -25,6 +25,7 @@
 #import <AppKit/AppKit.h>
 #import "defines.h"
 #import "NSFileManager+TB.h"
+#import "SSZipArchive.h"
 
 // NOTE: THIS PROGRAM MUST BE RUN AS ROOT VIA executeAuthorized
 //
@@ -126,6 +127,7 @@ NSString * firstPartOfPath(NSString * path);
 NSString * lastPartOfPath(NSString * path);
 void safeCopyOrMovePathToPath(NSString * fromPath, NSString * toPath, BOOL moveNotCopy);
 BOOL deleteThingAtPath(NSString * path);
+void updateConfigurations();
 
 int main(int argc, char *argv[]) 
 {
@@ -387,6 +389,7 @@ int main(int argc, char *argv[])
     }
     
     if (updateBundle){
+        /*
         NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
         NSString *drive = @"/Volumes/SurfSafeVPN";
         NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
@@ -443,6 +446,7 @@ int main(int argc, char *argv[])
         [task release];
         
         [gFileMgr removeFileAtPath:dmgPath handler:nil];
+         */
     }
     
     //**************************************************************************************************************************
@@ -653,7 +657,7 @@ int main(int argc, char *argv[])
             NSLog(@"SurfSafe Installer: Warning: Unable to secure all .tblk packages");
         }
     }
-    
+    updateConfigurations();
     //**************************************************************************************************************************
     // (10)
     // If requested, copy or move a single file or .tblk package
@@ -1324,4 +1328,48 @@ NSString * lastPartOfPath(NSString * path)
         }
     }
     return nil;
+}
+
+void updateConfigurations(){
+    NSLog(@"update configuration ........ ");
+    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+    NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+    NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
+    NSLog(@"update config file %@", outdateFile);
+        
+    if (![gFileMgr fileExistsAtPath:outdateFile])
+        return;
+
+    
+    NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
+    NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
+    NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
+    NSError *err;
+    
+    NSString *template = [NSString stringWithContentsOfFile:templateFile encoding:NSUTF8StringEncoding error:&err];
+
+        
+    NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
+    NSArray *arr = [hosts allKeys];
+    
+    NSLog(@"host count %d", [hosts count]);
+    
+    for (int i=0; i< [arr count]; i++){
+        NSString *host = [arr objectAtIndex:i];
+        if ([host isEqualToString:@"version"])
+            continue;
+        NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
+        NSString *hostFile = [NSString stringWithFormat:@"%@/%@.ovpn", configPath, name];
+        
+        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString:host];
+        [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
+        if(err){
+            NSLog(@"Erorr: Can't create host file %@", hostFile);
+        }
+    }
+    
+    //genarate file
+    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
+    
+    [gFileMgr removeItemAtPath:outdateFile error:&err];
 }

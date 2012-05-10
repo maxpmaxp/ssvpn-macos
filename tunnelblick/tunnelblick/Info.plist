@@ -25,16 +25,18 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>SurfSafeVPN</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>Tunnelblick Help</string>
 	<key>CFBundleIconFile</key>
 	<string>SurfSafeVPN_32x32_active.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>net.tunnelblick.tunnelblick</string>
-	<key>CFBundleName</key>
-	<string>SurfSafeVPN</string>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<string>net.surfsafe.surfsafe</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>SurfSafeVPN</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -42,27 +44,25 @@
 	<key>CFBundleSignature</key>
 	<string>OVPN</string>
 	<key>CFBundleVersion</key>
-	<string>0.1</string>
+	<string>1.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSUIElement</key>
 	<string>1</string>
+	<key>OSAScriptingDefinition</key>
+	<string>SurfSafeVPN.sdef</string>
 	<key>SUEnableSystemProfiling</key>
 	<true/>
 	<key>SUFeedURL</key>
 	<string>http://tunnelblick.net/appcast.rss</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
-	<key>NSAppleScriptEnabled</key>
-	<true/>
-	<key>OSAScriptingDefinition</key>
-	<string>tunnelblick.sdef</string>
-	<key>CFBundleHelpBookFolder</key>
-	<string>help</string>
-	<key>CFBundleHelpBookName</key>
-	<string>Tunnelblick Help</string>
 	<key>SUServerListURL</key>
 	<string>http://surfsafevpn.com/servers.xml</string>
 	<key>SurfSafeURL</key>
