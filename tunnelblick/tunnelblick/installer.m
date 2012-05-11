@@ -226,12 +226,25 @@ int main(int argc, char *argv[])
             }
         }
         
+        
+        
+        NSString *tmp = @"/tmp/SurfSafeVPN.app";
+        if (  ! [gFileMgr tbCopyPath: currentPath toPath: tmp handler: nil]  ) {
+            NSLog(@"SurfsafeVPN Installer: Unable to copy %@ to %@", currentPath, targetPath);
+            errorExit();
+        } else {
+            [gFileMgr tbMovePath: tmp toPath: targetPath handler: nil];
+            NSLog(@"SurfsafeVPN Installer: Copied %@ to %@", currentPath, targetPath);
+        }
+        
+        /*
         if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
             NSLog(@"SurfsafeVPN Installer: Unable to copy %@ to %@", currentPath, targetPath);
             errorExit();
         } else {
             NSLog(@"SurfsafeVPN Installer: Copied %@ to %@", currentPath, targetPath);
         }
+         */
     }
         
     //**************************************************************************************************************************
