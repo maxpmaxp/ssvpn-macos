@@ -1225,7 +1225,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * path = [connection configPath];
     if (  ! [[path pathExtension] isEqualToString: @"tblk"]  ) {
         TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
-                        NSLocalizedString(@"You cannot make a configuration shared if it is not a SurfSafe VPN Configuration (.tblk).", @"Window text"),
+                        NSLocalizedString(@"You cannot make a configuration shared if it is not a SurfSafeVPN VPN Configuration (.tblk).", @"Window text"),
                         nil, nil, nil);
         return;
     }
@@ -1381,7 +1381,7 @@ static BOOL firstTimeShowingWindow = TRUE;
             [[configurationsPrefsView whenToConnectPopUpButton] selectItemAtIndex: ix];
             [self setSelectedWhenToConnectIndex: ix];
             TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
-                            NSLocalizedString(@"Only a SurfSafe VPN Configuration (.tblk) can start when the computer starts.", @"Window text"),
+                            NSLocalizedString(@"Only a SurfSafeVPN Configuration (.tblk) can start when the computer starts.", @"Window text"),
                             nil, nil, nil);
         } else {
             [self setSelectedWhenToConnectIndex: 2];
@@ -1657,9 +1657,9 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
     
     if (  failedToFixPreferences  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         [NSString stringWithFormat: 
-                         NSLocalizedString(@"SurfSafe failed to repair problems with preferences for '%@'. Details are in the Console Log", @"Window text"),
+                         NSLocalizedString(@"SurfSafeVPN failed to repair problems with preferences for '%@'. Details are in the Console Log", @"Window text"),
                          displayName],
                         nil, nil, nil);
     }

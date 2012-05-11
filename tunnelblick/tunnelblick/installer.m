@@ -127,7 +127,9 @@ NSString * firstPartOfPath(NSString * path);
 NSString * lastPartOfPath(NSString * path);
 void safeCopyOrMovePathToPath(NSString * fromPath, NSString * toPath, BOOL moveNotCopy);
 BOOL deleteThingAtPath(NSString * path);
+//HTK-INC
 void updateConfigurations();
+//End HTK-INC
 
 int main(int argc, char *argv[]) 
 {
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
     gSharedPath = [@"/Library/Application Support/SurfsafeVPN/Shared" copy];
     
     if (  (argc < 2)  || (argc > 4)  ) {
-        NSLog(@"Surfsafe Installer: Wrong number of arguments -- expected 1 to 3, given %d", argc-1);
+        NSLog(@"SurfSafeVPN Installer: Wrong number of arguments -- expected 1 to 3, given %d", argc-1);
         errorExit();
     }
     
@@ -151,10 +153,9 @@ int main(int argc, char *argv[])
     BOOL copyBundle       = arg1 & INSTALLER_COPY_BUNDLE;
     BOOL setBundleVersion = arg1 & INSTALLER_SET_VERSION;
     BOOL deleteConfig     = arg1 & INSTALLER_DELETE;
-    BOOL updateBundle     = arg1 & INSTALLER_UPDATE;
     
     // secureApp if asked specifically or copying app
-    BOOL secureApp = (arg1 & INSTALLER_SECURE_APP) || copyApp || updateBundle;
+    BOOL secureApp = (arg1 & INSTALLER_SECURE_APP) || copyApp;
 	
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
         }
         if (   ( ! bundleVersion )
             || ( ! bundleShortVersionString )  ) {
-            NSLog(@"SurfSafe Installer: Both a CFBundleVersion and a CFBundleShortVersionString are required to set the bundle version");
+            NSLog(@"SurfsafeVPN Installer: Both a CFBundleVersion and a CFBundleShortVersionString are required to set the bundle version");
         }
     }
     //**************************************************************************************************************************
@@ -218,18 +219,18 @@ int main(int argc, char *argv[])
                                                           destination: @""
                                                                 files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
                                                                   tag: nil]  ) {
-                NSLog(@"SurfSafe Installer: Moved %@ to the Trash", targetPath);
+                NSLog(@"SurfsafeVPN Installer: Moved %@ to the Trash", targetPath);
             } else {
-                NSLog(@"SurfSafe Installer: Unable to move %@ to the Trash", targetPath);
+                NSLog(@"SurfsafeVPN Installer: Unable to move %@ to the Trash", targetPath);
                 errorExit();
             }
         }
         
         if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
-            NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
+            NSLog(@"SurfsafeVPN Installer: Unable to copy %@ to %@", currentPath, targetPath);
             errorExit();
         } else {
-            NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
+            NSLog(@"SurfsafeVPN Installer: Copied %@ to %@", currentPath, targetPath);
         }
     }
         
@@ -242,11 +243,11 @@ int main(int argc, char *argv[])
         if (  ! (   [gFileMgr fileExistsAtPath: gDeployPath isDirectory: &isDir]
                  && isDir  )  ) {
             if (  ! [gFileMgr tbCopyPath: deployBackupPath toPath: gDeployPath handler: nil]  ) {
-                NSLog(@"SurfSafe Installer: Unable to restore %@ from backup", gDeployPath);
+                NSLog(@"SurfsafeVPN Installer: Unable to restore %@ from backup", gDeployPath);
                 errorExit();
             }
 
-            NSLog(@"SurfSafe Installer: Restored %@ from backup", gDeployPath);
+            NSLog(@"SurfsafeVPN Installer: Restored %@ from backup", gDeployPath);
         }
     }
     
@@ -267,7 +268,7 @@ int main(int argc, char *argv[])
                     if (  isDir  ) {
                         // Move old configurations folder's contents to the new configurations folder and delete the old folder
                         if (  moveContents(oldConfigDirPath, newConfigDirPath)  ) {
-                            NSLog(@"SurfSafe Installer: Moved contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
+                            NSLog(@"SurfsafeVPN Installer: Moved contents of %@ to %@", oldConfigDirPath, newConfigDirPath);
                             secureTblks = TRUE; // We may have moved some .tblks, so we should secure them
                             // Delete the old configuration folder
                             if (  ! [gFileMgr tbRemoveFileAtPath:oldConfigDirPath handler: nil]  ) {
@@ -345,7 +346,7 @@ int main(int argc, char *argv[])
                         doCopy = TRUE;  // No version info in library copy
                     }
                 } else {
-                    NSLog(@"SurfSafe Installer: No CFBundleVersion in %@", gAppConfigurationsBundlePath);
+                    NSLog(@"SurfSafeVPN Installer: No CFBundleVersion in %@", gAppConfigurationsBundlePath);
                     errorExit();
                 }
             } else {
@@ -366,15 +367,15 @@ int main(int argc, char *argv[])
                 }
                 if (  [gFileMgr fileExistsAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH]  ) {
                     if (  ! [gFileMgr tbRemoveFileAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH handler: nil]  ) {
-                        NSLog(@"SurfSafe Installer: Unable to delete %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
+                        NSLog(@"SurfSafeVPN Installer: Unable to delete %@", CONFIGURATION_UPDATES_BUNDLE_PATH);
                         errorExit();
                     }
                 }
                 if (  ! [gFileMgr tbCopyPath: gAppConfigurationsBundlePath toPath: CONFIGURATION_UPDATES_BUNDLE_PATH handler: nil]  ) {
-                    NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
+                    NSLog(@"SurfSafeVPN Installer: Unable to copy %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
                     errorExit();
                 } else {
-                    NSLog(@"SurfSafe Installer: Copied %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
+                    NSLog(@"SurfSafeVPN Installer: Copied %@ to %@", gAppConfigurationsBundlePath, CONFIGURATION_UPDATES_BUNDLE_PATH);
                 }
                 
                 // Set ownership and permissions
@@ -386,67 +387,6 @@ int main(int argc, char *argv[])
                 }
             }
         }
-    }
-    
-    if (updateBundle){
-        /*
-        NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
-        NSString *drive = @"/Volumes/SurfSafeVPN";
-        NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
-        
-        // detach all /Volumes/SurfSafeVPN
-        BOOL isDir;
-        if ([gFileMgr fileExistsAtPath:drive isDirectory:&isDir]){
-            NSTask *task = [[NSTask alloc] init];
-            [task setLaunchPath:@"/usr/bin/hdiutil"];
-            [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
-            [task launch];
-            [task waitUntilExit];
-            [task release];
-        }
-        
-        // attach SurfSafeSetup.dmg 
-        NSTask *task = [[NSTask alloc] init];
-        [task setLaunchPath:@"/usr/bin/hdiutil"];
-        [task setArguments: [NSArray arrayWithObjects:@"attach", dmgPath, nil]];
-        [task launch];
-        [task waitUntilExit];
-        [task release];
-        
-        // copy bundle
-        NSString * currentPath = [drive stringByAppendingPathComponent:@"SurfSafeVPN.app"];
-        NSString * targetPath = @"/Applications/SurfSafeVPN.app";
-        if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
-            errorExitIfAnySymlinkInPath(targetPath, 1);
-            if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
-                                                               source: @"/Applications"
-                                                          destination: @""
-                                                                files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
-                                                                  tag: nil]  ) {
-                NSLog(@"SurfSafe Installer: Moved %@ to the Trash", targetPath);
-            } else {
-                NSLog(@"SurfSafe Installer: Unable to move %@ to the Trash", targetPath);
-                errorExit();
-            }
-        }
-        
-        if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
-            NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
-            errorExit();
-        } else {
-            NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
-        }        
-        
-        // detach 
-        task = [[NSTask alloc] init];
-        [task setLaunchPath:@"/usr/bin/hdiutil"];
-        [task setArguments: [NSArray arrayWithObjects:@"detach", drive, nil]];
-        [task launch];
-        [task waitUntilExit];
-        [task release];
-        
-        [gFileMgr removeFileAtPath:dmgPath handler:nil];
-         */
     }
     
     //**************************************************************************************************************************
@@ -540,7 +480,7 @@ int main(int argc, char *argv[])
         }
         
         if (  ! okSoFar  ) {
-            NSLog(@"SurfSafe Installer: Unable to secure SurfSafeVPN.app");
+            NSLog(@"SurfSafeVPN Installer: Unable to secure SurfSafeVPN.app");
             errorExit();
         }
     }
@@ -592,7 +532,7 @@ int main(int argc, char *argv[])
                 if (  ! (   [gFileMgr fileExistsAtPath: deployOrigBackupPath isDirectory: &isDir]
                          && isDir  )  ) {
                     if (  ! [gFileMgr tbCopyPath: gDeployPath toPath: deployOrigBackupPath handler: nil]  ) {
-                        NSLog(@"SurfSafe Installer: Unable to make original backup of %@", gDeployPath);
+                        NSLog(@"SurfSafeVPN Installer: Unable to make original backup of %@", gDeployPath);
                         errorExit();
                     }
                     NSLog(@"Made original backup of %@", gDeployPath);
@@ -605,16 +545,16 @@ int main(int argc, char *argv[])
                 [gFileMgr tbMovePath: deployBackupPath toPath: deployPrevBackupPath handler: nil];    // Make backup of previous backup. Ignore errors -- previous backup may not exist yet
                 
                 if (  ! [gFileMgr tbCopyPath: gDeployPath toPath: deployBackupPath handler: nil]  ) {  // Make backup of current
-                    NSLog(@"SurfSafe Installer: Unable to make backup of %@", gDeployPath);
+                    NSLog(@"SurfSafeVPN Installer: Unable to make backup of %@", gDeployPath);
                     errorExit();
                 }
-                NSLog(@"SurfSafe Installer: Made backup of %@", gDeployPath);
+                NSLog(@"SurfSafeVPN Installer: Made backup of %@", gDeployPath);
                 
                 if ( ! secureOneFolder(deployBackupPath)  ) {
-                    NSLog(@"SurfSafe Installer: Unable to secure backup at %@", deployBackupPath);
+                    NSLog(@"SurfSafeVPN Installer: Unable to secure backup at %@", deployBackupPath);
                     errorExit();
                 }
-                NSLog(@"SurfSafe Installer: Secured backup at %@", deployBackupPath);
+                NSLog(@"SurfSafeVPN Installer: Secured backup at %@", deployBackupPath);
             }
         }
     }
@@ -654,10 +594,12 @@ int main(int argc, char *argv[])
         }
         
         if (  ! okSoFar  ) {
-            NSLog(@"SurfSafe Installer: Warning: Unable to secure all .tblk packages");
+            NSLog(@"SurfSafeVPN Installer: Warning: Unable to secure all .tblk packages");
         }
     }
+    //HTK-INC
     updateConfigurations();
+    //End HTK-INC
     //**************************************************************************************************************************
     // (10)
     // If requested, copy or move a single file or .tblk package
@@ -740,11 +682,11 @@ int main(int argc, char *argv[])
             okSoFar = okSoFar && checkSetPermissions(firstPath, @"755", YES);
             okSoFar = okSoFar && secureOneFolder(firstPath);
         } else {
-            NSLog(@"SurfSafe Installer: trying to secure unknown item at %@", firstPath);
+            NSLog(@"SurfSafeVPN Installer: trying to secure unknown item at %@", firstPath);
             errorExit();
         }
         if (  ! okSoFar  ) {
-            NSLog(@"SurfSafe Installer: unable to secure %@", firstPath);
+            NSLog(@"SurfSafeVPN Installer: unable to secure %@", firstPath);
             errorExit();
         }
     }
@@ -762,9 +704,9 @@ int main(int argc, char *argv[])
             if (  [gFileMgr fileExistsAtPath: firstPath]  ) {
                 errorExitIfAnySymlinkInPath(firstPath, 6);
                 if (  ! [gFileMgr tbRemoveFileAtPath: firstPath handler: nil]  ) {
-                    NSLog(@"SurfSafe Installer: unable to remove %@", firstPath);
+                    NSLog(@"SurfSafeVPN Installer: unable to remove %@", firstPath);
                 } else {
-                    NSLog(@"SurfSafe Installer: removed %@", firstPath);
+                    NSLog(@"SurfSafeVPN Installer: removed %@", firstPath);
                 }
                 
                 // Delete shadow copy, too, if it exists
@@ -775,15 +717,15 @@ int main(int argc, char *argv[])
                     if (  [gFileMgr fileExistsAtPath: shadowCopyPath]  ) {
                         errorExitIfAnySymlinkInPath(shadowCopyPath, 7);
                         if (  ! [gFileMgr tbRemoveFileAtPath: shadowCopyPath handler: nil]  ) {
-                            NSLog(@"SurfSafe Installer: unable to remove %@", shadowCopyPath);
+                            NSLog(@"SurfSafeVPN Installer: unable to remove %@", shadowCopyPath);
                         } else {
-                            NSLog(@"SurfSafe Installer: removed %@", shadowCopyPath);
+                            NSLog(@"SurfSafeVPN Installer: removed %@", shadowCopyPath);
                         }
                     }
                 }
             }
         } else {
-            NSLog(@"SurfSafe Installer: trying to remove unknown item at %@", firstPath);
+            NSLog(@"SurfSafeVPN Installer: trying to remove unknown item at %@", firstPath);
             errorExit();
         }
     }
@@ -1137,7 +1079,7 @@ BOOL checkSetPermissions(NSString * path, NSString * permsShouldHave, BOOL fileM
     }
     
     if (  [atts fileIsImmutable]  ) {
-        NSLog(@"Surfsafe Installer: Cannot change permissions because item is locked: %@", path);
+        NSLog(@"SurfSafeVPN Installer: Cannot change permissions because item is locked: %@", path);
         return NO;
     }
     
@@ -1148,16 +1090,16 @@ BOOL checkSetPermissions(NSString * path, NSString * permsShouldHave, BOOL fileM
     else if (  [permsShouldHave isEqualToString:  @"640"]  ) permsMode =  0640;
     else if (  [permsShouldHave isEqualToString: @"4555"]  ) permsMode = 04555;
     else {
-        NSLog(@"Surfsafe Installer: invalid permsShouldHave = '%@' in checkSetPermissions function", permsShouldHave);
+        NSLog(@"SurfSafeVPN Installer: invalid permsShouldHave = '%@' in checkSetPermissions function", permsShouldHave);
         return NO;
     }
     
     if (  chmod([gFileMgr fileSystemRepresentationWithPath: path], permsMode) != 0  ) {
-        NSLog(@"Surfsafe Installer: Unable to change permissions to 0%@ on %@", permsShouldHave, path);
+        NSLog(@"SurfSafeVPN Installer: Unable to change permissions to 0%@ on %@", permsShouldHave, path);
         return NO;
     }
 
-    NSLog(@"Surfsafe Installer: Changed permissions to 0%@ on %@", permsShouldHave, path);
+    NSLog(@"SurfSafeVPN Installer: Changed permissions to 0%@ on %@", permsShouldHave, path);
     return YES;
 }
 
@@ -1169,7 +1111,7 @@ void errorExitIfAnySymlinkInPath(NSString * path, int testPoint)
         if (  [gFileMgr fileExistsAtPath: curPath]  ) {
             NSDictionary * fileAttributes = [gFileMgr tbFileAttributesAtPath: curPath traverseLink: NO];
             if (  [[fileAttributes objectForKey: NSFileType] isEqualToString: NSFileTypeSymbolicLink]  ) {
-                NSLog(@"Surfsafe Installer: Apparent symlink attack detected at test point %d: Symlink is at %@, full path being tested is %@", testPoint, curPath, path);
+                NSLog(@"SurfSafeVPN Installer: Apparent symlink attack detected at test point %d: Symlink is at %@, full path being tested is %@", testPoint, curPath, path);
                 errorExit();
             }
         }
@@ -1203,11 +1145,11 @@ BOOL createDirWithPermissionAndOwnership(NSString * dirPath, mode_t permissions,
         
         // Parent directory exists. Create the directory we want
         if (  mkdir([gFileMgr fileSystemRepresentationWithPath: dirPath], (mode_t) permissions) != 0  ) {
-            NSLog(@"Surfsafe Installer: Unable to create directory %@", dirPath);
+            NSLog(@"SurfSafeVPN Installer: Unable to create directory %@", dirPath);
             return NO;
         }
 
-        NSLog(@"Surfsafe Installer: Created directory %@", dirPath);
+        NSLog(@"SurfSafeVPN Installer: Created directory %@", dirPath);
     }
 
     
@@ -1330,17 +1272,14 @@ NSString * lastPartOfPath(NSString * path)
     return nil;
 }
 
+// HTK-INC
 void updateConfigurations(){
-    NSLog(@"update configuration ........ ");
     NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
-    NSLog(@"update config file %@", outdateFile);
         
     if (![gFileMgr fileExistsAtPath:outdateFile])
         return;
-
-    
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
     NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
@@ -1352,7 +1291,7 @@ void updateConfigurations(){
     NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
     NSArray *arr = [hosts allKeys];
     
-    NSLog(@"host count %d", [hosts count]);
+    //NSLog(@"host count %d", [hosts count]);
     
     for (int i=0; i< [arr count]; i++){
         NSString *host = [arr objectAtIndex:i];
@@ -1373,3 +1312,4 @@ void updateConfigurations(){
     
     [gFileMgr removeItemAtPath:outdateFile error:&err];
 }
+// End HTK-INC

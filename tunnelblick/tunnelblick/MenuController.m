@@ -34,7 +34,6 @@
 #import "NSApplication+LoginItem.h"
 #import "NSApplication+NetworkNotifications.h"
 #import "NSApplication+SystemVersion.h"
-#import "NSApplication+Relaunch.h"
 #import "NSString+TB.h"
 #import "helper.h"
 #import "TBUserDefaults.h"
@@ -164,8 +163,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                     repairApp:              (BOOL)              repairIt
                            moveLibraryOpenVPN:              (BOOL)              moveConfigs
                                repairPackages:              (BOOL)              repairPkgs
-                                   copyBundle:              (BOOL)              copyBundle
-                                 updateBundle:              (BOOL)              updateBundle;
+                                   copyBundle:              (BOOL)              copyBundle;
 
 -(BOOL)             setupHookupWatchdogTimer;
 -(void)             setupHotKeyWithCode:                    (UInt32)            keyCode
@@ -187,7 +185,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         
         if (  ! runningOnTigerOrNewer()  ) {
             TBRunAlertPanel(NSLocalizedString(@"System Requirements Not Met", @"Window title"),
-                            NSLocalizedString(@"SurfSafe requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")", @"Window text"),
+                            NSLocalizedString(@"SurfSafeVPN requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")", @"Window text"),
                             nil, nil, nil);
             [NSApp setAutoLaunchOnLogin: NO];
             [NSApp terminate:self];
@@ -413,7 +411,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         }
         if (  showSplashScreen  ) {
             splashScreen = [[SplashWindowController alloc] init];
-            NSString * text = NSLocalizedString(@"Starting SurfSafe...", @"Window text");
+            NSString * text = NSLocalizedString(@"Starting SurfSafeVPN...", @"Window text");
             [splashScreen setMessage: text];
             [splashScreen showWindow: self];
         }
@@ -421,12 +419,18 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         // Create private configurations folder if necessary
         createDir(gPrivatePath, 0755);
         
+        //HTK-INC
+        // check update here because for first run time.
         ssUpdater = [[SurfSafeUpdater alloc] init];
         [ssUpdater setDelegate:(id) self];
         [ssUpdater checkForUpdate];
-        [self dmgCheck];    // If running from a place that can't do suid (e.g., a disk image), THIS METHOD DOES NOT RETURN
-        [self installCheck];
+        //end HTK-INC
         
+        [self dmgCheck];    // If running from a place that can't do suid (e.g., a disk image), THIS METHOD DOES NOT RETURN
+        
+        //HTK-INC
+        [self installCheck];
+        //end HTK-INC
 		
         // Run the installer only if necessary. The installer restores Resources/Deploy and/or repairs permissions,
         // moves the config folder if it hasn't already been moved, and backs up Resources/Deploy if it exists
@@ -435,36 +439,29 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         BOOL needsRestoreDeploy;
         BOOL needsPkgRepair;
         BOOL needsBundleCopy;
-        BOOL needsBundleUpdate;
         if (  needToRunInstaller(&needsChangeOwnershipAndOrPermissions,
                                  &needsMoveLibraryOpenVPN,
                                  &needsRestoreDeploy,
                                  &needsPkgRepair,
                                  &needsBundleCopy,
-                                 &needsBundleUpdate,
                                  FALSE )  ) {
             
-            NSString * text = NSLocalizedString(@"Securing SurfSafe...", @"Window text");
+            NSString * text = NSLocalizedString(@"Securing SurfSafeVPN...", @"Window text");
             [splashScreen setMessage: text];
             if (  ! [self runInstallerRestoreDeploy: needsRestoreDeploy
                                             copyApp: NO
                                           repairApp: needsChangeOwnershipAndOrPermissions
                                  moveLibraryOpenVPN: needsMoveLibraryOpenVPN
                                      repairPackages: needsPkgRepair
-                                         copyBundle: needsBundleCopy            
-                                        updateBundle: needsBundleUpdate]  ) {
+                                         copyBundle: needsBundleCopy]  ) {
                 // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
                 [NSApp setAutoLaunchOnLogin: NO];
                 [NSApp terminate:self];
             }
             
-            text = NSLocalizedString(@"SurfSafe has been secured successfully.", @"Window text");
+            text = NSLocalizedString(@"SurfSafeVPN has been secured successfully.", @"Window text");
             [splashScreen setMessage: text];
         }
-        
-        // SurfSafe check for update
-        /*ConfigurationUpdater *cfgUpdater = [[ConfigurationUpdater alloc] initSurfSafe];
-        [cfgUpdater checkForUpdate];*/
         
         // If this is the first time we are using the new CFBundleIdentifier
         //    Rename the old preferences so we can access them with the new CFBundleIdentifier
@@ -717,8 +714,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         
         ignoreNoConfigs = TRUE;    // We ignore the "no configurations" situation until we've processed application:openFiles:
 		
-        updater = [[SUUpdater alloc] init];
-        myConfigUpdater = [[ConfigurationUpdater alloc] init]; // Set up a separate Sparkle Updater for configurations   
+        //updater = [[SUUpdater alloc] init];
+        //myConfigUpdater = [[ConfigurationUpdater alloc] init]; // Set up a separate Sparkle Updater for configurations   
 
     }
     
@@ -825,9 +822,9 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                 [gFileMgr tbRemoveFileAtPath:launchSurfSafeVPNSymlinkPath handler: nil];
                 if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchSurfSafeVPNSymlinkPath
                                                pathContent: pathToThisApp]  ) {
-                    NSLog(@"Created 'Launch SurfSafe' link in Configurations folder; links to %@", pathToThisApp);
+                    NSLog(@"Created 'Launch SurfSafeVPN' link in Configurations folder; links to %@", pathToThisApp);
                 } else {
-                    NSLog(@"Unable to create 'Launch SurfSafe' link in Configurations folder linking to %@", pathToThisApp);
+                    NSLog(@"Unable to create 'Launch SurfSafeVPN' link in Configurations folder linking to %@", pathToThisApp);
                 }
             } else if (  ! [linkContents isEqualToString: pathToThisApp]  ) {
                 ignoreNoConfigs = TRUE; // We're dealing with no configs already, and will either quit or create one
@@ -836,9 +833,9 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                 }
                 if (  [gFileMgr tbCreateSymbolicLinkAtPath: launchSurfSafeVPNSymlinkPath
                                                pathContent: pathToThisApp]  ) {
-                    NSLog(@"Replaced 'Launch SurfSafe' link in Configurations folder; now links to %@", pathToThisApp);
+                    NSLog(@"Replaced 'Launch SurfSafeVPN' link in Configurations folder; now links to %@", pathToThisApp);
                 } else {
-                    NSLog(@"Unable to create 'Launch SurfSafe' link in Configurations folder linking to %@", pathToThisApp);
+                    NSLog(@"Unable to create 'Launch SurfSafeVPN' link in Configurations folder linking to %@", pathToThisApp);
                 }
             }
         }
@@ -868,16 +865,21 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
     [hookupWatchdogTimer invalidate];
     [hookupWatchdogTimer release];
     [theAnim release];
-    [updater release];
+    //[updater release];
+    
+    //HTK-INC
     [ssUpdater release];
-    [myConfigUpdater release];
+    //[myConfigUpdater release];
     [customMenuScripts release];
     [customRunOnLaunchPath release];
     [customRunOnConnectPath release];
     
     [aboutItem release];
     [checkForUpdatesNowItem release];
-    [vpnDetailsItem release];
+    //[vpnDetailsItem release];
+    // HTK-INC
+    [clearKeychainItem release];
+    // End HTK-INC
     [quitItem release];
     [statusMenuItem release];
     [statusItem release];
@@ -1145,7 +1147,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
 #ifdef INCLUDE_VPNSERVICE
     [registerForTunnelblickItem release];
     registerForTunnelblickItem = [[NSMenuItem alloc] init];
-    [registerForTunnelblickItem setTitle: NSLocalizedString(@"Register for SurfSafe...", @"Menu item VPNService")];
+    [registerForTunnelblickItem setTitle: NSLocalizedString(@"Register for SurfSafeVPN...", @"Menu item VPNService")];
     [registerForTunnelblickItem setTarget: self];
     [registerForTunnelblickItem setAction: @selector(registerForTunnelblickWasClicked:)];
 #endif
@@ -1158,11 +1160,11 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         [addConfigurationItem setAction: @selector(addConfigurationWasClicked:)];
     }
     
-    [vpnDetailsItem release];
-    vpnDetailsItem = [[NSMenuItem alloc] init];
-    [vpnDetailsItem setTitle: NSLocalizedString(@"VPN Details...", @"Menu item")];
-    [vpnDetailsItem setTarget: self];
-    [vpnDetailsItem setAction: @selector(openPreferencesWindow:)];
+    //[vpnDetailsItem release];
+    //vpnDetailsItem = [[NSMenuItem alloc] init];
+    //[vpnDetailsItem setTitle: NSLocalizedString(@"VPN Details...", @"Menu item")];
+    //[vpnDetailsItem setTarget: self];
+    //[vpnDetailsItem setAction: @selector(openPreferencesWindow:)];
     
     [contactTunnelblickItem release];
     contactTunnelblickItem = nil;
@@ -1171,8 +1173,8 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
             NSString * menuTitle = nil;
             NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
             if (  [[infoPlist objectForKey: @"CFBundleShortVersionString"] rangeOfString: @"beta"].length != 0  ) {
-                if (  [NSLocalizedString(@"SurfSafe", "Window title") isEqualToString: @"Surf" "Safe"]  ) {
-                    if (  [@"SurfSafe" isEqualToString: @"Surf" "Safe"]  ) {
+                if (  [NSLocalizedString(@"SurfSafeVPN", "Window title") isEqualToString: @"Surf" "SafeVPN"]  ) {
+                    if (  [@"SurfSafeVPN" isEqualToString: @"Surf" "SafeVPN"]  ) {
                         menuTitle = NSLocalizedString(@"Suggestion or Bug Report...", @"Menu item");
                     }
                 }
@@ -1188,7 +1190,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     
     [quitItem release];
     quitItem = [[NSMenuItem alloc] init];
-    [quitItem setTitle: NSLocalizedString(@"Quit SurfSafe", @"Menu item")];
+    [quitItem setTitle: NSLocalizedString(@"Quit SurfSafeVPN", @"Menu item")];
     [quitItem setTarget: self];
     [quitItem setAction: @selector(quit:)];
     
@@ -1197,6 +1199,14 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [statusMenuItem setTarget: self];
     [statusMenuItem setAction: @selector(disconnectAllMenuItemWasClicked:)];
     
+    // HTK-INC
+    [clearKeychainItem release];
+    clearKeychainItem = [[NSMenuItem alloc] init];
+    [clearKeychainItem setTitle: NSLocalizedString(@"Clear saved VPN ID/Activation code", @"Menu item")];
+    [clearKeychainItem setTarget:self];
+    [clearKeychainItem setAction:@selector(clearKeychain:)];
+    
+    // End HTK-INC
 
     [myVPNMenu release];
 	myVPNMenu = [[NSMenu alloc] init];
@@ -1258,7 +1268,9 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         //[myVPNMenu addItem: [NSMenuItem separatorItem]];
 	}
     
-    [myVPNMenu addItem: quitItem];
+    [myVPNMenu addItem: clearKeychainItem];
+    [myVPNMenu addItem: [NSMenuItem separatorItem]];
+    [myVPNMenu addItem: quitItem];    
     
     status = pthread_mutex_unlock( &myVPNMenuMutex );
     if (  status != EXIT_SUCCESS  ) {
@@ -1763,11 +1775,11 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     VPNConnection* myConnection = [myVPNConnectionDictionary objectForKey: dispNm];
     if (  ! [[myConnection state] isEqualTo: @"EXITING"]  ) {
-        [myConnection addToLog: @"*SurfSafe: Disconnecting; user asked to delete the configuration"];
+        [myConnection addToLog: @"*SurfSafeVPN: Disconnecting; user asked to delete the configuration"];
         [myConnection disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];
         
         TBRunAlertPanel([NSString stringWithFormat: NSLocalizedString(@"'%@' has been disconnected", @"Window title"), dispNm],
-                        [NSString stringWithFormat: NSLocalizedString(@"SurfSafe has disconnected '%@' because its configuration file has been removed.", @"Window text"), dispNm],
+                        [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN has disconnected '%@' because its configuration file has been removed.", @"Window text"), dispNm],
                         nil, nil, nil);
     }
     
@@ -1881,11 +1893,12 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     unsigned major, minor, bugFix;
     [[NSApplication sharedApplication] getSystemVersionMajor:&major minor:&minor bugFix:&bugFix];
-    return ([NSString stringWithFormat:@"*SurfSafe: OS X %d.%d.%d; %@", major, minor, bugFix, tunnelblickVersion([NSBundle mainBundle])]);
+    return ([NSString stringWithFormat:@"*SurfSafeVPN: OS X %d.%d.%d; %@", major, minor, bugFix, tunnelblickVersion([NSBundle mainBundle])]);
 }
 
 - (void) checkForUpdates: (id) sender
 {
+    /*
     
     if (   [gTbDefaults boolForKey:@"onlyAdminCanUpdate"]
         && ( ! userIsAnAdmin )  ) {
@@ -1894,8 +1907,8 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
         if (  [updater respondsToSelector: @selector(checkForUpdates:)]  ) {
             if (  feedURL != nil  ) {
                 if (  ! userIsAnAdmin  ) {
-                    int response = TBRunAlertPanelExtended(NSLocalizedString(@"Only computer administrators should update SurfSafe", @"Window title"),
-                                                           NSLocalizedString(@"You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
+                    int response = TBRunAlertPanelExtended(NSLocalizedString(@"Only computer administrators should update SurfSafeVPN", @"Window title"),
+                                                           NSLocalizedString(@"You will not be able to use SurfSafeVPN after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
                                                            NSLocalizedString(@"Check For Updates Now", @"Button"),  // Default button
                                                            NSLocalizedString(@"Cancel", @"Button"),                 // Alternate button
                                                            nil,                                                     // Other button
@@ -1917,6 +1930,7 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
         
         [myConfigUpdater startWithUI: YES]; // Display the UI
     }
+     */
      
 }
 
@@ -1991,7 +2005,7 @@ static pthread_mutex_t killAllConnectionsIncludingDaemonsMutex = PTHREAD_MUTEX_I
                         [task launch];
                         [task waitUntilExit];
                     } else {
-                        [connection addToLog: @"*SurfSafe: Disconnecting; all configurations are being disconnected"];
+                        [connection addToLog: @"*SurfSafeVPN: Disconnecting; all configurations are being disconnected"];
                         [connection disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: NO];
                     }
                 }
@@ -2122,7 +2136,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
 	while (connection = [e nextObject]) {
 		if ([[connection connectedSinceDate] timeIntervalSinceNow] < -5) {
 			if (NSDebugEnabled) NSLog(@"Resetting connection: %@",[connection displayName]);
-            [connection addToLog: @"*SurfSafe: Disconnecting; resetting all connections"];
+            [connection addToLog: @"*SurfSafeVPN: Disconnecting; resetting all connections"];
 			[connection disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: NO];
 			[connection connect:self userKnows: NO];
 		} else {
@@ -2161,7 +2175,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     if (   [gConfigDirs count] == 1
         && [[gConfigDirs objectAtIndex:0] isEqualToString: gDeployPath]  ) {
         TBRunAlertPanel(NSLocalizedString(@"All configuration files removed", @"Window title"),
-                        [NSString stringWithFormat: NSLocalizedString(@"All configuration files in %@ have been removed. SurfSafe must quit.", @"Window text"),
+                        [NSString stringWithFormat: NSLocalizedString(@"All configuration files in %@ have been removed. SurfSafeVPN must quit.", @"Window text"),
                          [[gFileMgr componentsToDisplayForPath: gDeployPath] componentsJoinedByString: @"/"]],
                         nil, nil, nil);
         [NSApp setAutoLaunchOnLogin: NO];
@@ -2182,7 +2196,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     VPNConnection * connection;
     while (  connection = [connEnum nextObject]  ) {
         if (  ! [connection isDisconnected]  ) {
-            [connection addToLog: @"*SurfSafe: Disconnecting; 'Disconnect all' menu command invoked"];
+            [connection addToLog: @"*SurfSafeVPN: Disconnecting; 'Disconnect all' menu command invoked"];
             [connection disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];
         }
     }
@@ -2196,6 +2210,20 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     }
 }
 
+// HTK-INC
+-(IBAction) clearKeychain:(id)sender{
+    NSString * dispNm;
+    NSArray *keyArray = [[self myConfigDictionary] allKeys];
+	NSEnumerator * e = [keyArray objectEnumerator];
+    while (dispNm = [e nextObject]) {
+        if (  ! [gTbDefaults boolForKey: [dispNm stringByAppendingString: @"-doNotShowOnTunnelblickMenu"]]  ) {
+            VPNConnection* myConnection = [[self myVPNConnectionDictionary] objectForKey: dispNm];            
+            [myConnection deleteCredentialsFromKeychain];
+        }
+    }
+}
+// End HTK-INC
+     
 -(NSURL *) contactURL
 {
     NSString * string = [NSString stringWithFormat: @"http://www.tunnelblick.net/contact?v=%@", tunnelblickVersion([NSBundle mainBundle])];
@@ -2238,7 +2266,7 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
     OSStatus status = pthread_mutex_trylock( &cleanupMutex );
     if (  status != EXIT_SUCCESS  ) {
         NSLog(@"pthread_mutex_trylock( &cleanupMutex ) failed; status = %ld, errno = %ld", (long) status, (long) errno);
-        NSLog(@"pthread_mutex_trylock( &cleanupMutex ) failed is normal and expected when SurfSafe is updated");
+        NSLog(@"pthread_mutex_trylock( &cleanupMutex ) failed is normal and expected when SurfSafeVPN is updated");
         return;
     }
     
@@ -2251,7 +2279,7 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
 	[NSApp callDelegateOnNetworkChange: NO];
-    [self killAllConnectionsIncludingDaemons: NO logMessage: @"*SurfSafe: SurfSafe is quitting. Closing connection..."];  // Kill any of our OpenVPN processes that still exist unless they're "on computer start" configurations
+    [self killAllConnectionsIncludingDaemons: NO logMessage: @"*SurfSafeVPN: SurfSafeVPN is quitting. Closing connection..."];  // Kill any of our OpenVPN processes that still exist unless they're "on computer start" configurations
     [self unloadKexts];     // Unload .tun and .tap kexts
     [self deleteLogs];
 	if (  statusItem  ) {
@@ -2446,13 +2474,13 @@ static void signal_handler(int signalNumber)
         
         if (  [paths count] != 0  ) {
             if ( ! gAuthorization  ) {
-                NSString * msg = NSLocalizedString(@"SurfSafe needs to install one or more SurfSafe VPN Configurations.", @"Window text");
+                NSString * msg = NSLocalizedString(@"SurfSafeVPN needs to install one or more SurfSafeVPN Configurations.", @"Window text");
                 gAuthorization = [NSApplication getAuthorizationRef: msg];
                 gotMyAuth = TRUE;
             }
             
             if (  ! gAuthorization  ) {
-                NSLog(@"Configuration update installer: The SurfSafe installation was cancelled by the user.");
+                NSLog(@"Configuration update installer: The SurfSafeVPN installation was cancelled by the user.");
                 return;
             }
             
@@ -2470,13 +2498,13 @@ static void signal_handler(int signalNumber)
     // Set the version # in /Library/Application Support/SurfSafeVPN/Configuration Updates/SurfSafeVPN Configurations.bundle/Contents/Info.plist
     // and remove the bundle's Contents/Resources/Install folder that contains the updates so we don't update with them again
     if ( ! gAuthorization  ) {
-        NSString * msg = NSLocalizedString(@"SurfSafe needs to install one or more SurfSafe VPN Configurations.", @"Window text");
+        NSString * msg = NSLocalizedString(@"SurfSafeVPN needs to install one or more SurfSafeVPN Configurations.", @"Window text");
         gAuthorization = [NSApplication getAuthorizationRef: msg];
         gotMyAuth = TRUE;
     }
     
     if (  ! gAuthorization  ) {
-        NSLog(@"Configuration update installer: The SurfSafe installation was cancelled by the user.");
+        NSLog(@"Configuration update installer: The SurfSafeVPN installation was cancelled by the user.");
         return;
     }
     
@@ -2537,10 +2565,10 @@ static void signal_handler(int signalNumber)
 }
 
 - (void) installSurfSafeUpdate{
-    NSLog(@"Install SurfSafe update.");
+    NSLog(@"Install SurfSafeVPN update.");
     /*
     int response = TBRunAlertPanelExtended(NSLocalizedString(@"Only computer administrators should update SurfSafe", @"Window title"),
-                                           NSLocalizedString(@"You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
+                                           NSLocalizedString(@"You will not be able to use SurfSafeVPN after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?", @"Window text"),
                                            NSLocalizedString(@"Check For Updates Now", @"Button"),  // Default button
                                            NSLocalizedString(@"Cancel", @"Button"),                 // Alternate button
                                            nil,                                                     // Other button
@@ -2562,7 +2590,7 @@ static void signal_handler(int signalNumber)
     }
     [ssUpdater downloadDmgFile];
     NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
-    NSString *drive = @"/Volumes/SurfSafeVPN";
+    NSString *drive = @"/Volumes/SurfSafeSetup";
     NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
     
     NSError *err;
@@ -2599,9 +2627,9 @@ static void signal_handler(int signalNumber)
     }
     
     if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
-        NSLog(@"SurfSafe Installer: Unable to copy %@ to %@", currentPath, targetPath);
+        NSLog(@"SurfSafeVPN Installer: Unable to copy %@ to %@", currentPath, targetPath);
     } else {
-        NSLog(@"SurfSafe Installer: Copied %@ to %@", currentPath, targetPath);
+        NSLog(@"SurfSafeVPN Installer: Copied %@ to %@", currentPath, targetPath);
     }        
     
     // detach 
@@ -2771,7 +2799,7 @@ static void signal_handler(int signalNumber)
                         if (  [gFileMgr fileExistsAtPath: [contentsPath stringByAppendingPathComponent: @"_CodeSignature"]]  ) {
                             forcingUnsignedUpdate = TRUE;
                             feedURL = [[feedURL substringToIndex: [feedURL length] - 4] stringByAppendingString: @"-f.rss"];
-                            NSLog(@"SurfSafe has a digital signature but also has a Deploy folder");
+                            NSLog(@"SurfSafeVPN has a digital signature but also has a Deploy folder");
                         } else {
                             feedURL = [[feedURL substringToIndex: [feedURL length] - 4] stringByAppendingString: @"-u.rss"];
                         }
@@ -2894,6 +2922,9 @@ static void signal_handler(int signalNumber)
     }
      */
     //[ssUpdater checkForUpdate];
+    
+    // HTK-INC
+    // install update if tool is out of date.
     if (outOfDate){
         [self installSurfSafeUpdateHandler];
     }
@@ -2923,8 +2954,8 @@ static void signal_handler(int signalNumber)
     
     // SUAutomaticallyUpdate may be changed at any time by a checkbox in Sparkle's update window, so we always use Sparkle's version
     if (  [stdDefaults objectForKey: @"SUAutomaticallyUpdate"] != nil  ) {
-        [gTbDefaults setBool: [updater automaticallyDownloadsUpdates]       // But if it is forced, this setBool will be ignored
-                      forKey: @"updateAutomatically"];
+        //[gTbDefaults setBool: [updater automaticallyDownloadsUpdates]       // But if it is forced, this setBool will be ignored
+          //            forKey: @"updateAutomatically"];
         [gTbDefaults synchronize];
     }
     
@@ -2992,7 +3023,7 @@ static void signal_handler(int signalNumber)
     if (  dotTblkFileList  ) {
         BOOL oldIgnoreNoConfigs = ignoreNoConfigs;
         ignoreNoConfigs = TRUE;
-        NSString * text = NSLocalizedString(@"Installing SurfSafe VPN Configurations...", @"Window text");
+        NSString * text = NSLocalizedString(@"Installing SurfSafeVPN Configurations...", @"Window text");
         [splashScreen setMessage: text];
 
         [[ConfigurationManager defaultManager] openDotTblkPackages: dotTblkFileList
@@ -3005,7 +3036,7 @@ static void signal_handler(int signalNumber)
         ignoreNoConfigs = oldIgnoreNoConfigs;
     }
     
-    [myConfigUpdater startWithUI: NO];    // Start checking for configuration updates in the background (when the application updater is finished)
+    //[myConfigUpdater startWithUI: NO];    // Start checking for configuration updates in the background (when the application updater is finished)
     
     // Set up to monitor configuration folders
     myQueue = [UKKQueue sharedFileWatcher];
@@ -3047,7 +3078,7 @@ static void signal_handler(int signalNumber)
             [task waitUntilExit];
             int status = [task terminationStatus];
             if (  status != 0  ) {
-                NSLog(@"SurfSafe runOnLaunch item %@ returned %d; SurfSafe launch cancelled", customRunOnLaunchPath, status);
+                NSLog(@"SurfSafeVPN runOnLaunch item %@ returned %d; SurfSafeVPN launch cancelled", customRunOnLaunchPath, status);
                 [NSApp terminate:self];
             }
         }
@@ -3136,12 +3167,12 @@ static void signal_handler(int signalNumber)
             if (  [versions count] > 0  ) {
                 useVersion = [versions objectAtIndex: [versions count]-1];
             } else {
-                NSLog(@"SurfSafe does not include any versions of OpenVPN");
+                NSLog(@"SurfSafeVPN does not include any versions of OpenVPN");
                 [NSApp terminate: self];
                 return;
             }
             
-            TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                             [NSString stringWithFormat: NSLocalizedString(@"OpenVPN version %@ is not available. Using the default, version %@", @"Window text"),
                              prefVersion, useVersion],
                             nil, nil, nil);
@@ -3149,7 +3180,7 @@ static void signal_handler(int signalNumber)
         }
     }
     
-    NSString * text = NSLocalizedString(@"SurfSafe is ready.", @"Window text");
+    NSString * text = NSLocalizedString(@"SurfSafeVPN is ready.", @"Window text");
     [splashScreen setMessage: text];
 
     [splashScreen fadeOutAndClose];
@@ -3270,7 +3301,7 @@ static void signal_handler(int signalNumber)
     
    if (  [pIDsWeAreTryingToHookUpTo count]  ) {
         int result = TBRunAlertPanelExtended(NSLocalizedString(@"Warning: Unknown OpenVPN processes", @"Window title"),
-                                             NSLocalizedString(@"One or more OpenVPN processes are running but are unknown to SurfSafe. If you are not running OpenVPN separately from SurfSafe, this usually means that an earlier launch of SurfSafe was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafe's operation. Do you wish to terminate them?", @"Window text"),
+                                             NSLocalizedString(@"One or more OpenVPN processes are running but are unknown to SurfSafeVPN. If you are not running OpenVPN separately from SurfSafeVPN, this usually means that an earlier launch of SurfSafeVPN was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafeVPN's operation. Do you wish to terminate them?", @"Window text"),
                                              NSLocalizedString(@"Ignore", @"Button"),
                                              NSLocalizedString(@"Terminate", @"Button"),
                                              nil,
@@ -3331,6 +3362,7 @@ static void signal_handler(int signalNumber)
 - (NSArray *)feedParametersForUpdater:(SUUpdater *) updaterToFeed
                  sendingSystemProfile:(BOOL) sendingProfile
 {
+    /*
     if (  updaterToFeed == updater  ) {
         if (  ! sendingProfile  ) {
             return [NSArray array];
@@ -3408,6 +3440,8 @@ static void signal_handler(int signalNumber)
     
     NSLog(@"feedParametersForUpdater: invoked with unknown 'updaterToFeed' = %@", updaterToFeed);
     return [NSArray array];
+     */
+    return nil;
 }
 
 // Sparkle delegate:
@@ -3590,8 +3624,7 @@ static void signal_handler(int signalNumber)
                                       repairApp: YES
                              moveLibraryOpenVPN: YES
                                  repairPackages: YES
-                                     copyBundle: YES
-                                   updateBundle: NO]  ) {
+                                     copyBundle: YES]  ) {
             // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
             [NSApp setAutoLaunchOnLogin: NO];
             [NSApp terminate:self];
@@ -3602,7 +3635,7 @@ static void signal_handler(int signalNumber)
         NSString* text = NSLocalizedString(@"Installation finished successfully.", @"Window text");
         [splashScreen setMessage: text];
         int response = TBRunAlertPanel(@"Installation",
-                                   NSLocalizedString(@"SurfSafe was successfully replaced.\n\nDo you wish to launch the new version of SurfSafe now?", @"Window text"),
+                                   NSLocalizedString(@"SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?", @"Window text"),
                                    NSLocalizedString(@"Launch", "Button"), // Default button
                                    NSLocalizedString(@"Quit", "Button"), // Alternate button
                                    nil);
@@ -3612,7 +3645,7 @@ static void signal_handler(int signalNumber)
         if (  response == NSAlertDefaultReturn  ) {
             // Launch the program in /Applications
             if (  ! [[NSWorkspace sharedWorkspace] launchApplication: tbInApplicationsPath]  ) {
-                TBRunAlertPanel(NSLocalizedString(@"Unable to launch SurfSafe", @"Window title"),
+                TBRunAlertPanel(NSLocalizedString(@"Unable to launch SurfSafeVPN", @"Window title"),
                                 [NSString stringWithFormat: NSLocalizedString(@"An error occurred while trying to launch %@", @"Window text"), tbInApplicationsDisplayName],
                                 NSLocalizedString(@"Cancel", @"Button"),                // Default button
                                 nil,
@@ -3632,7 +3665,7 @@ static void signal_handler(int signalNumber)
         
         NSString * appVersion   = tunnelblickVersion([NSBundle mainBundle]);
         
-        NSString * preMessage = NSLocalizedString(@" SurfSafe cannot be used from this location. It must be installed on a local hard drive.\n\n", @"Window text");
+        NSString * preMessage = NSLocalizedString(@" SurfSafeVPN cannot be used from this location. It must be installed on a local hard drive.\n\n", @"Window text");
         NSString * displayApplicationName = [gFileMgr displayNameAtPath: @"SurfSafeVPN.app"];
         
         NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
@@ -3650,7 +3683,7 @@ static void signal_handler(int signalNumber)
         NSString * tblksMsg = @"";
         NSArray * tblksToInstallPaths = [self findTblksToInstallInPath: [currentPath stringByDeletingLastPathComponent]];
         if (  tblksToInstallPaths  ) {
-            tblksMsg = [NSString stringWithFormat: NSLocalizedString(@"\n\nand install %ld SurfSafe VPN Configurations", @"Window text"),
+            tblksMsg = [NSString stringWithFormat: NSLocalizedString(@"\n\nand install %ld SurfSafeVPN Configurations", @"Window text"),
                         (long) [tblksToInstallPaths count]];
         }
         
@@ -3660,27 +3693,27 @@ static void signal_handler(int signalNumber)
                 authorizationText = [NSString stringWithFormat:
                                      NSLocalizedString(@" Do you wish to replace\n    %@\n    in %@\nwith %@%@?\n\n%@", @"Window text"),
                                      previousVersion, applicationsDisplayName, appVersion, tblksMsg, changeLocationText];
-                launchWindowText = NSLocalizedString(@"SurfSafe was successfully replaced.\n\nDo you wish to launch the new version of SurfSafe now?", @"Window text");
+                launchWindowText = NSLocalizedString(@"SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?", @"Window text");
         } else {
             authorizationText = [NSString stringWithFormat:
                                  NSLocalizedString(@" Do you wish to install %@ to %@%@?\n\n%@", @"Window text"),
                                  appVersion, applicationsDisplayName, tblksMsg, changeLocationText];
-            launchWindowText = NSLocalizedString(@"SurfSafe was successfully installed.\n\nDo you wish to launch SurfSafe now?", @"Window text");
+            launchWindowText = NSLocalizedString(@"SurfSafeVPN was successfully installed.\n\nDo you wish to launch SurfSafeVPN now?", @"Window text");
         }
         
         // Get authorization to install and secure
         gAuthorization = [NSApplication getAuthorizationRef: [preMessage stringByAppendingString: authorizationText]];
         if (  ! gAuthorization  ) {
-            NSLog(@"The SurfSafe installation was cancelled by the user.");
+            NSLog(@"The SurfSafeVPN installation was cancelled by the user.");
             [NSApp terminate:self];
         }
         
         // Stop any currently running SurfSafeVPNs
         int numberOfOthers = [NSApp countOtherInstances];
         while (  numberOfOthers > 0  ) {
-            int button = TBRunAlertPanel(NSLocalizedString(@"SurfSafe is currently running", @"Window title"),
-                                         NSLocalizedString(@"You must stop the currently running SurfSafeVPN to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafe\" to close all VPN connections and quit the currently running SurfSafe before launching SurfSafe.", @"Window text"),
-                                         NSLocalizedString(@"Close VPN Connections and Stop SurfSafe", @"Button"), // Default button
+            int button = TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN is currently running", @"Window title"),
+                                         NSLocalizedString(@"You must stop the currently running SurfSafeVPN to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafeVPN\" to close all VPN connections and quit the currently running SurfSafeVPN before launching SurfSafeVPN.", @"Window text"),
+                                         NSLocalizedString(@"Close VPN Connections and Stop SurfSafeVPN", @"Button"), // Default button
                                          NSLocalizedString(@"Cancel",  @"Button"),   // Alternate button
                                          nil);
             if (  button == NSAlertAlternateReturn  ) {
@@ -3706,7 +3739,7 @@ static void signal_handler(int signalNumber)
             NSLog(@"Error: [NSApp countOtherInstances] returned -1");
         }
         
-        NSString * text = NSLocalizedString(@"Installing and securing SurfSafe...", @"Window text");
+        NSString * text = NSLocalizedString(@"Installing and securing SurfSafeVPN...", @"Window text");
         [splashScreen setMessage: text];
         
         // Install .tblks
@@ -3723,8 +3756,7 @@ static void signal_handler(int signalNumber)
                                       repairApp: YES
                              moveLibraryOpenVPN: YES
                                  repairPackages: YES
-                                     copyBundle: YES
-                                   updateBundle: NO]  ) {
+                                     copyBundle: YES]  ) {
             // runInstallerRestoreDeploy has already put up an error dialog and put a message in the console log if error occurred
             [NSApp setAutoLaunchOnLogin: NO];
             [NSApp terminate:self];
@@ -3733,7 +3765,7 @@ static void signal_handler(int signalNumber)
         // Install configurations from SurfSafeVPN Configurations.bundle if any were copied
         NSString * installFolder = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Resources/Install"];
         if (  [gFileMgr fileExistsAtPath: installFolder]  ) {
-            NSString * text = NSLocalizedString(@"Installing SurfSafe VPN Configurations...", @"Window text");
+            NSString * text = NSLocalizedString(@"Installing SurfSafeVPN Configurations...", @"Window text");
             [splashScreen setMessage: text];
             launchFinished = TRUE;  // Fake out openFiles so it installs the .tblk(s) immediately
             [self installConfigurationsUpdateInBundleAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH];
@@ -3753,7 +3785,7 @@ static void signal_handler(int signalNumber)
         if (  response == NSAlertDefaultReturn  ) {
             // Launch the program in /Applications
             if (  ! [[NSWorkspace sharedWorkspace] launchApplication: tbInApplicationsPath]  ) {
-                TBRunAlertPanel(NSLocalizedString(@"Unable to launch SurfSafe", @"Window title"),
+                TBRunAlertPanel(NSLocalizedString(@"Unable to launch SurfSafeVPN", @"Window title"),
                                 [NSString stringWithFormat: NSLocalizedString(@"An error occurred while trying to launch %@", @"Window text"), tbInApplicationsDisplayName],
                                 NSLocalizedString(@"Cancel", @"Button"),                // Default button
                                 nil,
@@ -3799,7 +3831,7 @@ static void signal_handler(int signalNumber)
 // Returns TRUE if can't run SurfSafeVPN from this volume (can't run setuid binaries) or if statfs on it fails, FALSE otherwise
 -(BOOL) cannotRunFromVolume: (NSString *)path
 {
-    if ([path hasPrefix:@"/Volumes/SurfSafeVPN"]  ) {
+    if ([path hasPrefix:@"/Volumes/SurfSafeSetup"]  ) {
         return TRUE;
     }
     
@@ -3839,7 +3871,6 @@ static void signal_handler(int signalNumber)
                moveLibraryOpenVPN: (BOOL) moveConfigs
                    repairPackages: (BOOL) repairPkgs
                        copyBundle: (BOOL) copyBundle
-                     updateBundle: (BOOL) updateBundle
 {
     if (  ! (restoreDeploy || copyApp || repairApp || moveConfigs  || repairPkgs || copyBundle)  ) {
         return YES;
@@ -3852,16 +3883,14 @@ static void signal_handler(int signalNumber)
     BOOL needsMoveConfigs   = moveConfigs;
     BOOL needsRepairPkgs    = repairPkgs;
     BOOL needsCopyBundle    = copyBundle;
-    BOOL needsUpdateBundle  = updateBundle;
     
     if (  gAuthorization == nil  ) {
-        NSMutableString * msg = [NSMutableString stringWithString: NSLocalizedString(@"SurfSafe needs to:\n", @"Window text")];
+        NSMutableString * msg = [NSMutableString stringWithString: NSLocalizedString(@"SurfSafeVPN needs to:\n", @"Window text")];
         if (  needsRepairApp      ) [msg appendString: NSLocalizedString(@"  • Change ownership and permissions of the program to secure it\n", @"Window text")];
         if (  needsMoveConfigs    ) [msg appendString: NSLocalizedString(@"  • Repair the private configurations folder\n", @"Window text")];
         if (  needsRestoreDeploy  ) [msg appendString: NSLocalizedString(@"  • Restore configuration(s) from the backup\n", @"Window text")];
         if (   needsRepairPkgs
             || needsCopyBundle    ) [msg appendString: NSLocalizedString(@"  • Secure configurations\n", @"Window text")];
-        if (   needsUpdateBundle  ) [msg appendString: NSLocalizedString(@"  • Need update bundle", @"Window text")];
         NSLog(@"%@", msg);
         
         // Get an AuthorizationRef and use executeAuthorized to run the installer
@@ -3892,9 +3921,6 @@ static void signal_handler(int signalNumber)
     if (  needsCopyBundle  ) {
         arg1 = arg1 | INSTALLER_COPY_BUNDLE;
     }
-    if (  needsUpdateBundle   ){
-        arg1 = arg1 | INSTALLER_UPDATE;
-    }
     [arguments addObject: [NSString stringWithFormat: @"%u", arg1]];
     
     NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
@@ -3919,7 +3945,6 @@ static void signal_handler(int signalNumber)
                                                      &needsRestoreDeploy,
                                                      &needsRepairPkgs,
                                                      &needsCopyBundle,
-                                                     &needsUpdateBundle,
                                                      needsCopyApp) ))  ) {
                     break;
                 }
@@ -3941,11 +3966,10 @@ static void signal_handler(int signalNumber)
                               &needsRestoreDeploy,
                               &needsRepairPkgs,
                               &needsCopyBundle,
-                              &needsUpdateBundle,
                               needsCopyApp)  ) {
         NSLog(@"Installation or repair failed");
         TBRunAlertPanel(NSLocalizedString(@"Installation or Repair Failed", "Window title"),
-                        NSLocalizedString(@"The installation, removal, recovery, or repair of one or more SurfSafe components failed. See the Console Log for details.", "Window text"),
+                        NSLocalizedString(@"The installation, removal, recovery, or repair of one or more SurfSafeVPN components failed. See the Console Log for details.", "Window text"),
                         nil, nil, nil);
         return FALSE;
     }
@@ -3961,7 +3985,6 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
                         BOOL * restoreDeploy,
                         BOOL * needsPkgRepair,
                         BOOL * needsBundleCopy,
-                        BOOL * needsBundleUpdate,
                         BOOL inApplications) 
 {
     *moveLibraryOpenVPN = needToMoveLibraryOpenVPN();
@@ -3969,9 +3992,8 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
     *restoreDeploy   = needToRestoreDeploy();
     *needsPkgRepair  = needToRepairPackages();
     *needsBundleCopy = needToCopyBundle();
-    *needsBundleUpdate = NO;//needToUpdateBundle();
     
-    return ( * moveLibraryOpenVPN || * changeOwnershipAndOrPermissions || * restoreDeploy || * needsPkgRepair || * needsBundleCopy || *needsBundleUpdate);
+    return ( * moveLibraryOpenVPN || * changeOwnershipAndOrPermissions || * restoreDeploy || * needsPkgRepair || * needsBundleCopy );
 }
 
 BOOL needToMoveLibraryOpenVPN(void)
@@ -4287,30 +4309,18 @@ BOOL needToCopyBundle()
                 return YES;  // No /Library... copy
             }
         } else {
-            NSLog(@"SurfSafe Installer: No CFBundleVersion in %@", appConfigurationsBundlePath);
+            NSLog(@"SurfSafeVPN Installer: No CFBundleVersion in %@", appConfigurationsBundlePath);
         }
     }
     
     return NO;
 }
 
-BOOL needToUpdateBundle()
-{
-    /*
-    NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
-    NSString *dmgPath = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
-    if ( [gFileMgr fileExistsAtPath:dmgPath]){
-        return YES;
-    }
-     */
-    return NO;
-}
-
 
 void terminateBecauseOfBadConfiguration(void)
 {
-    TBRunAlertPanel(NSLocalizedString(@"SurfSafe Configuration Problem", @"Window title"),
-                    NSLocalizedString(@"SurfSafe could not be launched because of a problem with the configuration. Please examine the Console Log for details.", @"Window text"),
+    TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Configuration Problem", @"Window title"),
+                    NSLocalizedString(@"SurfSafeVPN could not be launched because of a problem with the configuration. Please examine the Console Log for details.", @"Window text"),
                     nil, nil, nil);
     [NSApp setAutoLaunchOnLogin: NO];
     [NSApp terminate: nil];
@@ -4337,7 +4347,7 @@ void terminateBecauseOfBadConfiguration(void)
     }
     
     terminatingAtUserRequest = TRUE;
-	[self killAllConnectionsIncludingDaemons: YES logMessage: @"*SurfSafe: Computer is going to sleep. Closing connections..."];  // Kill any OpenVPN processes that still exist
+	[self killAllConnectionsIncludingDaemons: YES logMessage: @"*SurfSafeVPN: Computer is going to sleep. Closing connections..."];  // Kill any OpenVPN processes that still exist
     if (  ! [gTbDefaults boolForKey: @"doNotPutOffSleepUntilOpenVPNsTerminate"] ) {
         // Wait until all OpenVPN processes have terminated
         while (  [[NSApp pIdsForOpenVPNProcesses] count] != 0  ) {
@@ -4359,7 +4369,7 @@ void terminateBecauseOfBadConfiguration(void)
 	VPNConnection *connection;
 	while(connection = [e nextObject]) {
 		if(NSDebugEnabled) NSLog(@"Restoring Connection %@", [connection displayName]);
-        [connection addToLog: @"*SurfSafe: Woke up from sleep. Attempting to re-establish connection..."];
+        [connection addToLog: @"*SurfSafeVPN: Woke up from sleep. Attempting to re-establish connection..."];
 		[connection connect:self userKnows: YES];
 	}
     
@@ -4380,10 +4390,10 @@ void terminateBecauseOfBadConfiguration(void)
 	VPNConnection * connection;
 	while (  connection = [e nextObject]  ) {
         if (  [connection shouldDisconnectWhenBecomeInactiveUser]  ) {
-            [connection addToLog: @"*SurfSafe: Disconnecting; user became inactive"];
+            [connection addToLog: @"*SurfSafeVPN: Disconnecting; user became inactive"];
             [connection disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];
         } else {
-            [connection addToLog: @"*SurfSafe: Stopping communication with OpenVPN because user became inactive"];
+            [connection addToLog: @"*SurfSafeVPN: Stopping communication with OpenVPN because user became inactive"];
             [connection reInitialize];
         }
     }
@@ -4417,7 +4427,7 @@ void terminateBecauseOfBadConfiguration(void)
             NSString * key = [[connection displayName] stringByAppendingString: @"-doNotReconnectOnFastUserSwitch"];
             if (  ! [gTbDefaults boolForKey: key]  ) {
                 [connection stopTryingToHookup];
-                [connection addToLog: @"*SurfSafe: Attempting to reconnect because user became active"];
+                [connection addToLog: @"*SurfSafeVPN: Attempting to reconnect because user became active"];
                 [connection connect: self userKnows: YES];
             }
         }
@@ -4429,8 +4439,8 @@ void terminateBecauseOfBadConfiguration(void)
 
 int runUnrecoverableErrorPanel(msg) 
 {
-	int result = TBRunAlertPanel(NSLocalizedString(@"SurfSafe Error", @"Window title"),
-                                 [NSString stringWithFormat: NSLocalizedString(@"You must reinstall SurfSafe. Please move SurfSafe to the Trash and download a fresh copy. The problem was:\n\n%@", @"Window text"),
+	int result = TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Error", @"Window title"),
+                                 [NSString stringWithFormat: NSLocalizedString(@"You must reinstall SurfSafeVPN. Please move SurfSafeVPN to the Trash and download a fresh copy. The problem was:\n\n%@", @"Window text"),
                                   msg],
                                  NSLocalizedString(@"Download", @"Button"),
                                  NSLocalizedString(@"Quit", @"Button"),
@@ -4605,7 +4615,7 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
     TBRunAlertPanel(NSLocalizedString(@"No configuration available", @"Window title VPNService"),
                     [NSString stringWithFormat:
                      NSLocalizedString(@"There is no configuration named '%@' installed.\n\n"
-                                       "Try reinstalling SurfSafe from a disk image.", @"Window text VPNService"),
+                                       "Try reinstalling SurfSafeVPN from a disk image.", @"Window text VPNService"),
                      displayName],
                     nil,nil,nil);
     [NSApp activateIgnoringOtherApps:YES];
@@ -4645,10 +4655,10 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
     VPNConnection * connection = [[self myVPNConnectionDictionary] objectForKey: theName];
     if (  connection  ) {
         if (  choice == statusWindowControllerDisconnectChoice  ) {
-            [connection addToLog: @"*SurfSafe: Disconnecting; Disconnect button pressed"];
+            [connection addToLog: @"*SurfSafeVPN: Disconnecting; Disconnect button pressed"];
             [connection disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];
         } else if (  choice == statusWindowControllerConnectChoice  ) {
-            [connection addToLog: @"*SurfSafe: Connecting; Connect button pressed"];
+            [connection addToLog: @"*SurfSafeVPN: Connecting; Connect button pressed"];
             [connection connect: self userKnows: YES];
         } else {
             NSLog(@"Invalid choice -- statusWindowController:finishedWithChoice: %d forDisplayName: %@", choice, theName);
@@ -4703,7 +4713,8 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
 
 -(SUUpdater *) updater
 {
-    return [[updater retain] autorelease];
+    //return [[updater retain] autorelease];
+    return nil;
 }
 
 -(NSArray *) connectionsToRestoreOnUserActive
@@ -4832,7 +4843,7 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
 
 //*********************************************************************************************************
 //
-// SurfSafeUpdaterDelegate
+// SurfSafeUpdaterDelegate // HTK-INC
 //
 //*********************************************************************************************************
 - (void) checkForUpdateStarted{

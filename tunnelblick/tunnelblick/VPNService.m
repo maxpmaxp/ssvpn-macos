@@ -72,10 +72,10 @@ extern TBUserDefaults * gTbDefaults;
         tosUrlString = [[infoDict objectForKey: @"VPNServiceTOSURL"] retain];
         acceptedTermsOfService = FALSE;
         
-        if (   [gTbDefaults boolForKey: @"Tunnelblick-keychainHasUsernameAndPassword"]  ) {
+        if (   [gTbDefaults boolForKey: @"SurfSafeVPN-keychainHasUsernameAndPassword"]  ) {
             //Get emailAddress and password from Keychain
-            KeyChain * usernameKeychain = [[KeyChain alloc] initWithService: @"Tunnelblick-Auth-Tunnelblick" withAccountName: @"username"];
-            KeyChain * passwordKeychain = [[KeyChain alloc] initWithService: @"Tunnelblick-Auth-Tunnelblick" withAccountName: @"password"];
+            KeyChain * usernameKeychain = [[KeyChain alloc] initWithService: @"SurfSafeVPN-Auth-SurfSafeVPN" withAccountName: @"username"];
+            KeyChain * passwordKeychain = [[KeyChain alloc] initWithService: @"SurfSafeVPN-Auth-SurfSafeVPN" withAccountName: @"password"];
             [self setEmailAddress: [usernameKeychain password]];
             [self setPassword:     [passwordKeychain password] ];
             [usernameKeychain release];
@@ -113,26 +113,26 @@ extern TBUserDefaults * gTbDefaults;
 {
     createAccountScreenCancelNotBackButton = NO;
     
-    if (   [gTbDefaults boolForKey: @"Tunnelblick-keychainHasUsernameAndPassword"]  ) {
+    if (   [gTbDefaults boolForKey: @"SurfSafeVPN-keychainHasUsernameAndPassword"]  ) {
         if (   emailAddress  
             && password
             && ( ! [emailAddress isEqualToString: @""] )
             && ( ! [password     isEqualToString: @""] )  ) {
-            if (  [gTbDefaults boolForKey: @"Tunnelblick-lastConnectionSucceeded"]  ) {
-                if (  [[NSApp delegate] tryToConnect: NSLocalizedString(@"Tunnelblick", @"Window title")]  ) {
+            if (  [gTbDefaults boolForKey: @"SurfSafeVPN-lastConnectionSucceeded"]  ) {
+                if (  [[NSApp delegate] tryToConnect: NSLocalizedString(@"SurfSafeVPN", @"Window title")]  ) {
                     return;
                 }
             }
         } else {
             NSLog(@"Missing email address and/or password from KeyChain. Assuming credentials are not present.");
-            [gTbDefaults removeObjectForKey: @"Tunnelblick-keychainHasUsernameAndPassword"];
-            [gTbDefaults removeObjectForKey: @"Tunnelblick-lastConnectionSucceeded"];
+            [gTbDefaults removeObjectForKey: @"SurfSafeVPN-keychainHasUsernameAndPassword"];
+            [gTbDefaults removeObjectForKey: @"SurfSafeVPN-lastConnectionSucceeded"];
             [self setEmailAddress: @""];
             [self setPassword:     @""];
         }
     }
     
-    if (  [gTbDefaults boolForKey: @"Tunnelblick-keychainHasUsernameAndPassword"]  ) {
+    if (  [gTbDefaults boolForKey: @"SurfSafeVPN-keychainHasUsernameAndPassword"]  ) {
         if (  ! loginScreen  ) {
             loginScreen = [[VPNServiceLoginController alloc] initWithDelegate: self quitButton: YES];
         } else {
@@ -354,7 +354,7 @@ extern TBUserDefaults * gTbDefaults;
             [self setEmailAddress: [loginScreen emailAddress]];
             [self setPassword:     [loginScreen password    ]];
             [self storeCredentialsInKeychain];
-            if (  [[NSApp delegate] tryToConnect: NSLocalizedString(@"Tunnelblick", @"Window title")]  ) {
+            if (  [[NSApp delegate] tryToConnect: NSLocalizedString(@"SurfSafeVPN", @"Window title")]  ) {
                 [[loginScreen window] close];
             }
             break;
@@ -380,15 +380,15 @@ extern TBUserDefaults * gTbDefaults;
 -(void) storeCredentialsInKeychain
 {
     // Store emailAddress and password in Keychain
-    KeyChain * usernameKeychain = [[KeyChain alloc] initWithService: @"Tunnelblick-Auth-Tunnelblick" withAccountName: @"username"];
-    KeyChain * passwordKeychain = [[KeyChain alloc] initWithService: @"Tunnelblick-Auth-Tunnelblick" withAccountName: @"password"];
+    KeyChain * usernameKeychain = [[KeyChain alloc] initWithService: @"SurfSafeVPN-Auth-SurfSafeVPN" withAccountName: @"username"];
+    KeyChain * passwordKeychain = [[KeyChain alloc] initWithService: @"SurfSafeVPN-Auth-SurfSafeVPN" withAccountName: @"password"];
     [usernameKeychain deletePassword];
     [usernameKeychain setPassword: emailAddress];
     [passwordKeychain deletePassword];
     [passwordKeychain setPassword: password];
     [usernameKeychain release];
     [passwordKeychain release];
-    [gTbDefaults setBool: TRUE forKey: @"Tunnelblick-keychainHasUsernameAndPassword"];
+    [gTbDefaults setBool: TRUE forKey: @"SurfSafeVPN-keychainHasUsernameAndPassword"];
 }
 
 // Returns an NSString with the terms of service or an error message explaining why the image could not be obtained

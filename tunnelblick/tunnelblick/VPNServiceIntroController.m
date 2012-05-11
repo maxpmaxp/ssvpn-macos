@@ -52,7 +52,7 @@
 
 -(void) awakeFromNib
 {
-    [[self window] setTitle: NSLocalizedString(@"SurfSafe - Free VPN", @"Window title  VPNService")];
+    [[self window] setTitle: NSLocalizedString(@"SurfSafeVPN - Free VPN", @"Window title  VPNService")];
     
     NSString * imagePath = [[NSBundle mainBundle] pathForResource: @"VPNService-Intro" ofType: @"png"];
     [introIV setImage: [[[NSImage alloc] initWithContentsOfFile: imagePath] autorelease]];
@@ -61,7 +61,7 @@
     [self setTitle: NSLocalizedString(@"Create a Free Account"  , @"Button VPNService") ofControl: createAccountButton ];
     [self setTitle: NSLocalizedString(@"Login",                   @"Button VPNService") ofControl: loginButton         ];
     
-    [[self introTFC] setStringValue: NSLocalizedString(@"SurfSafe allows you to explore the Internet freely without restrictions "
+    [[self introTFC] setStringValue: NSLocalizedString(@"SurfSafeVPN allows you to explore the Internet freely without restrictions "
                                                        "while simultaneously securing your Internet connection.", @"Window text VPNService")];
     [[self window] center];
     [NSApp activateIgnoringOtherApps:YES];

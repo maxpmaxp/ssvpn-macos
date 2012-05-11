@@ -202,6 +202,8 @@ struct Statistics {
 -(void)             stopTryingToHookup;
 
 -(IBAction)         toggle:                     (id)            sender;
+-(IBAction)         clearKeychain:              (id)
+    sender;
 
 -(void)             tryToHookupToPort:          (int)           inPortNumber
                  withOpenvpnstartArgs:          (NSString *)    inStartArgs;
@@ -209,6 +211,8 @@ struct Statistics {
 -(int)              useDNSStatus;
 
 -(BOOL)             usedModifyNameserver;
+
+-(void)             deleteCredentialsFromKeychain;
 
 TBPROPERTY_WRITEONLY(NSSound *, tunnelUpSound, setTunnelUpSound)
 TBPROPERTY_WRITEONLY(NSSound *, tunnelDownSound, setTunnelDownSound)

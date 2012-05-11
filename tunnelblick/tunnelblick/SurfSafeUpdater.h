@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+// HTK-INC
+
 #import <Foundation/Foundation.h>
 
 @protocol SurfSafeUpdaterDelegate <NSObject>

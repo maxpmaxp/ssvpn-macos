@@ -170,7 +170,7 @@ enum state_t {                      // These are the "states" of the guideState 
                     if (  [ext isEqualToString: @"tblk"]  ) {
                         NSString * tbPath = tblkPathFromConfigPath(fullPath);
                         if (  ! tbPath  ) {
-                            NSLog(@"SurfsafeVPN VPN Configuration ignored: No .conf or .ovpn file in %@", fullPath);
+                            NSLog(@"SurfsafeVPN Configuration ignored: No .conf or .ovpn file in %@", fullPath);
                              ignored = TRUE;
                         } else {
                             addIt = TRUE;
@@ -207,7 +207,7 @@ enum state_t {                      // These are the "states" of the guideState 
                     if (  [ext isEqualToString: @"tblk"]  ) {
                         NSString * tbPath = configPathFromTblkPath(fullPath);
                         if (  ! tbPath  ) {
-                            NSLog(@"SurfsafeVPN VPN Configuration ignored: No .conf or .ovpn file. Try reinstalling %@", fullPath);
+                            NSLog(@"SurfsafeVPN Configuration ignored: No .conf or .ovpn file. Try reinstalling %@", fullPath);
                              ignored = TRUE;
                         } else {
                             addIt = TRUE;
@@ -220,7 +220,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 }
                 if (   [folderPath isEqualToString: gSharedPath]
                     && ([ext isEqualToString: @"ovpn"] || [ext isEqualToString: @"conf"])  ) {
-                    NSLog(@"SurfsafeVPN VPN Configuration ignored: Only SurfsafeVPN VPN Configurations (.tblk packages) may be shared %@", fullPath);
+                    NSLog(@"SurfsafeVPN Configuration ignored: Only SurfsafeVPN Configurations (.tblk packages) may be shared %@", fullPath);
                      ignored = TRUE;
                 }
             }
@@ -306,7 +306,7 @@ enum state_t {                      // These are the "states" of the guideState 
             if (  button == NSAlertAlternateReturn  ) {
                 if (  ! [[ConfigurationManager defaultManager] unprotectConfigurationFile: targetPath]  ) {
                     int button = TBRunAlertPanel(NSLocalizedString(@"Examine the configuration file?", @"Window title"),
-                                                 NSLocalizedString(@"SurfSafe could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?", @"Window text"),
+                                                 NSLocalizedString(@"SurfSafeVPN could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?", @"Window text"),
                                                  NSLocalizedString(@"Cancel", @"Button"),    // Default button
                                                  NSLocalizedString(@"Examine", @"Button"),   // Alternate button
                                                  nil);
@@ -505,7 +505,7 @@ enum state_t {                      // These are the "states" of the guideState 
     if (   ( ! devOption )
         || ( ! (   [devOptionFirst3Chars isEqualToString: @"tun"]
                 || [devOptionFirst3Chars isEqualToString: @"tap"]  )  )  ) {
-        NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafe operation. Consult with your network administrator or the OpenVPN documentation.", @"Window text"),
+        NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafeVPN operation. Consult with your network administrator or the OpenVPN documentation.", @"Window text"),
                [connection displayName]];
         NSString * skipWarningKey = [[connection displayName] stringByAppendingString: @"-skipWarningAboutNoTunOrTap"];
         TBRunAlertPanelExtended(NSLocalizedString(@"No 'dev tun' or 'dev tap' found", @"Window title"), 
@@ -597,7 +597,7 @@ enum state_t {                      // These are the "states" of the guideState 
           skipResultMessage: (BOOL) skipResultMsg
 {
     if (  [gTbDefaults boolForKey: @"doNotOpenDotTblkFiles"]  )  {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe VPN Configuration Installation Error", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Configuration Installation Error", @"Window title"),
                         NSLocalizedString(@"Installation of .tblk packages is not allowed", "Window text"),
                         nil, nil, nil);
         [NSApp replyToOpenOrPrint: NSApplicationDelegateReplyFailure];
@@ -684,7 +684,7 @@ enum state_t {                      // These are the "states" of the guideState 
     if (   ([sourceList count] == 0)
         && ([deleteList count] == 0)  ) {
         if (  [errList count] != 0  ) {
-            TBRunAlertPanel(NSLocalizedString(@"SurfSafe VPN Configuration Installation Error", @"Window title"),
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Configuration Installation Error", @"Window title"),
                             NSLocalizedString(@"There was a problem with one or more configurations. Details are in the Console Log\n\n", @"Window text"),
                             nil, nil, nil);
         }
@@ -759,12 +759,12 @@ enum state_t {                      // These are the "states" of the guideState 
     
     AuthorizationRef localAuth = authRef;
     if ( ! authRef  ) {    // If we weren't given an AuthorizationRef, get our own
-        NSString * msg = NSLocalizedString(@"SurfSafe needs to install and/or uninstall one or more SurfSafe VPN Configurations.", @"Window text");
+        NSString * msg = NSLocalizedString(@"SurfSafeVPN needs to install and/or uninstall one or more SurfSafeVPN Configurations.", @"Window text");
         localAuth = [NSApplication getAuthorizationRef: msg];
     }
     
     if (  ! localAuth  ) {
-        NSLog(@"Configuration installer: The SurfsafeVPN VPN Configuration installation was cancelled by the user.");
+        NSLog(@"Configuration installer: The SurfsafeVPN Configuration installation was cancelled by the user.");
         [NSApp replyToOpenOrPrint: NSApplicationDelegateReplyCancel];
         return;
     }
@@ -809,7 +809,7 @@ enum state_t {                      // These are the "states" of the guideState 
             msg = [NSString stringWithFormat: NSLocalizedString(@"%d configurations were not installed. See the Console Log for details.", "Window text"),
                    nErrors];
         }
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe VPN Configuration Installation Error", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Configuration Installation Error", @"Window title"),
                         msg,
                         nil, nil, nil);
         [NSApp replyToOpenOrPrint: NSApplicationDelegateReplyFailure];
@@ -818,31 +818,31 @@ enum state_t {                      // These are the "states" of the guideState 
         int nUninstalled = [deleteList count];
         NSString * msg;
         if (  nUninstalled == 1  ) {
-            msg = NSLocalizedString(@"One SurfSafe VPN Configuration was uninstalled successfully.", @"Window text");
+            msg = NSLocalizedString(@"One SurfSafeVPN Configuration was uninstalled successfully.", @"Window text");
         } else {
-            msg = [NSString stringWithFormat: NSLocalizedString(@"%d SurfSafe VPN Configurations were uninstalled successfully.", @"Window text"), nUninstalled];
+            msg = [NSString stringWithFormat: NSLocalizedString(@"%d SurfSafeVPN Configurations were uninstalled successfully.", @"Window text"), nUninstalled];
         }
         if (  nOK > 0  ) {
             if (  nOK == 1  ) {
                 if (  nUninstalled  == 0  ) {
-                    msg = NSLocalizedString(@"One SurfSafe VPN Configuration was installed successfully.", @"Window text");
+                    msg = NSLocalizedString(@"One SurfSafeVPN Configuration was installed successfully.", @"Window text");
                 } else {
                     msg = [msg stringByAppendingString:
-                           NSLocalizedString(@"\n\nOne SurfSafe VPN Configuration was installed successfully.", @"Window text")];
+                           NSLocalizedString(@"\n\nOne SurfSafeVPN Configuration was installed successfully.", @"Window text")];
                 }
             } else {
                 if (  nUninstalled  == 0  ) {
-                    msg = [NSString stringWithFormat: NSLocalizedString(@"%d SurfSafe VPN Configurations were installed successfully.", @"Window text"), nOK];
+                    msg = [NSString stringWithFormat: NSLocalizedString(@"%d SurfSafeVPN Configurations were installed successfully.", @"Window text"), nOK];
                 } else {
                     msg = [msg stringByAppendingString:
                            [NSString stringWithFormat:
-                            NSLocalizedString(@"\n\n%d SurfSafe VPN Configurations were installed successfully.", @"Window text"), nOK]];
+                            NSLocalizedString(@"\n\n%d SurfSafeVPN Configurations were installed successfully.", @"Window text"), nOK]];
                 }
             }
         }
         
         if (  ! skipResultMsg  ) {
-            TBRunAlertPanel(NSLocalizedString(@"SurfSafe VPN Configuration Installation", @"Window title"),
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN Configuration Installation", @"Window title"),
                             msg,
                             nil, nil, nil);
         }
@@ -861,9 +861,9 @@ enum state_t {                      // These are the "states" of the guideState 
     if (   [filePath hasPrefix: gPrivatePath]
         || [filePath hasPrefix: gSharedPath]
         || [filePath hasPrefix: gDeployPath]  ) {
-        NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration is already installed: %@", filePath);
+        NSLog(@"Configuration installer: SurfsafeVPN Configuration is already installed: %@", filePath);
         TBRunAlertPanel(NSLocalizedString(@"Configuration Installation Error", @"Window title"),
-                        NSLocalizedString(@"You cannot install a SurfSafe VPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.", @"Window text"),
+                        NSLocalizedString(@"You cannot install a SurfSafeVPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.", @"Window text"),
                         nil, nil, nil);
         return nil;
     }
@@ -1033,7 +1033,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSString * oldIdentifier = [self getLowerCaseStringForKey: @"CFBundleIdentifier" inDictionary: oldInfo defaultTo: nil];
                 if (  [oldIdentifier isEqualToString: pkgId]) {
                     if (  [pkgReplaceIdentical isEqualToString: @"no"]  ) {
-                        NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ has NOT been %@installed: TBReplaceOption=NO.",
+                        NSLog(@"Configuration installer: SurfsafeVPN Configuration %@ has NOT been %@installed: TBReplaceOption=NO.",
                               tryDisplayName, (pkgDoUninstall ? @"un" : @""));
                         if (  pkgUninstallFailOK  ) {
                             return [NSArray array];
@@ -1044,7 +1044,7 @@ enum state_t {                      // These are the "states" of the guideState 
                         // Fall through to install
                     } else if (  [pkgReplaceIdentical isEqualToString: @"yes"]  ) {
                         if (  [oldVersion compare: pkgVersion options: NSNumericSearch] == NSOrderedDescending  ) {
-                            NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ has NOT been %@installed: it has a lower version number.",
+                            NSLog(@"Configuration installer: SurfsafeVPN Configuration %@ has NOT been %@installed: it has a lower version number.",
                                   tryDisplayName, (pkgDoUninstall ? @"un" : @""));
                             if (  pkgUninstallFailOK  ) {
                                 return [NSArray array];
@@ -1087,9 +1087,9 @@ enum state_t {                      // These are the "states" of the guideState 
                         
                         NSString * header;
                         if (  pkgDoUninstall  ) {
-                            header = NSLocalizedString(@"Uninstall SurfSafe VPN Configuration", @"Window title");
+                            header = NSLocalizedString(@"Uninstall SurfSafeVPN Configuration", @"Window title");
                         } else {
-                            header = NSLocalizedString(@"Replace SurfSafe VPN Configuration", @"Window title");
+                            header = NSLocalizedString(@"Replace SurfSafeVPN Configuration", @"Window title");
                         }
 
                         int result = TBRunAlertPanel(header,
@@ -1098,7 +1098,7 @@ enum state_t {                      // These are the "states" of the guideState 
                                                      NSLocalizedString(@"Cancel", @"Button"),   // Alternate
                                                      nil);
                         if (  result == NSAlertAlternateReturn  ) {
-                            NSLog(@"Configuration installer: SurfsafeVPN VPN Configuration %@ (un)installation declined by user.", tryDisplayName);
+                            NSLog(@"Configuration installer: SurfsafeVPN Configuration %@ (un)installation declined by user.", tryDisplayName);
                             return [NSArray array];
                         }
                     }
@@ -1148,13 +1148,13 @@ enum state_t {                      // These are the "states" of the guideState 
             
             if((error) || (CFUserNotificationReceiveResponse(notification, 0, &response))) {
                 CFRelease(notification);    // Couldn't receive a response
-                NSLog(@"Configuration installer: The SurfsafeVPN VPN Package has NOT been installed.\n\nAn unknown error occured.");
+                NSLog(@"Configuration installer: The SurfsafeVPN Package has NOT been installed.\n\nAn unknown error occured.");
                 return nil;
             }
             
             if((response & 0x3) != kCFUserNotificationDefaultResponse) {
                 CFRelease(notification);    // User clicked "Cancel"
-                NSLog(@"Configuration installer: Installation of SurfsafeVPN VPN Package %@ has been cancelled.", tryDisplayName);
+                NSLog(@"Configuration installer: Installation of SurfsafeVPN Package %@ has been cancelled.", tryDisplayName);
                 return [NSArray array];
             }
             
@@ -1208,7 +1208,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 } else if (  result == NSAlertAlternateReturn  ) {
                     pkgSharePackage = @"shared";
                 } else {
-                    NSLog(@"Configuration installer: Installation of SurfsafeVPN VPN Package %@ has been cancelled.", tryDisplayName);
+                    NSLog(@"Configuration installer: Installation of SurfsafeVPN Package %@ has been cancelled.", tryDisplayName);
                     return [NSArray array];
                 }
             }
@@ -1278,7 +1278,7 @@ enum state_t {                      // These are the "states" of the guideState 
     // If empty package, make a sample config
     if (  [pkgList count] == 0  ) {
         int result = TBRunAlertPanel(NSLocalizedString(@"Install Sample Configuration?", @"Window Title"),
-                                     [NSString stringWithFormat: NSLocalizedString(@"SurfSafe VPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?", @"Window text"),
+                                     [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?", @"Window text"),
                                       [[thePath lastPathComponent]stringByDeletingPathExtension]],
                                      NSLocalizedString(@"Install Sample", @"Button"),
                                      NSLocalizedString(@"Cancel", @"Button"),
@@ -1462,7 +1462,7 @@ enum state_t {                      // These are the "states" of the guideState 
         
         // We don't use a shadow configuration file
 		NSLog(@"Configuration file %@ needs ownership/permissions repair", cfgPath);
-        authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafe needs to repair ownership/permissions of the configuration file to secure it.", @"Window text")]; // Try to repair regular config
+        authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the configuration file to secure it.", @"Window text")]; // Try to repair regular config
         if ( authRef == nil ) {
             NSLog(@"Repair authorization cancelled by user");
             AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
@@ -1502,7 +1502,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 if ( [self configNotProtected:altCfgPath] ) {                            // Check ownership/permissions
                     // Alt config needs repair
                     NSLog(@"The shadow copy of configuration file %@ needs ownership/permissions repair", cfgPath);
-                    authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafe needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.", @"Window text")]; // Repair if necessary
+                    authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.", @"Window text")]; // Repair if necessary
                     if ( authRef == nil ) {
                         NSLog(@"Repair authorization cancelled by user");
                         AuthorizationFree(authRef, kAuthorizationFlagDefaults);
@@ -1518,7 +1518,7 @@ enum state_t {                      // These are the "states" of the guideState 
             } else {
                 // Alt config exists but is different
                 NSLog(@"The shadow copy of configuration file %@ needs to be updated from the original", cfgPath);
-                authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafe needs to update the shadow copy of the configuration file from the original.", @"Window text")];// Overwrite it with the standard one and set ownership & permissions
+                authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to update the shadow copy of the configuration file from the original.", @"Window text")];// Overwrite it with the standard one and set ownership & permissions
                 if ( authRef == nil ) {
                     NSLog(@"Authorization for update of shadow copy cancelled by user");
                     AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
@@ -1548,7 +1548,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 return nil;
             }
             
-            authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafe needs to create a shadow copy of the configuration file.", @"Window text")]; // Create folders if they don't exist:
+            authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to create a shadow copy of the configuration file.", @"Window text")]; // Create folders if they don't exist:
             if ( authRef == nil ) {
                 NSLog(@"Authorization to create a shadow copy of the configuration file cancelled by user.");
                 AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
@@ -1604,7 +1604,7 @@ enum state_t {                      // These are the "states" of the guideState 
     }
     
     int button = TBRunAlertPanel(NSLocalizedString(@"You cannot use the sample configuration", @"Window title"),
-                                 NSLocalizedString(@"You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafe. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n", @"Window text"),
+                                 NSLocalizedString(@"You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafeVPN. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n", @"Window text"),
                                  NSLocalizedString(@"Cancel", @"Button"),                           // Default button
                                  NSLocalizedString(@"Go to the OpenVPN documentation on the web", @"Button"), // Alternate button
                                  nil);                                                              // No Other button
@@ -1713,7 +1713,7 @@ enum state_t {                      // These are the "states" of the guideState 
         TBRunAlertPanel([NSString stringWithFormat:@"%@: %@",
                          [self displayNameForPath: configFilePath],
                          NSLocalizedString(@"Not connecting", @"Window title")],
-                        NSLocalizedString(@"SurfSafe could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.", @"Window text"),
+                        NSLocalizedString(@"SurfSafeVPN could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.", @"Window text"),
                         nil,
                         nil,
                         nil);
@@ -1763,7 +1763,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSLog(@"Could not copy configuration file %@ to %@", sourcePath, targetPath);
                 if (  warn  ) {
                     NSString * title = NSLocalizedString(@"Could Not Copy Configuration", @"Window title");
-                    NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafe could not copy the '%@' configuration. See the Console Log for details.", @"Window text"), name];
+                    NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not copy the '%@' configuration. See the Console Log for details.", @"Window text"), name];
                     TBRunAlertPanel(title, msg, nil, nil, nil);
                 }
                 return FALSE;
@@ -1773,7 +1773,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSLog(@"Could not move configuration file %@ to %@", sourcePath, targetPath);
                 if (  warn  ) {
                     NSString * title = NSLocalizedString(@"Could Not Move Configuration", @"Window title");
-                    NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafe could not move the '%@' configuration. See the Console Log for details.", @"Window text"), name];
+                    NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not move the '%@' configuration. See the Console Log for details.", @"Window text"), name];
                     TBRunAlertPanel(title, msg, nil, nil, nil);
                 }
                 return FALSE;
@@ -1783,7 +1783,7 @@ enum state_t {                      // These are the "states" of the guideState 
         NSLog(@"Moved or copied, but could not secure configuration file at %@", targetPath);
         if (  warn  ) {
             NSString * title = NSLocalizedString(@"Could Not Secure Configuration", @"Window title");
-            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafe could not secure the '%@' configuration. See the Console Log for details.", @"Window text"), name];
+            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not secure the '%@' configuration. See the Console Log for details.", @"Window text"), name];
             TBRunAlertPanel(title, msg, nil, nil, nil);
         }
         return TRUE;    // Copied or moved OK, but not secured
@@ -1830,7 +1830,7 @@ enum state_t {                      // These are the "states" of the guideState 
         NSLog(@"Could not uninstall configuration file %@", targetPath);
         if (  warn  ) {
             NSString * title = NSLocalizedString(@"Could Not Uninstall Configuration", @"Window title");
-            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafe could not uninstall the '%@' configuration. See the Console Log for details.", @"Window text"), name];
+            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not uninstall the '%@' configuration. See the Console Log for details.", @"Window text"), name];
             TBRunAlertPanel(title, msg, nil, nil, nil);
         }
         return FALSE;
@@ -1899,7 +1899,7 @@ enum state_t {                      // These are the "states" of the guideState 
     
     NSLog(@"SurfsafeVPN could not create folder %@ for the alternate configuration.", folderPath);
     TBRunAlertPanel(NSLocalizedString(@"Not connecting", @"Window title"),
-                    NSLocalizedString(@"SurfSafe could not create a folder for the alternate local configuration. See the Console Log for details.", @"Window text"),
+                    NSLocalizedString(@"SurfSafeVPN could not create a folder for the alternate local configuration. See the Console Log for details.", @"Window text"),
                     nil,
                     nil,
                     nil);
@@ -1935,9 +1935,9 @@ enum state_t {                      // These are the "states" of the guideState 
             case entryNoConfigurations:
                 
                 // No configuration files (entry from haveNoConfigurationsGuild)
-                button = TBRunAlertPanel(NSLocalizedString(@"Welcome to SurfSafe", @"Window title"),
+                button = TBRunAlertPanel(NSLocalizedString(@"Welcome to SurfSafeVPN", @"Window title"),
                                          NSLocalizedString(@"There are no VPN configurations installed.\n\n"
-                                                           "SurfSafe needs one or more installed configurations to connect to a VPN. "
+                                                           "SurfSafeVPN needs one or more installed configurations to connect to a VPN. "
                                                            "Configurations are installed from files that are usually supplied to you by your network manager "
                                                            "or VPN service provider. The files must be installed to be used.\n\n"
                                                            "Configuration files have extensions of .tblk, .ovpn, or .conf.\n\n"
@@ -1994,7 +1994,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 // User wants to create a sample configuration on the Desktop and edit the OpenVPN configuration file in TextEdit
                 ; // Weird, but without this semicolon (i.e., empty statement) the compiler generates a syntax error for the next line!
-                NSString * sampleConfigFolderName = NSLocalizedString(@"Sample SurfSafe VPN Configuration", @"Folder name");
+                NSString * sampleConfigFolderName = NSLocalizedString(@"Sample SurfSafeVPN Configuration", @"Folder name");
                 NSString * targetPath = [[NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent: sampleConfigFolderName];
                 if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
                     button = TBRunAlertPanel(NSLocalizedString(@"Replace Existing File?", @"Window title"),
@@ -2017,7 +2017,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 if (  createDir(targetPath, 0755) == -1  ) {
                     NSLog(@"Installation failed. Not able to create %@", targetPath);
                     TBRunAlertPanel(NSLocalizedString(@"Installation failed", @"Window title"),
-                                    NSLocalizedString(@"SurfSafe could not create the empty configuration folder", @"Window text"),
+                                    NSLocalizedString(@"SurfSafeVPN could not create the empty configuration folder", @"Window text"),
                                     nil, nil, nil);
                     return;
                 }
@@ -2028,7 +2028,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 if (  ! [gFileMgr tbCopyPath: sourcePath toPath: targetConfigPath handler: nil]  ) {
                     NSLog(@"Installation failed. Not able to copy %@ to %@", sourcePath, targetConfigPath);
                     TBRunAlertPanel(NSLocalizedString(@"Installation failed", @"Window title"),
-                                    NSLocalizedString(@"SurfSafe could not create the sample configuration", @"Window text"),
+                                    NSLocalizedString(@"SurfSafeVPN could not create the sample configuration", @"Window text"),
                                     nil, nil, nil);
                     return;
                 }
@@ -2044,17 +2044,17 @@ enum state_t {                      // These are the "states" of the guideState 
                                                   "When you have finished editing the OpenVPN configuration file and saved the changes, please\n\n"
                                                   
                                                   "1. Move or copy any key or certificate files associated with the configuration "
-                                                  "into the 'Sample SurfSafe VPN Configuration' folder on your Desktop.\n\n"
+                                                  "into the 'Sample SurfSafeVPN Configuration' folder on your Desktop.\n\n"
                                                   "(This folder has been opened in a Finder window so you can drag the files to it.)\n\n"
                                                   
                                                   "2. Change the folder's name to a name of your choice. "
-                                                  "This will be the name that SurfSafe uses for the configuration.\n\n"
+                                                  "This will be the name that SurfSafeVPN uses for the configuration.\n\n"
                                                   
                                                   "3. Add .tblk to the end of the folder's name.\n\n"
                                                   
                                                   "4. Double-click the folder to install the configuration.\n\n"
                                                   
-                                                  "The new configuration will be available in SurfSafe immediately.",
+                                                  "The new configuration will be available in SurfSafeVPN immediately.",
                                                   
                                                   @"Window text"),
                                 nil, nil, nil);
@@ -2096,11 +2096,11 @@ enum state_t {                      // These are the "states" of the guideState 
                 // User has configuration files and wishes to add them
                 button = TBRunAlertPanel(NSLocalizedString(@"Which Type of Configuration Do You Have?", @"Window title"),
                                          NSLocalizedString(@"There are two types of configuration files:\n\n"
-                                                           "     • SurfSafe VPN Configurations (.tblk extension)\n\n"
+                                                           "     • SurfSafeVPN Configurations (.tblk extension)\n\n"
                                                            "     • OpenVPN Configurations (.ovpn or .conf extension)\n\n"
                                                            "Which type of configuration file do have?\n\n",
                                                            @"Window text"),
-                                         NSLocalizedString(@"SurfSafe VPN Configuration(s)", @"Button"),    // Default button
+                                         NSLocalizedString(@"SurfSafeVPN Configuration(s)", @"Button"),    // Default button
                                          NSLocalizedString(@"Back", @"Button"),                             // Alternate button
                                          NSLocalizedString(@"OpenVPN Configuration(s)", @"Button")             // Other button
                                          );
@@ -2125,9 +2125,9 @@ enum state_t {                      // These are the "states" of the guideState 
             case stateShowTbInstructions:
 
                 // User selected TUNNELBLICK VPN CONFIGURATION
-                button = TBRunAlertPanel(NSLocalizedString(@"Installing a SurfSafe VPN Configuration", @"Window title"),
-                                         NSLocalizedString(@"To install a SurfSafe VPN Configuration (.tblk extension), double-click it.\n\n"
-                                                           "The new configuration will be available in SurfSafe immediately.", @"Window text"),
+                button = TBRunAlertPanel(NSLocalizedString(@"Installing a SurfSafeVPN Configuration", @"Window title"),
+                                         NSLocalizedString(@"To install a SurfSafeVPN Configuration (.tblk extension), double-click it.\n\n"
+                                                           "The new configuration will be available in SurfSafeVPN immediately.", @"Window text"),
                                          NSLocalizedString(@"Done", @"Button"),    // Default button
                                          NSLocalizedString(@"Back", @"Button"),  // Alternate button
                                          nil
@@ -2148,16 +2148,16 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 button = TBRunAlertPanel(NSLocalizedString(@"Which Type of Configuration Do You Wish to Create?", @"Window title"),
                                          NSLocalizedString(@"     • With one configuration file at a time, you can "
-                                                           "create a SurfSafe VPN Configuration.\n\n"
+                                                           "create a SurfSafeVPN Configuration.\n\n"
                                                            
                                                            "     • With multiple configuration files, you "
                                                            "can place the configuration files (and certificate "
-                                                           "and key files if you have them) into SurfSafe's private configurations folder.\n"
+                                                           "and key files if you have them) into SurfSafeVPN's private configurations folder.\n"
                                                            "This is the traditional way OpenVPN configurations have been used.\n\n"
                                                            
-                                                           "Note: SurfSafe VPN Configurations are preferred, because they may be shared, may be started "
+                                                           "Note: SurfSafeVPN Configurations are preferred, because they may be shared, may be started "
                                                            "when the computer starts, and are secured automatically.", @"Window text"),
-                                         NSLocalizedString(@"Create SurfSafe VPN Configuration", @"Button"), // Default button
+                                         NSLocalizedString(@"Create SurfSafeVPN Configuration", @"Button"), // Default button
                                          NSLocalizedString(@"Back", @"Button"),                                 // Alternate button
                                          NSLocalizedString(@"Open Private Configurations Folder", @"Button")    // Other button
                                          );
@@ -2186,7 +2186,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 button = TBRunAlertPanel(NSLocalizedString(@"Private Configuration Folder is Open", @"Window title"),
                                          NSLocalizedString(@"The private configuration folder has been opened in a Finder window.\n\n"
                                                            "Move or copy OpenVPN configuration files and key and certificate files to the folder.\n\n"
-                                                           "The new configuration(s) will be available in SurfSafe immediately.", @"Window text"),
+                                                           "The new configuration(s) will be available in SurfSafeVPN immediately.", @"Window text"),
                                          NSLocalizedString(@"Done", @"Button"),    // Default button
                                          NSLocalizedString(@"Back", @"Button"),  // Alternate button
                                          nil
@@ -2205,7 +2205,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 // User wants to create an empty configuration
                 ; // Weird, but without this semicolon (i.e., empty statement) the compiler generates a syntax error for the next line!
-                NSString * emptyConfigFolderName = NSLocalizedString(@"Empty SurfSafe VPN Configuration", @"Folder name");
+                NSString * emptyConfigFolderName = NSLocalizedString(@"Empty SurfSafeVPN Configuration", @"Folder name");
                 targetPath = [[NSSearchPathForDirectoriesInDomains(NSDesktopDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent: emptyConfigFolderName];
                 if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
                     button = TBRunAlertPanel(NSLocalizedString(@"Replace Existing File?", @"Window title"),
@@ -2228,22 +2228,22 @@ enum state_t {                      // These are the "states" of the guideState 
                 if (    createDir(targetPath, 0755) == -1    ) {
                     NSLog(@"Installation failed. Not able to create %@", targetPath);
                     TBRunAlertPanel(NSLocalizedString(@"Installation failed", @"Window title"),
-                                    NSLocalizedString(@"SurfSafe could not create the empty configuration folder", @"Window text"),
+                                    NSLocalizedString(@"SurfSafeVPN could not create the empty configuration folder", @"Window text"),
                                     nil, nil, nil);
                     return;
                 }
                 
                 [[NSWorkspace sharedWorkspace] openFile: targetPath];
                 
-                button = TBRunAlertPanel(NSLocalizedString(@"An Empty SurfSafe VPN Configuration Has Been Created", @"Window title"),
-                                         NSLocalizedString(@"To install it as a SurfSafe VPN Configuration:\n\n"
-                                                           "1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafe "
+                button = TBRunAlertPanel(NSLocalizedString(@"An Empty SurfSafeVPN Configuration Has Been Created", @"Window title"),
+                                         NSLocalizedString(@"To install it as a SurfSafeVPN Configuration:\n\n"
+                                                           "1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafeVPN "
                                                            "VPN Configuration' folder which has been created on the Desktop.\n\n"
                                                            "2. Move or copy any key or certificate files associated with the configuration into the folder.\n\n"
-                                                           "3. Rename the folder to the name you want SurfSafe to use for the configuration.\n\n"
+                                                           "3. Rename the folder to the name you want SurfSafeVPN to use for the configuration.\n\n"
                                                            "4. Add an extension of .tblk to the end of the name of the folder.\n\n"
                                                            "5. Double-click the folder to install it.\n\n"
-                                                           "The new configuration will be available in SurfSafe immediately.\n\n"
+                                                           "The new configuration will be available in SurfSafeVPN immediately.\n\n"
                                                            "(For your convenience, the folder has been opened in a Finder window.)",
                                                            @"Window text"),
                                          NSLocalizedString(@"Done", @"Button"),    // Default button

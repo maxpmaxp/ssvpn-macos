@@ -49,7 +49,6 @@ BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
                         BOOL * restoreDeploy,
                         BOOL * needsPkgRepair,
                         BOOL * needsBundleCopy,
-                        BOOL * needsBundleUpdate,
                         BOOL inApplications); 
 
 BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications);
@@ -57,7 +56,6 @@ BOOL needToMoveLibraryOpenVPN(void);
 BOOL needToRestoreDeploy(void);
 BOOL needToRepairPackages(void);
 BOOL needToCopyBundle(void);
-BOOL needToUpdateBundle(void);
 
 
 @interface MenuController : NSObject <NSAnimationDelegate,NSMenuDelegate,SurfSafeUpdaterDelegate>
@@ -78,7 +76,8 @@ BOOL needToUpdateBundle(void);
     NSMenuItem              * checkForUpdatesNowItem;       //    "Check For Updates Now" menu item
     NSMenuItem              * aboutItem;                    //    "About..." item for menu
     NSMenuItem              * quitItem;                     // "Quit Tunnelblick" item for menu
-
+    NSMenuItem              * clearKeychainItem;
+    
     NSAnimation             * theAnim;                      // For animation of the Tunnelblick icon in the Status Bar
     NSMutableArray          * animImages;                   // Images for animation of the Tunnelblick icon in the Status Bar
     NSImage                 * connectedImage;               // Image to display when one or more connections are active
@@ -116,13 +115,13 @@ BOOL needToUpdateBundle(void);
 	
     NSTimer                 * statisticsWindowTimer;        // Used to check for stale statistics that must be cleared 
     
-    SUUpdater               * updater;                      // Sparkle Updater item used to check for updates to the program
+    //SUUpdater               * updater;                      // Sparkle Updater item used to check for updates to the program
     
     SurfSafeUpdater         * ssUpdater;
 
     NSString                * feedURL;                      // URL to send program update requests to
     
-    ConfigurationUpdater    * myConfigUpdater;              // Our class used to check for updates to the configurations
+    //ConfigurationUpdater    * myConfigUpdater;              // Our class used to check for updates to the configurations
     
     BOOL                      areLoggingOutOrShuttingDown;  // Flag that NSWorkspaceWillPowerOffNotification was received
     
@@ -174,6 +173,8 @@ BOOL needToUpdateBundle(void);
 -(IBAction)         openPreferencesWindow:                  (id)                sender;
 -(IBAction)         addConfigurationWasClicked:             (id)                sender;
 -(IBAction)         quit:                                   (id)                sender;
+-(IBAction)         clearKeychain:                                   (id)                sender;
+
 
 // General methods
 -(void)             addConnection:                          (id)                sender;

@@ -96,7 +96,7 @@ extern NSFileManager  * gFileMgr;
     
     // Splash screen checkboxes
     [appearanceSplashTFC setTitle: NSLocalizedString(@"Startup window:", @"Window text")];
-    [appearanceDisplaySplashScreenCheckbox setTitle: NSLocalizedString(@"Display window while SurfSafe is starting up", @"Checkbox name")];
+    [appearanceDisplaySplashScreenCheckbox setTitle: NSLocalizedString(@"Display window while SurfSafeVPN is starting up", @"Checkbox name")];
     
     
     // Connection window display criteria
@@ -110,7 +110,7 @@ extern NSFileManager  * gFileMgr;
     [appearanceConnectionWindowDisplayCriteriaButton sizeToFit];
 
     [appearanceDisplayStatisticsWindowsCheckbox
-     setTitle: NSLocalizedString(@"Show when the pointer is over the SurfSafe icon", @"Checkbox name")];
+     setTitle: NSLocalizedString(@"Show when the pointer is over the SurfSafeVPN icon", @"Checkbox name")];
 }
 
 -(NSArray *) getIconSets

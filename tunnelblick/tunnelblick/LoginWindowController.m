@@ -44,7 +44,8 @@
 
 -(void) awakeFromNib
 {
-    [[self window] setTitle: NSLocalizedString(@"SurfSafe: Login Required", @"Window title")];
+    NSString * title = [NSString stringWithFormat:NSLocalizedString(@"SurfSafeVPN %@: Login Required", @"Window title"),surfsafevpnVersion([NSBundle mainBundle])];
+    [[self window] setTitle: title];
     
     [iconIV setImage: [NSApp applicationIconImage]];
     

@@ -62,7 +62,7 @@
 "Check Now" = "Check Now";
 
 /* Button */
-"Close VPN Connections and Stop SurfSafe" = "Close VPN Connections and Stop SurfSafe";
+"Close VPN Connections and Stop SurfSafeVPN" = "Close VPN Connections and Stop SurfSafeVPN";
 
 /* Button */
 "Connect" = "Connect";
@@ -71,7 +71,7 @@
 "Copy Log to Clipboard" = "Copy Log to Clipboard";
 
 /* Button */
-"Create SurfSafe VPN Configuration" = "Create SurfSafe VPN Configuration";
+"Create SurfSafeVPN Configuration" = "Create SurfSafeVPN Configuration";
 
 /* Button */
 "Create sample configuration and edit it" = "Create sample configuration and edit it";
@@ -179,13 +179,13 @@
 "Try again" = "Try again";
 
 /* Button */
-"SurfSafe VPN Configuration(s)" = "SurfSafe VPN Configuration(s)";
+"SurfSafeVPN Configuration(s)" = "SurfSafeVPN Configuration(s)";
 
 /* Button */
 "Unprotect and Modify" = "Unprotect and Modify";
 
 /* Button */
-"When SurfSafe launches" = "When SurfSafe launches";
+"When SurfSafeVPN launches" = "When SurfSafeVPN launches";
 
 /* Button */
 "When computer starts" = "When computer starts";
@@ -224,7 +224,10 @@
 "No VPN Configurations Available" = "No VPN Configurations Available";
 
 /* Menu item */
-"Quit SurfSafe" = "Quit SurfSafe";
+"Quit SurfSafeVPN" = "Quit SurfSafeVPN";
+
+/* Menu item */
+"Clear saved VPN ID/Activation code" = "Clear saved VPN ID/Activation code";
 
 /* Menu Item */
 "Rename Configuration..." = "Rename Configuration…";
@@ -248,7 +251,7 @@
 "Display connection timers" = "Display connection timers";
 
 /* Checkbox name */
-"Display window while SurfSafe is starting up" = "Display window while SurfSafe is starting up";
+"Display window while SurfSafeVPN is starting up" = "Display window while SurfSafeVPN is starting up";
 
 /* Checkbox name */
 "Do not ask again, always 'Ignore'" = "Do not ask again, always 'Ignore'";
@@ -287,10 +290,10 @@
 "Scan configuration file for problems before connecting" = "Scan configuration file for problems before connecting";
 
 /* Checkbox name */
-"Show configuration on SurfSafe menu" = "Show configuration on SurfSafe menu";
+"Show configuration on SurfSafeVPN menu" = "Show configuration on SurfSafeVPN menu";
 
 /* Checkbox name */
-"Use SurfSafe tun/tap drivers" = "Use SurfSafe tun/tap drivers";
+"Use SurfSafeVPN tun/tap drivers" = "Use SurfSafeVPN tun/tap drivers";
 
 /* Checkbox name */
 "Use shadow copies of configuration files" = "Use shadow copies of configuration files";
@@ -353,10 +356,10 @@
 "WAIT" = "Waiting for server response";   // Please translate "Waiting for Server Response"
 
 /* Folder name */
-"Empty SurfSafe VPN Configuration" = "Empty SurfSafe VPN Configuration";
+"Empty SurfSafeVPN Configuration" = "Empty SurfSafeVPN Configuration";
 
 /* Folder name */
-"Sample SurfSafe VPN Configuration" = "Sample SurfSafe VPN Configuration";
+"Sample SurfSafeVPN Configuration" = "Sample SurfSafeVPN Configuration";
 
 /* System profile item */
 "Computer admin" = "Computer admin";
@@ -368,7 +371,7 @@
 "Deployed" = "Deployed";
 
 /* Window title */
-" (Deployed)" = " (Deployed)"; /* Indicates a configuration from a customized version of SurfSafe -- see http://code.google.com/p/tunnelblick/wiki/DeployingTunnelblick */
+" (Deployed)" = " (Deployed)"; /* Indicates a configuration from a customized version of SurfSafeVPN -- see http://code.google.com/p/tunnelblick/wiki/DeployingTunnelblick */
 
 /* Window title */
 " (Private)" = " (Private)";
@@ -398,7 +401,7 @@
 "All configuration files removed" = "All configuration files removed";
 
 /* Window title */
-"An Empty SurfSafe VPN Configuration Has Been Created" = "An Empty SurfSafe VPN Configuration Has Been Created";
+"An Empty SurfSafeVPN Configuration Has Been Created" = "An Empty SurfSafeVPN Configuration Has Been Created";
 
 /* Window title */
 "Appearance" = "Appearance";
@@ -431,7 +434,7 @@
 "Create and Edit a Sample Configuration?" = "Create and Edit a Sample Configuration?";
 
 /* Window title */
-"Details - SurfSafe" = "Details - SurfSafe";
+"Details - SurfSafeVPN" = "Details - SurfSafeVPN";
 
 /* Window title */
 "Do you wish to connect?" = "Do you wish to connect?";
@@ -461,7 +464,7 @@
 "Installation succeeded" = "Installation succeeded";
 
 /* Window title */
-"Installing a SurfSafe VPN Configuration" = "Installing a SurfSafe VPN Configuration";
+"Installing a SurfSafeVPN Configuration" = "Installing a SurfSafeVPN Configuration";
 
 /* Window title */
 "Log" = "Log";
@@ -482,7 +485,7 @@
 "Not connecting" = "Not connecting";
 
 /* Window title */
-"Only computer administrators should update SurfSafe" = "Only computer administrators should update SurfSafe";
+"Only computer administrators should update SurfSafeVPN" = "Only computer administrators should update SurfSafeVPN";
 
 /* Window title */
 "OpenVPN Not Responding" = "OpenVPN Not Responding";
@@ -512,7 +515,7 @@
 "Replace Existing File?" = "Replace Existing File?";
 
 /* Window title */
-"Replace SurfSafe VPN Configuration" = "Replace SurfSafe VPN Configuration";
+"Replace SurfSafeVPN Configuration" = "Replace SurfSafeVPN Configuration";
 
 /* Window title */
 "Sample Configuration Created" = "Sample Configuration Created";
@@ -527,34 +530,37 @@
 "The configuration file is protected" = "The configuration file is protected";
 
 /* Window title */
-"SurfSafe Configuration Problem" = "SurfSafe Configuration Problem";
+"SurfSafeVPN Configuration Problem" = "SurfSafeVPN Configuration Problem";
 
 /* Window title */
-"SurfSafe Error" = "SurfSafe Error";
+"SurfSafeVPN Error" = "SurfSafeVPN Error";
 
 /* Window title */
-"SurfSafe VPN Configuration Installation Error" = "SurfSafe VPN Configuration Installation Error";
+"SurfSafeVPN Configuration Installation Error" = "SurfSafeVPN Configuration Installation Error";
 
 /* Window title */
-"SurfSafe VPN Configuration Installation" = "SurfSafe VPN Configuration Installation";
+"SurfSafeVPN Configuration Installation" = "SurfSafeVPN Configuration Installation";
 
 /* Window title */
-"SurfSafe is currently running" = "SurfSafe is currently running";
+"SurfSafeVPN is currently running" = "SurfSafeVPN is currently running";
 
 /* Window title */
-"SurfSafe" = "SurfSafe";
+"SurfSafeVPN" = "SurfSafeVPN";
+
+/* Window title*/
+"SurfSafeVPN %@" = "SurfSafeVPN %@";
 
 /* Window title */
-"SurfSafe: Login Required" = "SurfSafe: Login Required";
+"SurfSafeVPN %@: Login Required" = "SurfSafeVPN %@: Login Required";
 
 /* Window title */
-"SurfSafe: Passphrase Required" = "SurfSafe: Passphrase Required";
+"SurfSafeVPN: Passphrase Required" = "SurfSafeVPN: Passphrase Required";
 
 /* Window title */
-"Unable to launch SurfSafe" = "Unable to launch SurfSafe";
+"Unable to launch SurfSafeVPN" = "Unable to launch SurfSafeVPN";
 
 /* Window title */
-"Uninstall SurfSafe VPN Configuration" = "Uninstall SurfSafe VPN Configuration";
+"Uninstall SurfSafeVPN Configuration" = "Uninstall SurfSafeVPN Configuration";
 
 /* Window title */
 "Use 'down-root' plugin for OpenVPN?" = "Use 'down-root' plugin for OpenVPN?";
@@ -569,7 +575,7 @@
 "Warning: Unknown OpenVPN processes" = "Warning: Unknown OpenVPN processes";
 
 /* Window title */
-"Welcome to SurfSafe" = "Welcome to SurfSafe";
+"Welcome to SurfSafeVPN" = "Welcome to SurfSafeVPN";
 
 /* Window title */
 "Which Type of Configuration Do You Have?" = "Which Type of Configuration Do You Have?";
@@ -584,7 +590,7 @@
 "You cannot use the sample configuration" = "You cannot use the sample configuration";
 
 /* Window text */
-"     • With one configuration file at a time, you can create a SurfSafe VPN Configuration.\n\n     • With multiple configuration files, you can place the configuration files (and certificate and key files if you have them) into SurfSafe's private configurations folder.\nThis is the traditional way OpenVPN configurations have been used.\n\nNote: SurfSafe VPN Configurations are preferred, because they may be shared, may be started when the computer starts, and are secured automatically." = "     • With one configuration file at a time, you can create a SurfSafe VPN Configuration.\n\n     • With multiple configuration files, you can place the configuration files (and certificate and key files if you have them) into SurfSafe's private configurations folder.\nThis is the traditional way OpenVPN configurations have been used.\n\nNote: SurfSafe VPN Configurations are preferred, because they may be shared, may be started when the computer starts, and are secured automatically.";
+"     • With one configuration file at a time, you can create a SurfSafeVPN Configuration.\n\n     • With multiple configuration files, you can place the configuration files (and certificate and key files if you have them) into SurfSafeVPN's private configurations folder.\nThis is the traditional way OpenVPN configurations have been used.\n\nNote: SurfSafeVPN Configurations are preferred, because they may be shared, may be started when the computer starts, and are secured automatically." = "     • With one configuration file at a time, you can create a SurfSafeVPN Configuration.\n\n     • With multiple configuration files, you can place the configuration files (and certificate and key files if you have them) into SurfSafeVPN's private configurations folder.\nThis is the traditional way OpenVPN configurations have been used.\n\nNote: SurfSafezVPN Configurations are preferred, because they may be shared, may be started when the computer starts, and are secured automatically.";
 
 /* Window text */
 "  • Change ownership and permissions of the program to secure it\n" = "  • Change ownership and permissions of the program to secure it\n";
@@ -611,13 +617,13 @@
 " Do you wish to replace\n    %@\n    in %@\nwith %@%@?\n\n%@" = " Do you wish to replace\n    %1$@\n    in %2$@\nwith %3$@%4$@?\n\n%5$@";
 
 /* Window text */
-" SurfSafe cannot be used from this location. It must be installed on a local hard drive.\n\n" = " SurfSafe cannot be used from this location. It must be installed on a local hard drive.\n\n";
+" SurfSafeVPN cannot be used from this location. It must be installed on a local hard drive.\n\n" = " SurfSafeVPN cannot be used from this location. It must be installed on a local hard drive.\n\n";
 
 /* Window text */
-" SurfSafe needs computer administrator access so it can automatically connect '%@' when the computer starts." = " SurfSafe needs computer administrator access so it can automatically connect '%@' when the computer starts.";
+" SurfSafeVPN needs computer administrator access so it can automatically connect '%@' when the computer starts." = " SurfSafeVPN needs computer administrator access so it can automatically connect '%@' when the computer starts.";
 
 /* Window text */
-" SurfSafe needs computer administrator access so it can stop automatically connecting '%@' when the computer starts." = " SurfSafe needs computer administrator access so it can stop automatically connecting '%@' when the computer starts.";
+" SurfSafeVPN needs computer administrator access so it can stop automatically connecting '%@' when the computer starts." = " SurfSafeVPN needs computer administrator access so it can stop automatically connecting '%@' when the computer starts.";
 
 /* Window text */
 " and install %d configurations" = " and install %d configurations";
@@ -626,10 +632,10 @@
 " and install one configuration" = " and install one configuration";
 
 /* Window text */
-"%d SurfSafe VPN Configurations were installed successfully." = "%d SurfSafe VPN Configurations were installed successfully.";
+"%d SurfSafeVPN Configurations were installed successfully." = "%d SurfSafeVPN Configurations were installed successfully.";
 
 /* Window text */
-"%d SurfSafe VPN Configurations were uninstalled successfully." = "%d SurfSafe VPN Configurations were uninstalled successfully.";
+"%d SurfSafeVPN Configurations were uninstalled successfully." = "%d SurfSafeVPN Configurations were uninstalled successfully.";
 
 /* Window text */
 "%d configurations were not installed. See the Console Log for details." = "%d configurations were not installed. See the Console Log for details.";
@@ -647,7 +653,7 @@
 "(if connected when user switched out)" = "(if connected when user switched out)";
 
 /* Window text */
-"<br>Based on SurfSafe, free software available at<br><a href=\"http://code.google.com/p/tunnelblick\">http://code.google.com/p/tunnelblick</a>" = "<br>Based on SurfSafe, free software available at<br><a href=\"http://code.google.com/p/tunnelblick\">http://code.google.com/p/tunnelblick</a>";
+"<br>Based on SurfSafeVPN, free software available at<br><a href=\"http://code.google.com/p/tunnelblick\">http://code.google.com/p/tunnelblick</a>" = "<br>Based on SurfSafeVPN, free software available at<br><a href=\"http://code.google.com/p/tunnelblick\">http://code.google.com/p/tunnelblick</a>";
 
 /* Window text */
 "A configuration was not installed. See the Console log for details." = "A configuration was not installed. See the Console log for details.";
@@ -665,7 +671,7 @@
 "A VPN ID and Activation code are required to connect to\n  %@" = "A VPN ID and Activation code are required to connect to\n  %@";
 
 /* Window text */
-"All configuration files in %@ have been removed. SurfSafe must quit." = "All configuration files in %@ have been removed. SurfSafe must quit.";
+"All configuration files in %@ have been removed. SurfSafeVPN must quit." = "All configuration files in %@ have been removed. SurfSafeVPN must quit.";
 
 /* Window text */
 "An error occurred while trying to launch %@" = "An error occurred while trying to launch %@";
@@ -734,10 +740,10 @@
 "Installation of .tblk packages is not allowed" = "Installation of .tblk packages is not allowed";
 
 /* Window text */
-"Installing SurfSafe VPN Configurations..." = "Installing SurfSafe VPN Configurations…";
+"Installing SurfSafeVPN Configurations..." = "Installing SurfSafeVPN Configurations…";
 
 /* Window text */
-"Installing and securing SurfSafe..." = "Installing and securing SurfSafe…";
+"Installing and securing SurfSafeVPN..." = "Installing and securing SurfSafeVPN…";
 
 /* Window text */
 "Keyboard shortcut:" = "Keyboard shortcut:";
@@ -770,25 +776,25 @@
 "Notification window:" = "Notification window:";
 
 /* Window text */
-"One SurfSafe VPN Configuration was installed successfully." = "One SurfSafe VPN Configuration was installed successfully.";
+"One SurfSafeVPN Configuration was installed successfully." = "One SurfSafeVPN Configuration was installed successfully.";
 
 /* Window text */
-"One SurfSafe VPN Configuration was uninstalled successfully." = "One SurfSafe VPN Configuration was uninstalled successfully.";
+"One SurfSafeVPN Configuration was uninstalled successfully." = "One SurfSafeVPN Configuration was uninstalled successfully.";
 
 /* Window text */
-"One or more OpenVPN processes are running but are unknown to SurfSafe. If you are not running OpenVPN separately from SurfSafe, this usually means that an earlier launch of SurfSafe was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafe's operation. Do you wish to terminate them?" = "One or more OpenVPN processes are running but are unknown to SurfSafe. If you are not running OpenVPN separately from SurfSafe, this usually means that an earlier launch of SurfSafe was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafe's operation. Do you wish to terminate them?";
+"One or more OpenVPN processes are running but are unknown to SurfSafeVPN. If you are not running OpenVPN separately from SurfSafeVPN, this usually means that an earlier launch of SurfSafeVPN was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafeVPN's operation. Do you wish to terminate them?" = "One or more OpenVPN processes are running but are unknown to SurfSafeVPN. If you are not running OpenVPN separately from SurfSafeVPN, this usually means that an earlier launch of SurfSafeVPN was unable to shut them down properly and you should terminate them. They are likely to interfere with SurfSafeVPN's operation. Do you wish to terminate them?";
 
 /* Window text */
 "One or more configurations are being ignored. See the Console Log for details." = "One or more configurations are being ignored. See the Console Log for details.";
 
 /* Window text */
-"Only a SurfSafe VPN Configuration (.tblk) can start when the computer starts." = "Only a SurfSafe VPN Configuration (.tblk) can start when the computer starts.";
+"Only a SurfSafeVPN Configuration (.tblk) can start when the computer starts." = "Only a SurfSafeVPN Configuration (.tblk) can start when the computer starts.";
 
 /* Window text */
 "OpenVPN has not responded to disconnect requests for %d seconds.\n\nThe connection will be considered disconnected, but this computer's network configuration may be in an inconsistent state." = "OpenVPN has not responded to disconnect requests for %d seconds.\n\nThe connection will be considered disconnected, but this computer's network configuration may be in an inconsistent state.";
 
 /* Window text */
-"OpenVPN is not responding to disconnect requests.\n\nThere is a known bug in OpenVPN version 2.1 that sometimes causes a delay of one or two minutes before it responds to such requests.\n\nSurfSafe will continue to try to disconnect for up to %d seconds.\n\nThe connection will be unavailable until OpenVPN disconnects or %d seconds elapse, whichever comes first." = "OpenVPN is not responding to disconnect requests.\n\nThere is a known bug in OpenVPN version 2.1 that sometimes causes a delay of one or two minutes before it responds to such requests.\n\nSurfSafe will continue to try to disconnect for up to %1$d seconds.\n\nThe connection will be unavailable until OpenVPN disconnects or %2$d seconds elapse, whichever comes first.";
+"OpenVPN is not responding to disconnect requests.\n\nThere is a known bug in OpenVPN version 2.1 that sometimes causes a delay of one or two minutes before it responds to such requests.\n\nSurfSafeVPN will continue to try to disconnect for up to %d seconds.\n\nThe connection will be unavailable until OpenVPN disconnects or %d seconds elapse, whichever comes first." = "OpenVPN is not responding to disconnect requests.\n\nThere is a known bug in OpenVPN version 2.1 that sometimes causes a delay of one or two minutes before it responds to such requests.\n\nSurfSafeVPN will continue to try to disconnect for up to %1$d seconds.\n\nThe connection will be unavailable until OpenVPN disconnects or %2$d seconds elapse, whichever comes first.";
 
 /* Window text */
 "OpenVPN version %@ is not available. Using the default, version %@" = "OpenVPN version %1$@ is not available. Using the default, version %2$@";
@@ -822,13 +828,13 @@
 "Search domain:" = "Search domain:";
 
 /* Window text */
-"Securing SurfSafe..." = "Securing SurfSafe…";
+"Securing SurfSafeVPN..." = "Securing SurfSafeVPN...";
 
 /* Window text */
 "Set DNS/WINS:" = "Set DNS/WINS:";
 
 /* Window text */
-"Starting SurfSafe..." = "Starting SurfSafe…";
+"Starting SurfSafeVPN..." = "Starting SurfSafeVPN...";
 
 /* Window text */
 "Startup window:" = "Startup window:";
@@ -852,31 +858,31 @@
 "The configuration file for '%@' appears to use the 'user' and/or 'group' options and is using a down script ('Do not set nameserver' not selected, or there is a 'down' option in the configuration file).\n\nIt is likely that restarting the connection (done automatically when the connection is lost) will fail unless the 'openvpn-down-root.so' plugin for OpenVPN is used.\n\nDo you wish to use the plugin?" = "The configuration file for '%@' appears to use the 'user' and/or 'group' options and is using a down script ('Do not set nameserver' not selected, or there is a 'down' option in the configuration file).\n\nIt is likely that restarting the connection (done automatically when the connection is lost) will fail unless the 'openvpn-down-root.so' plugin for OpenVPN is used.\n\nDo you wish to use the plugin?";
 
 /* Window text */
-"The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafe operation. Consult with your network administrator or the OpenVPN documentation." = "The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafe operation. Consult with your network administrator or the OpenVPN documentation.";
+"The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafeVPN operation. Consult with your network administrator or the OpenVPN documentation." = "The configuration file for '%@' does not appear to contain a 'dev tun' or 'dev tap' option. This option may be needed for proper SurfSafeVPN operation. Consult with your network administrator or the OpenVPN documentation.";
 
 /* Window text */
 "The credentials (passphrase or username/password) were not accepted by the remote VPN server." = "The credentials (passphrase or username/password) were not accepted by the remote VPN server.";
 
 /* Window text */
-"The installation, removal, recovery, or repair of one or more SurfSafe components failed. See the Console Log for details." = "The installation, removal, recovery, or repair of one or more SurfSafe components failed. See the Console Log for details.";
+"The installation, removal, recovery, or repair of one or more SurfSafeVPN components failed. See the Console Log for details." = "The installation, removal, recovery, or repair of one or more SurfSafeVPN components failed. See the Console Log for details.";
 
 /* Window text */
 "The passphrase must not be empty!\nPlease enter VPN passphrase." = "The passphrase must not be empty!\nPlease enter VPN passphrase.";
 
 /* Window text */
-"The private configuration folder has been opened in a Finder window.\n\nMove or copy OpenVPN configuration files and key and certificate files to the folder.\n\nThe new configuration(s) will be available in SurfSafe immediately." = "The private configuration folder has been opened in a Finder window.\n\nMove or copy OpenVPN configuration files and key and certificate files to the folder.\n\nThe new configuration(s) will be available in SurfSafe immediately.";
+"The private configuration folder has been opened in a Finder window.\n\nMove or copy OpenVPN configuration files and key and certificate files to the folder.\n\nThe new configuration(s) will be available in SurfSafeVPN immediately." = "The private configuration folder has been opened in a Finder window.\n\nMove or copy OpenVPN configuration files and key and certificate files to the folder.\n\nThe new configuration(s) will be available in SurfSafeVPN immediately.";
 
 /* Window text */
-"The sample configuration folder has been created on your Desktop, and the OpenVPN configuration file has been opened in TextEdit so you can modify the file for your VPN setup.\n\nWhen you have finished editing the OpenVPN configuration file and saved the changes, please\n\n1. Move or copy any key or certificate files associated with the configuration into the 'Sample SurfSafe VPN Configuration' folder on your Desktop.\n\n(This folder has been opened in a Finder window so you can drag the files to it.)\n\n2. Change the folder's name to a name of your choice. This will be the name that SurfSafe uses for the configuration.\n\n3. Add .tblk to the end of the folder's name.\n\n4. Double-click the folder to install the configuration.\n\nThe new configuration will be available in SurfSafe immediately." = "The sample configuration folder has been created on your Desktop, and the OpenVPN configuration file has been opened in TextEdit so you can modify the file for your VPN setup.\n\nWhen you have finished editing the OpenVPN configuration file and saved the changes, please\n\n1. Move or copy any key or certificate files associated with the configuration into the 'Sample SurfSafe VPN Configuration' folder on your Desktop.\n\n(This folder has been opened in a Finder window so you can drag the files to it.)\n\n2. Change the folder's name to a name of your choice. This will be the name that SurfSafe uses for the configuration.\n\n3. Add .tblk to the end of the folder's name.\n\n4. Double-click the folder to install the configuration.\n\nThe new configuration will be available in SurfSafe immediately.";
+"The sample configuration folder has been created on your Desktop, and the OpenVPN configuration file has been opened in TextEdit so you can modify the file for your VPN setup.\n\nWhen you have finished editing the OpenVPN configuration file and saved the changes, please\n\n1. Move or copy any key or certificate files associated with the configuration into the 'Sample SurfSafeVPN Configuration' folder on your Desktop.\n\n(This folder has been opened in a Finder window so you can drag the files to it.)\n\n2. Change the folder's name to a name of your choice. This will be the name that SurfSafeVPN uses for the configuration.\n\n3. Add .tblk to the end of the folder's name.\n\n4. Double-click the folder to install the configuration.\n\nThe new configuration will be available in SurfSafeVPN immediately." = "The sample configuration folder has been created on your Desktop, and the OpenVPN configuration file has been opened in TextEdit so you can modify the file for your VPN setup.\n\nWhen you have finished editing the OpenVPN configuration file and saved the changes, please\n\n1. Move or copy any key or certificate files associated with the configuration into the 'Sample SurfSafeVPN Configuration' folder on your Desktop.\n\n(This folder has been opened in a Finder window so you can drag the files to it.)\n\n2. Change the folder's name to a name of your choice. This will be the name that SurfSafeVPN uses for the configuration.\n\n3. Add .tblk to the end of the folder's name.\n\n4. Double-click the folder to install the configuration.\n\nThe new configuration will be available in SurfSafeVPN immediately.";
 
 /* Window text */
 "The username and the password must not be empty!\nPlease enter VPN username/password combination." = "The username and the password must not be empty!\nPlease enter VPN username/password combination.";
 
 /* Window text */
-"There are no VPN configurations installed.\n\nSurfSafe needs one or more installed configurations to connect to a VPN. Configurations are installed from files that are usually supplied to you by your network manager or VPN service provider. The files must be installed to be used.\n\nConfiguration files have extensions of .tblk, .ovpn, or .conf.\n\n(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\nDo you have any configuration files?\n" = "There are no VPN configurations installed.\n\nSurfSafe needs one or more installed configurations to connect to a VPN. Configurations are installed from files that are usually supplied to you by your network manager or VPN service provider. The files must be installed to be used.\n\nConfiguration files have extensions of .tblk, .ovpn, or .conf.\n\n(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\nDo you have any configuration files?\n";
+"There are no VPN configurations installed.\n\nSurfSafeVPN needs one or more installed configurations to connect to a VPN. Configurations are installed from files that are usually supplied to you by your network manager or VPN service provider. The files must be installed to be used.\n\nConfiguration files have extensions of .tblk, .ovpn, or .conf.\n\n(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\nDo you have any configuration files?\n" = "There are no VPN configurations installed.\n\nSurfSafeVPN needs one or more installed configurations to connect to a VPN. Configurations are installed from files that are usually supplied to you by your network manager or VPN service provider. The files must be installed to be used.\n\nConfiguration files have extensions of .tblk, .ovpn, or .conf.\n\n(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\nDo you have any configuration files?\n";
 
 /* Window text */
-"There are two types of configuration files:\n\n     • SurfSafe VPN Configurations (.tblk extension)\n\n     • OpenVPN Configurations (.ovpn or .conf extension)\n\nWhich type of configuration file do have?\n\n" = "There are two types of configuration files:\n\n     • SurfSafe VPN Configurations (.tblk extension)\n\n     • OpenVPN Configurations (.ovpn or .conf extension)\n\nWhich type of configuration file do have?\n\n";
+"There are two types of configuration files:\n\n     • SurfSafeVPN Configurations (.tblk extension)\n\n     • OpenVPN Configurations (.ovpn or .conf extension)\n\nWhich type of configuration file do have?\n\n" = "There are two types of configuration files:\n\n     • SurfSafeVPN Configurations (.tblk extension)\n\n     • OpenVPN Configurations (.ovpn or .conf extension)\n\nWhich type of configuration file do have?\n\n";
 
 /* Window text */
 "There was a problem with %d configurations. Details are in the Console Log\n\n" = "There was a problem with %d configurations. Details are in the Console Log\n\n";
@@ -888,97 +894,97 @@
 "There was a problem with one or more configurations. Details are in the Console Log\n\n" = "There was a problem with one or more configurations. Details are in the Console Log\n\n";
 
 /* Window text */
-"To install a SurfSafe VPN Configuration (.tblk extension), double-click it.\n\nThe new configuration will be available in SurfSafe immediately." = "To install a SurfSafe VPN Configuration (.tblk extension), double-click it.\n\nThe new configuration will be available in SurfSafe immediately.";
+"To install a SurfSafeVPN Configuration (.tblk extension), double-click it.\n\nThe new configuration will be available in SurfSafeVPN immediately." = "To install a SurfSafeVPN Configuration (.tblk extension), double-click it.\n\nThe new configuration will be available in SurfSafeVPN immediately.";
 
 /* Window text */
-"To install it as a SurfSafe VPN Configuration:\n\n1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafe VPN Configuration' folder which has been created on the Desktop.\n\n2. Move or copy any key or certificate files associated with the configuration into the folder.\n\n3. Rename the folder to the name you want SurfSafe to use for the configuration.\n\n4. Add an extension of .tblk to the end of the name of the folder.\n\n5. Double-click the folder to install it.\n\nThe new configuration will be available in SurfSafe immediately.\n\n(For your convenience, the folder has been opened in a Finder window.)" = "To install it as a SurfSafe VPN Configuration:\n\n1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafe VPN Configuration' folder which has been created on the Desktop.\n\n2. Move or copy any key or certificate files associated with the configuration into the folder.\n\n3. Rename the folder to the name you want SurfSafe to use for the configuration.\n\n4. Add an extension of .tblk to the end of the name of the folder.\n\n5. Double-click the folder to install it.\n\nThe new configuration will be available in SurfSafe immediately.\n\n(For your convenience, the folder has been opened in a Finder window.)";
+"To install it as a SurfSafeVPN Configuration:\n\n1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafeVPN Configuration' folder which has been created on the Desktop.\n\n2. Move or copy any key or certificate files associated with the configuration into the folder.\n\n3. Rename the folder to the name you want SurfSafeVPN to use for the configuration.\n\n4. Add an extension of .tblk to the end of the name of the folder.\n\n5. Double-click the folder to install it.\n\nThe new configuration will be available in SurfSafeVPN immediately.\n\n(For your convenience, the folder has been opened in a Finder window.)" = "To install it as a SurfSafeVPN Configuration:\n\n1. Move or copy one OpenVPN configuration file (.ovpn or .conf extension) into the 'Empty SurfSafeVPN Configuration' folder which has been created on the Desktop.\n\n2. Move or copy any key or certificate files associated with the configuration into the folder.\n\n3. Rename the folder to the name you want SurfSafeVPN to use for the configuration.\n\n4. Add an extension of .tblk to the end of the name of the folder.\n\n5. Double-click the folder to install it.\n\nThe new configuration will be available in SurfSafeVPN immediately.\n\n(For your convenience, the folder has been opened in a Finder window.)";
 
 /* Window text */
 "Too many duplicate configurations already exist." = "Too many duplicate configurations already exist.";
 
 /* Window text */
-"SurfSafe VPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?" = "SurfSafe VPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?";
+"SurfSafeVPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?" = "SurfSafeVPN Configuration '%@' is empty. Do you wish to install a sample configuration with that name?";
 
 /* Window text */
-"SurfSafe could not be launched because of a problem with the configuration. Please examine the Console Log for details." = "SurfSafe could not be launched because of a problem with the configuration. Please examine the Console Log for details.";
+"SurfSafeVPN could not be launched because of a problem with the configuration. Please examine the Console Log for details." = "SurfSafeVPN could not be launched because of a problem with the configuration. Please examine the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not change ownership and permissions of the configuration file to secure it. See the Console Log for details." = "SurfSafe could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.";
+"SurfSafeVPN could not change ownership and permissions of the configuration file to secure it. See the Console Log for details." = "SurfSafeVPN could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not copy the '%@' configuration. See the Console Log for details." = "SurfSafe could not copy the '%@' configuration. See the Console Log for details.";
+"SurfSafeVPN could not copy the '%@' configuration. See the Console Log for details." = "SurfSafeVPN could not copy the '%@' configuration. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not create a folder for the alternate local configuration. See the Console Log for details." = "SurfSafe could not create a folder for the alternate local configuration. See the Console Log for details.";
+"SurfSafeVPN could not create a folder for the alternate local configuration. See the Console Log for details." = "SurfSafeVPN could not create a folder for the alternate local configuration. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not create the empty configuration folder" = "SurfSafe could not create the empty configuration folder";
+"SurfSafeVPN could not create the empty configuration folder" = "SurfSafeVPN could not create the empty configuration folder";
 
 /* Window text */
-"SurfSafe could not create the sample configuration" = "SurfSafe could not create the sample configuration";
+"SurfSafeVPN could not create the sample configuration" = "SurfSafeVPN could not create the sample configuration";
 
 /* Window text */
-"SurfSafe could not move the '%@' configuration. See the Console Log for details." = "SurfSafe could not move the '%@' configuration. See the Console Log for details.";
+"SurfSafeVPN could not move the '%@' configuration. See the Console Log for details." = "SurfSafeVPN could not move the '%@' configuration. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not secure the '%@' configuration. See the Console Log for details." = "SurfSafe could not secure the '%@' configuration. See the Console Log for details.";
+"SurfSafeVPN could not secure the '%@' configuration. See the Console Log for details." = "SurfSafeVPN could not secure the '%@' configuration. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not uninstall the '%@' configuration. See the Console Log for details." = "SurfSafe could not uninstall the '%@' configuration. See the Console Log for details.";
+"SurfSafeVPN could not uninstall the '%@' configuration. See the Console Log for details." = "SurfSafeVPN could not uninstall the '%@' configuration. See the Console Log for details.";
 
 /* Window text */
-"SurfSafe could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?" = "SurfSafe could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?";
+"SurfSafeVPN could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?" = "SurfSafeVPN could not unprotect the configuration file. Details are in the Console Log.\n\nDo you wish to examine the configuration file even though you will not be able to modify it?";
 
 /* Window text */
-"SurfSafe failed to repair problems with preferences for '%@'. Details are in the Console Log" = "SurfSafe failed to repair problems with preferences for '%@'. Details are in the Console Log";
+"SurfSafeVPN failed to repair problems with preferences for '%@'. Details are in the Console Log" = "SurfSafeVPN failed to repair problems with preferences for '%@'. Details are in the Console Log";
 
 /* Window text */
-"SurfSafe has been secured successfully." = "SurfSafe has been secured successfully.";
+"SurfSafeVPN has been secured successfully." = "SurfSafeVPN has been secured successfully.";
 
 /* Window text */
-"SurfSafe has disconnected '%@' because its configuration file has been removed." = "SurfSafe has disconnected '%@' because its configuration file has been removed.";
+"SurfSafeVPN has disconnected '%@' because its configuration file has been removed." = "SurfSafeVPN has disconnected '%@' because its configuration file has been removed.";
 
 /* Window text */
-"SurfSafe is based on %@. " = "SurfSafe is based on %@. ";
+"SurfSafeVPN is based on %@. " = "SurfSafeVPN is based on %@. ";
 
 /* Window text */
-"SurfSafe is ready." = "SurfSafe is ready.";
+"SurfSafeVPN is ready." = "SurfSafeVPN is ready.";
 
 /* Window text */
-"SurfSafe needs to create a shadow copy of the configuration file." = "SurfSafe needs to create a shadow copy of the configuration file.";
+"SurfSafeVPN needs to create a shadow copy of the configuration file." = "SurfSafeVPN needs to create a shadow copy of the configuration file.";
 
 /* Window text */
-"SurfSafe needs to install and/or uninstall one or more SurfSafe VPN Configurations." = "SurfSafe needs to install and/or uninstall one or more SurfSafe VPN Configurations.";
+"SurfSafeVPN needs to install and/or uninstall one or more SurfSafeVPN Configurations." = "SurfSafeVPN needs to install and/or uninstall one or more SurfSafeVPN Configurations.";
 
 /* Window text */
-"SurfSafe needs to install one or more SurfSafe VPN Configurations." = "SurfSafe needs to install one or more SurfSafe VPN Configurations.";
+"SurfSafeVPN needs to install one or more SurfSafeVPN Configurations." = "SurfSafeVPN needs to install one or more SurfSafeVPN Configurations.";
 
 /* Window text */
-"SurfSafe needs to repair ownership/permissions of the configuration file to secure it." = "SurfSafe needs to repair ownership/permissions of the configuration file to secure it.";
+"SurfSafeVPN needs to repair ownership/permissions of the configuration file to secure it." = "SurfSafeVPN needs to repair ownership/permissions of the configuration file to secure it.";
 
 /* Window text */
-"SurfSafe needs to repair ownership/permissions of the shadow copy of the configuration file to secure it." = "SurfSafe needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.";
+"SurfSafeVPN needs to repair ownership/permissions of the shadow copy of the configuration file to secure it." = "SurfSafeVPN needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.";
 
 /* Window text */
-"SurfSafe needs to update the shadow copy of the configuration file from the original." = "SurfSafe needs to update the shadow copy of the configuration file from the original.";
+"SurfSafeVPN needs to update the shadow copy of the configuration file from the original." = "SurfSafeVPN needs to update the shadow copy of the configuration file from the original.";
 
 /* Window text */
-"SurfSafe needs to:\n" = "SurfSafe needs to:\n";
+"SurfSafeVPN needs to:\n" = "SurfSafeVPN needs to:\n";
 
 /* Window text */
-"SurfSafe requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")" = "SurfSafe requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")";
+"SurfSafeVPN requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")" = "SurfSafeVPN requires OS X 10.4 or above\n     (\"Tiger\", \"Leopard\", or \"Snow Leopard\")";
 
 /* Window text */
-"SurfSafe was successfully installed.\n\nDo you wish to launch SurfSafe now?" = "SurfSafe was successfully installed.\n\nDo you wish to launch SurfSafe now?";
+"SurfSafeVPN was successfully installed.\n\nDo you wish to launch SurfSafeVPN now?" = "SurfSafeVPN was successfully installed.\n\nDo you wish to launch SurfSafeVPN now?";
 
 /* Window text */
-"SurfSafe was successfully replaced.\n\nDo you wish to launch the new version of SurfSafe now?" = "SurfSafe was successfully replaced.\n\nDo you wish to launch the new version of SurfSafe now?";
+"SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?" = "SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?";
 
 /* Window text */
-"SurfSafe was unable to establish communications with an existing OpenVPN process for '%@' within %d seconds. The attempt to establish communications has been abandoned." = "SurfSafe was unable to establish communications with an existing OpenVPN process for '%1$@' within %2$d seconds. The attempt to establish communications has been abandoned.";
+"SurfSafeVPN was unable to establish communications with an existing OpenVPN process for '%@' within %d seconds. The attempt to establish communications has been abandoned." = "SurfSafeVPN was unable to establish communications with an existing OpenVPN process for '%1$@' within %2$d seconds. The attempt to establish communications has been abandoned.";
 
 /* Window text */
-"SurfSafe was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details... window" = "SurfSafe was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details… window";
+"SurfSafeVPN was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details... window" = "SurfSafeVPN was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details… window";
 
 /* Window text */
 "Unable to Establish Communication" = "Unable to Establish Communication";
@@ -1017,7 +1023,7 @@
 "Would you like to\n\n     • Create a sample configuration on the Desktop\n             and\n     • Open its OpenVPN configuration file in TextEdit so you can modify it to connect to your VPN?\n\n" = "Would you like to\n\n     • Create a sample configuration on the Desktop\n             and\n     • Open its OpenVPN configuration file in TextEdit so you can modify it to connect to your VPN?\n\n";
 
 /* Window text */
-"You cannot install a SurfSafe VPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy." = "You cannot install a SurfSafe VPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.";
+"You cannot install a SurfSafeVPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy." = "You cannot install a SurfSafeVPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.";
 
 /* Window text */
 "You cannot make a configuration private if it is set to start when the computer starts." = "You cannot make a configuration private if it is set to start when the computer starts.";
@@ -1026,7 +1032,7 @@
 "You cannot make a configuration private unless it is disconnected." = "You cannot make a configuration private unless it is disconnected.";
 
 /* Window text */
-"You cannot make a configuration shared if it is not a SurfSafe VPN Configuration (.tblk)." = "You cannot make a configuration shared if it is not a SurfSafe VPN Configuration (.tblk).";
+"You cannot make a configuration shared if it is not a SurfSafeVPN Configuration (.tblk)." = "You cannot make a configuration shared if it is not a SurfSafeVPN Configuration (.tblk).";
 
 /* Window text */
 "You cannot make a configuration shared unless it is disconnected." = "You cannot make a configuration shared unless it is disconnected.";
@@ -1047,7 +1053,7 @@
 "You have asked to rename '%@' to '%@'." = "You have asked to rename '%1$@' to '%2$@'.";
 
 /* Window text */
-"You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafe. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n" = "You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafe. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n";
+"You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafeVPN. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n" = "You have tried to use a configuration file that is the same as the sample configuration file installed by SurfSafeVPN. The configuration file must be modified to connect to a VPN. You may also need other files, such as certificate or key files, to connect to the VPN.\n\nConsult your network administrator or your VPN service provider to obtain configuration and other files or the information you need to modify the sample file.\n\nOpenVPN documentation is available at\n\n     http://openvpn.net/index.php/open-source/documentation.html\n";
 
 /* Window text */
 "You may examine the configuration file, but if you plan to modify it, you must unprotect it now. If you unprotect the configuration file now, you will need to provide an administrator username and password the next time you connect using it." = "You may examine the configuration file, but if you plan to modify it, you must unprotect it now. If you unprotect the configuration file now, you will need to provide an administrator username and password the next time you connect using it.";
@@ -1074,25 +1080,25 @@
 "You may not rename a configuration which is set to start when the computer starts." = "You may not rename a configuration which is set to start when the computer starts.";
 
 /* Window text */
-"You must reinstall SurfSafe. Please move SurfSafe to the Trash and download a fresh copy. The problem was:\n\n%@" = "You must reinstall SurfSafe. Please move SurfSafe to the Trash and download a fresh copy. The problem was:\n\n%@";
+"You must reinstall SurfSafeVPN. Please move SurfSafeVPN to the Trash and download a fresh copy. The problem was:\n\n%@" = "You must reinstall SurfSafeVPN. Please move SurfSafeVPN to the Trash and download a fresh copy. The problem was:\n\n%@";
 
 /* Window text */
-"You must stop the currently running SurfSafe to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafe\" to close all VPN connections and quit the currently running SurfSafe before launching SurfSafe." = "You must stop the currently running SurfSafe to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafe\" to close all VPN connections and quit the currently running SurfSafe before launching SurfSafe.";
+"You must stop the currently running SurfSafeVPN to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafeVPN\" to close all VPN connections and quit the currently running SurfSafeVPN before launching SurfSafeVPN." = "You must stop the currently running SurfSafeVPN to launch the new copy.\n\nClick \"Close VPN Connections and Stop SurfSafeVPN\" to close all VPN connections and quit the currently running SurfSafeVPN before launching SurfSafeVPN.";
 
 /* Window text */
-"You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?" = "You will not be able to use SurfSafe after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?";
+"You will not be able to use SurfSafeVPN after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?" = "You will not be able to use SurfSafeVPN after updating unless you provide an administrator username and password.\n\nAre you sure you wish to check for updates?";
 
 /* Window text */
 "\n\n Note: Files associated with the configuration, such as key or certificate files, will not be deleted." = "\n\n Note: Files associated with the configuration, such as key or certificate files, will not be deleted.";
 
 /* Window text */
-"\n\n%d SurfSafe VPN Configurations were installed successfully." = "\n\n%d SurfSafe VPN Configurations were installed successfully.";
+"\n\n%d SurfSafeVPN Configurations were installed successfully." = "\n\n%d SurfSafeVPN Configurations were installed successfully.";
 
 /* Window text */
-"\n\nOne SurfSafe VPN Configuration was installed successfully." = "\n\nOne SurfSafe VPN Configuration was installed successfully.";
+"\n\nOne SurfSafeVPN Configuration was installed successfully." = "\n\nOne SurfSafeVPN Configuration was installed successfully.";
 
 /* Window text */
-"\n\nand install %d SurfSafe VPN Configurations" = "\n\nand install %d SurfSafe VPN Configurations";
+"\n\nand install %d SurfSafeVPN Configurations" = "\n\nand install %d SurfSafeVPN Configurations";
 
 /* Suffix for a duplicate of a file */
 " copy %d" = " copy %d";
@@ -1119,7 +1125,7 @@
 "Reject" = "Reject";
 
 /* Menu item VPNService */
-"Register for SurfSafe..." = "Register for SurfSafe…";
+"Register for SurfSafeVPN..." = "Register for SurfSafeVPN...";
 
 /* Window title  VPNService */
 "Cannot obtain image" = "Cannot obtain image";
@@ -1146,7 +1152,7 @@
 "Prove You are Human" = "Prove You are Human";
 
 /* Window title  VPNService */
-"Register with SurfSafe" = "Register with SurfSafe";
+"Register with SurfSafeVPN" = "Register with SurfSafeVPN";
 
 /* Window title  VPNService */
 "Sorry" = "Sorry";
@@ -1155,7 +1161,7 @@
 "Terms of Service" = "Terms of Service";
 
 /* Window title  VPNService */
-"SurfSafe - Free VPN" = "SurfSafe - Free VPN";
+"SurfSafeVPN - Free VPN" = "SurfSafeVPN - Free VPN";
 
 /* Window title  VPNService */
 "Welcome!" = "Welcome!";
@@ -1167,7 +1173,7 @@
 "Confirm password:" = "Confirm password:";
 
 /* Window text VPNService */
-"Congratulations! Your account has been created. You should receive an email from SurfSafe soon. Follow the instructions in the email to verify your email address and then click 'Next'." = "Congratulations! Your account has been created. You should receive an email from SurfSafe soon. Follow the instructions in the email to verify your email address and then click 'Next'.";
+"Congratulations! Your account has been created. You should receive an email from SurfSafeVPN soon. Follow the instructions in the email to verify your email address and then click 'Next'." = "Congratulations! Your account has been created. You should receive an email from SurfSafeVPN soon. Follow the instructions in the email to verify your email address and then click 'Next'.";
 
 /* Window text VPNService */
 "Could not check registration" = "Could not check registration";
@@ -1212,7 +1218,7 @@
 "The Terms of Service could not be loaded:" = "The Terms of Service could not be loaded:";
 
 /* Window text VPNService */
-"The email address has not been verified.\n\nYou will not be able to login and use the VPN until the email address has been verified by following the instructions in an email sent to you by SurfSafe when you registered for the service." = "The email address has not been verified.\n\nYou will not be able to login and use the VPN until the email address has been verified by following the instructions in an email sent to you by SurfSafe when you registered for the service.";
+"The email address has not been verified.\n\nYou will not be able to login and use the VPN until the email address has been verified by following the instructions in an email sent to you by SurfSafeVPN when you registered for the service." = "The email address has not been verified.\n\nYou will not be able to login and use the VPN until the email address has been verified by following the instructions in an email sent to you by SurfSafeVPN when you registered for the service.";
 
 /* Window text VPNService */
 "The email address you entered was not a valid email address." = "The email address you entered was not a valid email address.";
@@ -1224,13 +1230,13 @@
 "The text you entered did not match the text in the Captcha image." = "The text you entered did not match the text in the Captcha image.";
 
 /* Window text VPNService */
-"There is no configuration named '%@' installed.\n\nTry reinstalling SurfSafe from a disk image." = "There is no configuration named '%@' installed.\n\nTry reinstalling SurfSafe from a disk image.";
+"There is no configuration named '%@' installed.\n\nTry reinstalling SurfSafeVPN from a disk image." = "There is no configuration named '%@' installed.\n\nTry reinstalling SurfSafeVPN from a disk image.";
 
 /* Window text VPNService */
-"To create your free SurfSafe account we need your email address and a password of your choosing." = "To create your free SurfSafe account we need your email address and a password of your choosing.";
+"To create your free SurfSafeVPN account we need your email address and a password of your choosing." = "To create your free SurfSafeVPN account we need your email address and a password of your choosing.";
 
 /* Window text VPNService */
-"SurfSafe allows you to explore the Internet freely without restrictions while simultaneously securing your Internet connection." = "SurfSafe allows you to explore the Internet freely without restrictions while simultaneously securing your Internet connection.";
+"SurfSafeVPN allows you to explore the Internet freely without restrictions while simultaneously securing your Internet connection." = "SurfSafeVPN allows you to explore the Internet freely without restrictions while simultaneously securing your Internet connection.";
 
 /* Window text VPNService */
 "Type the characters above:" = "Type the characters above:";

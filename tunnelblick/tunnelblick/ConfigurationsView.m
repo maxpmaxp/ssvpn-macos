@@ -81,7 +81,7 @@ extern TBUserDefaults * gTbDefaults;
     
     [whenToConnectTFC                       setTitle: NSLocalizedString(@"Connect:", @"Window text")];
     [whenToConnectManuallyMenuItem          setTitle: NSLocalizedString(@"Manually"                 , @"Button")];
-    [whenToConnectTunnelBlickLaunchMenuItem setTitle: NSLocalizedString(@"When SurfSafe launches", @"Button")];
+    [whenToConnectTunnelBlickLaunchMenuItem setTitle: NSLocalizedString(@"When SurfSafeVPN launches", @"Button")];
     [whenToConnectOnComputerStartMenuItem   setTitle: NSLocalizedString(@"When computer starts"     , @"Button")];
     [whenToConnectPopUpButton sizeToFit];
     
@@ -90,7 +90,7 @@ extern TBUserDefaults * gTbDefaults;
     
     [monitorNetworkForChangesCheckbox setTitle: NSLocalizedString(@"Monitor network settings", @"Checkbox name")];
     
-    [showOnTunnelBlickMenuCheckbox setTitle: NSLocalizedString(@"Show configuration on SurfSafe menu", @"Checkbox name")];
+    [showOnTunnelBlickMenuCheckbox setTitle: NSLocalizedString(@"Show configuration on SurfSafeVPN menu", @"Checkbox name")];
     
     [alertSoundsBox setTitle: NSLocalizedString(@"Alert sounds", @"Window title")];
     

@@ -445,7 +445,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
             
             NSLog(@"Stopped trying to establish communications with an existing OpenVPN process for '%@' after %d seconds", [self displayName], gHookupTimeout);
             NSString * msg = [NSString stringWithFormat:
-                              NSLocalizedString(@"SurfSafe was unable to establish communications with an existing OpenVPN process for '%@' within %d seconds. The attempt to establish communications has been abandoned.", @"Window text"),
+                              NSLocalizedString(@"SurfSafeVPN was unable to establish communications with an existing OpenVPN process for '%@' within %d seconds. The attempt to establish communications has been abandoned.", @"Window text"),
                               [self displayName],
                               gHookupTimeout];
             NSString * prefKey = [NSString stringWithFormat: @"%@-skipWarningUnableToToEstablishOpenVPNLink", [self displayName]];
@@ -609,11 +609,11 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         NSString * msg;
         if (  startIt  ) {
             msg = [NSString stringWithFormat:
-                   NSLocalizedString(@" SurfSafe needs computer administrator access so it can automatically connect '%@' when the computer starts.", @"Window text"),
+                   NSLocalizedString(@" SurfSafeVPN needs computer administrator access so it can automatically connect '%@' when the computer starts.", @"Window text"),
                    [self displayName]];
         } else {
             msg = [NSString stringWithFormat:
-                   NSLocalizedString(@" SurfSafe needs computer administrator access so it can stop automatically connecting '%@' when the computer starts.", @"Window text"),
+                   NSLocalizedString(@" SurfSafeVPN needs computer administrator access so it can stop automatically connecting '%@' when the computer starts.", @"Window text"),
                    [self displayName]];
         }
         
@@ -709,7 +709,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     
     [*openvpnstartArgs insertObject: openvpnstartPath atIndex: 0];
     
-    NSString * daemonDescription = [NSString stringWithFormat: @"Processes SurfSafe 'Connect when system starts' for VPN configuration '%@'",
+    NSString * daemonDescription = [NSString stringWithFormat: @"Processes SurfSafeVPN 'Connect when system starts' for VPN configuration '%@'",
                                     [self displayName]];
     
     NSString * workingDirectory;
@@ -979,7 +979,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     int status = [task terminationStatus];
     if (  status != 0  ) {
         if (  status == 240  ) {
-            openvpnstartOutput = @"Internal SurfSafe error: openvpnstart syntax error";
+            openvpnstartOutput = @"Internal SurfSafeVPN error: openvpnstart syntax error";
         } else {
             file = [errPipe fileHandleForReading];
             data = [file readDataToEndOfFile];
@@ -1001,7 +1001,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         if (  userKnows  ) {
             TBRunAlertPanel(NSLocalizedString(@"Warning!", @"Window title"),
                             [NSString stringWithFormat:
-                             NSLocalizedString(@"SurfSafe was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details... window", @"Window text"),
+                             NSLocalizedString(@"SurfSafeVPN was unable to start OpenVPN to connect %@. For details, see the OpenVPN log in the VPN Details... window", @"Window text"),
                              [self displayName]],
                             nil, nil, nil);
             requestedState = oldRequestedState;
@@ -1319,6 +1319,17 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     return usedModifyNameserver;
 }
 
+-(void) deleteCredentialsFromKeychain{
+    [myAuthAgent setAuthMode: @"privateKey"];
+    if (  [myAuthAgent keychainHasCredentials]  ) {
+        [myAuthAgent deleteCredentialsFromKeychain];
+    }
+    [myAuthAgent setAuthMode: @"password"];
+    if (  [myAuthAgent keychainHasCredentials]  ) {
+        [myAuthAgent deleteCredentialsFromKeychain];
+    }
+}
+
 -(BOOL) tryingToHookup
 {
     return tryingToHookup;
@@ -1466,7 +1477,7 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
                     [NSString stringWithFormat: NSLocalizedString(@"OpenVPN is not responding to disconnect requests.\n\n"
                                                                   "There is a known bug in OpenVPN version 2.1 that sometimes"
                                                                   " causes a delay of one or two minutes before it responds to such requests.\n\n"
-                                                                  "SurfSafe will continue to try to disconnect for up to %d seconds.\n\n"
+                                                                  "SurfSafeVPN will continue to try to disconnect for up to %d seconds.\n\n"
                                                                   "The connection will be unavailable until OpenVPN disconnects or %d seconds elapse,"
                                                                   " whichever comes first.", @"Window text"), forceKillTimeout, forceKillTimeout],
                     nil, nil, nil);

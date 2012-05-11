@@ -279,7 +279,9 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     }
     
     [self setSizeAndPosition];
-    [[self window] setTitle: NSLocalizedString(@"SurfSafe", @"Window title")];
+    NSString * title = [NSString stringWithFormat:NSLocalizedString(@"SurfSafeVPN %@", @"Window title"), surfsafevpnVersion([NSBundle mainBundle])];
+    
+    [[self window] setTitle: title];
     
     NSView * windowView = [[self window] contentView];
     NSRect trackingFrame = [windowView frame];

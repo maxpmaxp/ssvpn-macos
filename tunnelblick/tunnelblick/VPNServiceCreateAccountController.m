@@ -74,7 +74,7 @@
     }
     [self setTitle:     NSLocalizedString(@"Next"   , @"Button VPNService") ofControl: nextButton ];
     
-    [[self createAccountTFC]   setStringValue: NSLocalizedString(@"To create your free SurfSafe account we need your email address"
+    [[self createAccountTFC]   setStringValue: NSLocalizedString(@"To create your free SurfSafeVPN account we need your email address"
                                                                  " and a password of your choosing.", @"Window text VPNService")];
     
     [[self emailAddressTFC]    setStringValue: NSLocalizedString(@"Email address:",    @"Window text VPNService")];

@@ -190,7 +190,7 @@ extern TBUserDefaults       * gTbDefaults;
     [connectingAndDisconnectingTabViewItem  setLabel: NSLocalizedString(@"Connecting & Disconnecting", @"Window title")];
      
     [scanConfigurationFileCheckbox          setTitle: NSLocalizedString(@"Scan configuration file for problems before connecting", @"Checkbox name")];
-    [useTunTapDriversCheckbox               setTitle: NSLocalizedString(@"Use SurfSafe tun/tap drivers"                       , @"Checkbox name")];
+    [useTunTapDriversCheckbox               setTitle: NSLocalizedString(@"Use SurfSafeVPN tun/tap drivers"                       , @"Checkbox name")];
     [flushDnsCacheCheckbox                  setTitle: NSLocalizedString(@"Flush DNS cache after connecting or disconnecting"     , @"Checkbox name")];
     
     

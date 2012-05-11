@@ -58,7 +58,7 @@
     [self setTitle: NSLocalizedString(@"Next" , @"Button VPNService") ofControl: nextButton ];
     
     [[self welcomeTFC] setStringValue: NSLocalizedString(@"Congratulations! Your account has been created."
-                                                         " You should receive an email from SurfSafe soon."
+                                                         " You should receive an email from SurfSafeVPN soon."
                                                          " Follow the instructions in the email to verify your"
                                                          " email address and then click 'Next'.", @"Window text VPNService")];
     [[self window] center];

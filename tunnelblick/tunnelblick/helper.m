@@ -359,7 +359,7 @@ NSString * tunnelblickVersion(NSBundle * bundle)
 
 NSString * surfsafevpnVersion(NSBundle *bundle)
 {
-    NSString * infoVersion = [bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    NSString * infoVersion = [NSString stringWithFormat:@"v%@", [bundle objectForInfoDictionaryKey:@"CFBundleVersion"]];
     
     return (infoVersion);
 }
@@ -888,9 +888,9 @@ BOOL copyOrMoveCredentials(NSString * fromDisplayName, NSString * toDisplayName,
         }
     }
     
-    KeyChain * passphraseKeychain = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"privateKey" ];
-    KeyChain * usernameKeychain   = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"username"   ];
-    KeyChain * passwordKeychain   = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"password"   ];
+    KeyChain * passphraseKeychain = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"privateKey" ];
+    KeyChain * usernameKeychain   = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"username"   ];
+    KeyChain * passwordKeychain   = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString: toDisplayName] withAccountName: @"password"   ];
     
     if (  myPassphrase  ) {
         [passphraseKeychain deletePassword];
@@ -1103,7 +1103,7 @@ void updateEasyRsa(BOOL silently) {
         return;
     }
     
-    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-Tunnelblick" ofType: @""];
+    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-SurfSafeVPN" ofType: @""];
     
     // Standard copies of OS X doesn't include "make", so we simulate a little bit of it here.
     

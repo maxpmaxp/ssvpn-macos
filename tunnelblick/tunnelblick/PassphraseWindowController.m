@@ -44,7 +44,7 @@
 
 -(void) awakeFromNib
 {
-    [[self window] setTitle: NSLocalizedString(@"SurfSafe: Passphrase Required", @"Window title")];
+    [[self window] setTitle: NSLocalizedString(@"SurfSafeVPN: Passphrase Required", @"Window title")];
     
     [iconIV setImage: [NSApp applicationIconImage]];
     

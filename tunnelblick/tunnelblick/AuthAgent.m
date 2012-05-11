@@ -56,12 +56,25 @@ extern TBUserDefaults  * gTbDefaults;
         username   = nil;
         password   = nil;
         
-        passphraseKeychain      = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"privateKey" ];
-        usernameKeychain        = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"username"   ];
-        passwordKeychain        = [[KeyChain alloc] initWithService:[@"Tunnelblick-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"password"   ];
+        /*
+        passphraseKeychain      = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"privateKey" ];
+        usernameKeychain        = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"username"   ];
+        passwordKeychain        = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"password"   ];
 
         passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             [self displayName]   ];
         usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    [self displayName]   ];
+        */
+        
+        
+        //HTK-INC
+        passphraseKeychain      = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"privateKey" ];
+        usernameKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"username"   ];
+        passwordKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"password"   ];
+        
+        passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             @"Global"   ];
+        usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    @"Global"   ];
+        //End HTK-INC
+         
         
         usedUniversalCredentials = NO;
     }
@@ -173,8 +186,8 @@ extern TBUserDefaults  * gTbDefaults;
         
     } else if (   [gTbDefaults boolForKey: @"keychainHasUniversalUsernameAndPassword"]  ) {
         // No connection-specific credentials, but universal credentials exist 
-        [self setUsernameKeychain: [[KeyChain alloc] initWithService: @"Tunnelblick-AuthUniversal" withAccountName: @"username"]];
-        [self setPasswordKeychain: [[KeyChain alloc] initWithService: @"Tunnelblick-AuthUniversal" withAccountName: @"password"]];
+        [self setUsernameKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"username"]];
+        [self setPasswordKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"password"]];
         [self setPassphrasePreferenceKey: [[NSString alloc] initWithFormat: @"%@-keychainHasPrivateKey", [self displayName]]];
         [self setUsernamePreferenceKey:   [[NSString alloc] initWithFormat: @"keychainHasUniversalUsernameAndPassword"]];
         usernameLocal= [usernameKeychain password]; // Get username and password from Keychain if they've been saved

@@ -52,7 +52,7 @@ extern NSFileManager        * gFileMgr;
         
         NSString *requestURL = [NSString stringWithFormat:@"%@?v=%@&os=%@", serverListUrl, version, os];
         
-        NSLog(@"Check for surfsafe update %@ ", requestURL);
+        NSLog(@"Check for SurfSafeVPN update %@ ", requestURL);
         
         //NSError *error;
         
@@ -74,11 +74,9 @@ extern NSFileManager        * gFileMgr;
 }
 
 -(void) generateFiles{
-    NSLog(@"update configuration ........ ");
     NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
-    NSLog(@"update config file %@", outdateFile);
     
     if (![gFileMgr fileExistsAtPath:outdateFile])
         return;
