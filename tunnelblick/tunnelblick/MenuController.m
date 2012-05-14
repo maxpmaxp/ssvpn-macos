@@ -47,6 +47,7 @@
 #import "UKKQueue/UKKQueue.h"
 #import "Sparkle/SUUpdater.h"
 #import "VPNConnection.h"
+#import "ConfigurationNetwork.h"
 
 
 #ifdef INCLUDE_VPNSERVICE
@@ -191,6 +192,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
             [NSApp terminate:self];
             
         }
+        
+        [[ConfigurationNetwork sharedInstance] getProxySetting:nil protocol: kWEB];
         
                
         launchFinished = FALSE;
@@ -869,6 +872,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
     
     //HTK-INC
     [ssUpdater release];
+
     //[myConfigUpdater release];
     [customMenuScripts release];
     [customRunOnLaunchPath release];

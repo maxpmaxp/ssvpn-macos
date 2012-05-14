@@ -165,7 +165,9 @@ BOOL needToCopyBundle(void);
     
     NSString                * vpnServiceConnectDisplayName; // Display name of connection that VPNService is trying to connect
 #endif
+    // HTK-INC
     BOOL                      outOfDate;
+    
 }
 
 // Menu actions
