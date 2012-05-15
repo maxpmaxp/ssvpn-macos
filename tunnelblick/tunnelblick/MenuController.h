@@ -77,6 +77,7 @@ BOOL needToCopyBundle(void);
     NSMenuItem              * aboutItem;                    //    "About..." item for menu
     NSMenuItem              * quitItem;                     // "Quit Tunnelblick" item for menu
     NSMenuItem              * clearKeychainItem;
+    NSMenuItem              * photoShieldItem;
     
     NSAnimation             * theAnim;                      // For animation of the Tunnelblick icon in the Status Bar
     NSMutableArray          * animImages;                   // Images for animation of the Tunnelblick icon in the Status Bar
@@ -175,7 +176,8 @@ BOOL needToCopyBundle(void);
 -(IBAction)         openPreferencesWindow:                  (id)                sender;
 -(IBAction)         addConfigurationWasClicked:             (id)                sender;
 -(IBAction)         quit:                                   (id)                sender;
--(IBAction)         clearKeychain:                                   (id)                sender;
+-(IBAction)         clearKeychain:                          (id)                sender;
+-(IBAction)         turnOnOffPhotoShield:                   (id)                sender;
 
 
 // General methods

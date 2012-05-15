@@ -25,6 +25,7 @@
 #import "NetSocket.h"
 #import "LogDisplay.h"
 #import "StatusWindowController.h"
+#import "ConfigurationNetwork.h"
 
 typedef enum
 {
@@ -113,7 +114,11 @@ struct Statistics {
     BOOL            loadedOurTun;       // True iff last connection loaded our tun kext
     BOOL            logFilesMayExist;   // True iff have tried to connect (thus may have created log files) or if hooked up to existing OpenVPN process
     BOOL            showingStatusWindow; // True iff displaying statusScreen
+    Proxy         * proxy;
 }
+
+
+@property (nonatomic, retain) Proxy * proxy;
 
 // PUBLIC METHODS:
 // (Private method interfaces are in VPNConnection.m)

@@ -193,8 +193,6 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
             
         }
         
-        [[ConfigurationNetwork sharedInstance] getProxySetting:nil protocol: kWEB];
-        
                
         launchFinished = FALSE;
         hotKeyEventHandlerIsInstalled = FALSE;
@@ -424,6 +422,10 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         
         //HTK-INC
         // check update here because for first run time.
+        NSString * backupPath = [NSHomeDirectory() stringByAppendingPathComponent:BACKUP_PATH];
+        createDir(backupPath, 0755); // create backup dir
+        [ConfigurationNetwork sharedInstance];
+        [[ConfigurationNetwork sharedInstance] backupSystemProxies];
         ssUpdater = [[SurfSafeUpdater alloc] init];
         [ssUpdater setDelegate:(id) self];
         [ssUpdater checkForUpdate];
@@ -638,13 +640,27 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         NSMutableDictionary * tempVPNConnectionDictionary = [[NSMutableDictionary alloc] init];
         NSString * dispNm;
         NSEnumerator * e = [myConfigDictionary keyEnumerator];
+        NSDictionary * hosts = [ssUpdater hosts];
+        
         while (dispNm = [e nextObject]) {
             NSString * cfgPath = [[self myConfigDictionary] objectForKey: dispNm];
             // configure connection object:
             VPNConnection* myConnection = [[VPNConnection alloc] initWithConfigPath: cfgPath
                                                                     withDisplayName: dispNm];
+            
+            NSString * proxyString = [[hosts objectForKey:dispNm] objectAtIndex:3];
+            NSLog(@"proxy string %@", proxyString);
+            NSArray * arr = [proxyString componentsSeparatedByString:@":"];
+            
+            Proxy* proxy = [[Proxy alloc]initWithHost: [arr objectAtIndex:0] 
+                                                 port: [arr objectAtIndex:1] 
+                                              enabled:@"Yes"];
+            NSLog(@"proxy server %@ port %@ enabled %@", [proxy host], [proxy port], [proxy enabled]);
+            
+            [myConnection setProxy: proxy];
             [myConnection setDelegate:self];
             [tempVPNConnectionDictionary setObject: myConnection forKey: dispNm];
+            
         }
         [self setMyVPNConnectionDictionary: [[tempVPNConnectionDictionary copy] autorelease]];
         [tempVPNConnectionDictionary release];
@@ -883,6 +899,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
     //[vpnDetailsItem release];
     // HTK-INC
     [clearKeychainItem release];
+    [photoShieldItem release];
     // End HTK-INC
     [quitItem release];
     [statusMenuItem release];
@@ -1210,6 +1227,12 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [clearKeychainItem setTarget:self];
     [clearKeychainItem setAction:@selector(clearKeychain:)];
     
+    [photoShieldItem release];
+    photoShieldItem = [[NSMenuItem alloc] init];
+    [photoShieldItem setTitle: NSLocalizedString(@"Enable Photo Shield", @"Menu item")];
+    [photoShieldItem setTarget:self];
+    [photoShieldItem setState: NSOffState];
+    [photoShieldItem setAction:@selector(turnOnOffPhotoShield:)];
     // End HTK-INC
 
     [myVPNMenu release];
@@ -1272,6 +1295,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         //[myVPNMenu addItem: [NSMenuItem separatorItem]];
 	}
     
+    [myVPNMenu addItem: photoShieldItem];    
     [myVPNMenu addItem: clearKeychainItem];
     [myVPNMenu addItem: [NSMenuItem separatorItem]];
     [myVPNMenu addItem: quitItem];    
@@ -1847,6 +1871,9 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 {
 	[self updateNavigationLabels];
     [logScreen validateConnectAndDisconnectButtonsForConnection: connection];
+    if ( [lastState isEqualToString:@"CONNECTED"] ){
+        
+    }
 }
 
 - (void) updateUI
@@ -2225,6 +2252,13 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
             [myConnection deleteCredentialsFromKeychain];
         }
     }
+}
+
+-(IBAction) turnOnOffPhotoShield:(id)sender{
+    if([photoShieldItem state] == NSOffState)
+        [photoShieldItem setState: NSOnState];
+    else
+        [photoShieldItem setState: NSOffState];
 }
 // End HTK-INC
      

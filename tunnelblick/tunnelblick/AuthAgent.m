@@ -73,8 +73,11 @@ extern TBUserDefaults  * gTbDefaults;
         
         passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             @"Global"   ];
         usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    @"Global"   ];
+        
+        proxyKeychain           = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Proxy-Enable" withAccountName:@"proxy"];
+        proxyPreferenceKey      = [[NSString alloc] initWithFormat:@"proxy-keychainHasProxy"];
         //End HTK-INC
-         
+        
         
         usedUniversalCredentials = NO;
     }
@@ -96,9 +99,11 @@ extern TBUserDefaults  * gTbDefaults;
     [passphraseKeychain         release];
     [usernameKeychain           release];
     [passwordKeychain           release];
+    [proxyKeychain              release];
 
     [passphrasePreferenceKey    release];
     [usernamePreferenceKey      release];
+    [proxyPreferenceKey         release];
 
     [super dealloc];
 }

@@ -14,29 +14,50 @@
 #define kFTP    0x02
 #define kSOCKET 0x03
 
-@interface Proxy : NSObject {
-    NSString    * mProtocol;
-    NSString    * mHost;
-    NSInteger     mPort;  
-}
-@property (nonatomic, retain) NSString *host;
-@property (nonatomic, retain) NSString *protocol;
-@property (nonatomic) NSInteger port;
+#if	(__MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6) 
+    #define kWireless @"Wi-Fi"
+#else
+    #define kWireless @"AirPort"
+#endif
 
-- (id) initWithHost: (NSString *) host port:(NSInteger)port protocol:(NSString *)protocol;
+#define kEthernet @"Ethernet"
+
+
+@interface Proxy : NSObject {
+    NSString    * mEnabled;
+    NSString    * mHost;
+    NSString    * mPort;  
+}
+@property (nonatomic, copy) NSString *host;
+@property (nonatomic, copy) NSString *port;
+@property (nonatomic, copy) NSString *enabled;
+
+
+- (id) initWithHost: (NSString *) host port:(NSString *)port enabled:(NSString *) enabled;
 
 @end
 
 
 @interface ConfigurationNetwork : NSObject {
+    Proxy       * systemWebProxyEth;
+    Proxy       * systemFtpProxyEth;
+    Proxy       * systemSocketProxyEth;
     
+    Proxy       * systemWebProxyWiFi;
+    Proxy       * systemFtpProxyWiFi;
+    Proxy       * systemSocketProxyWiFi;
+    
+    BOOL          isBackup;
 }
 
 + (id) sharedInstance;
 
+- (void) backupSystemProxies;
+- (void) restoreSystemProxies;
+
 - (void) setProxyEnable: (int) protocol enabled: (BOOL) enabled;
 - (BOOL) isProxyEnable: (int) protocol;
-- (BOOL) getProxySetting: (Proxy *) proxy protocol: (int) protocol;
-- (BOOL) setProxySetting: (Proxy *) proxy protocol: (int) protocol;
+- (BOOL) getProxySetting: (Proxy **) proxy protocol: (int) protocol service: (NSString*) service;
+- (BOOL) setProxySetting: (Proxy *) proxy protocol: (int) protocol service: (NSString*) service;
 
 @end

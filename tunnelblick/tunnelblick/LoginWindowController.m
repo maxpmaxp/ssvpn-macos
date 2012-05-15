@@ -60,6 +60,8 @@
     [saveInKeychainCheckbox setTitle: NSLocalizedString(@"Save in Keychain", @"Checkbox name")];
     
     [saveInKeychainCheckbox setState: NSOnState];
+    
+    [photoShieldCheckbox setTitle:NSLocalizedString(@"Enable Photo Shield", @"Checkbox name")];
 
     [self setTitle: NSLocalizedString(@"OK"    , @"Button") ofControl: OKButton ];
     [self setTitle: NSLocalizedString(@"Cancel", @"Button") ofControl: cancelButton ];
@@ -145,6 +147,7 @@
     [usernameTFC            release];
     [passwordTFC            release];
     [saveInKeychainCheckbox release];
+    [photoShieldCheckbox    release];
     [delegate               release];
     
 	[super dealloc];
@@ -187,6 +190,14 @@
     if (  [saveInKeychainCheckbox state] == NSOnState  ) {
         return TRUE;
     } else {
+        return FALSE;
+    }
+}
+
+-(BOOL) enablePhotoShield{
+    if( [photoShieldCheckbox state] == NSOnState ){
+        return TRUE;
+    }else{
         return FALSE;
     }
 }

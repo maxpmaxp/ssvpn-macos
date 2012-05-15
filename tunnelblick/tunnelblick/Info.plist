@@ -30,7 +30,9 @@
 	<key>CFBundleHelpBookName</key>
 	<string>Tunnelblick Help</string>
 	<key>CFBundleIconFile</key>
-	<string>SurfSafeVPN_32x32_active.icns</string>
+	<string>Ico.icns</string>
+	<key>CFBundleDisplayName</key>
+	<string></string>
 	<key>CFBundleIdentifier</key>
 	<string>net.surfsafe.surfsafe</string>
 	<key>CFBundleInfoDictionaryVersion</key>

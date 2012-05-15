@@ -124,6 +124,8 @@ extern NSString * lastPartOfPath(NSString * thePath);
 
 @implementation VPNConnection
 
+@synthesize proxy;
+
 -(id) initWithConfigPath: (NSString *) inPath withDisplayName: (NSString *) inDisplayName
 {	
     if (self = [super init]) {
@@ -2604,6 +2606,7 @@ TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelUpSound,   setTunnelUpSound)
 TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelDownSound, setTunnelDownSound)
 
 TBSYNTHESIZE_OBJECT(retain, NSDate *, bytecountsUpdated, setBytecountsUpdated)
+
 
 //*********************************************************************************************************
 //

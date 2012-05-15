@@ -20,6 +20,7 @@ extern NSFileManager        * gFileMgr;
 @implementation SurfSafeUpdater
 
 @synthesize delegate;
+@synthesize hosts;
 
 -(id) init{
     if (  self = [super init]  ) {
@@ -99,13 +100,15 @@ extern NSFileManager        * gFileMgr;
         NSString *host = [arr objectAtIndex:i];
         if ([host isEqualToString:@"version"])
             continue;
-        NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
+        NSString *name = host;
         NSString *hostFile = [NSString stringWithFormat:@"%@/%@.ovpn", configPath, name];
         
-        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString:host];
+        NSArray * arr = [hosts objectForKey:host];
+        
+        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString: [arr objectAtIndex:0]];
         [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
         if(err){
-            NSLog(@"Erorr: Can't create host file %@", hostFile);
+            NSLog(@"Error: Can't create host file %@", hostFile);
         }
     }
     
@@ -150,11 +153,16 @@ extern NSFileManager        * gFileMgr;
     }   
     else if ([elementName isEqualToString:@"host"]){
         NSString *configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
-        NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
-                NSString *hostname, *displayname, *location;
+        //NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
+        NSString *hostname, *displayname, *location, *proxy;
         
-        NSString *host = [[hostname componentsSeparatedByString:@"."] objectAtIndex:0];
-        host = [NSString stringWithFormat:@"%@.ovpn", host];
+        hostname    = [attributeDict objectForKey:@"hostname"];
+        displayname = [attributeDict objectForKey:@"name"];
+        location    = [attributeDict objectForKey:@"location"];
+        proxy       = [attributeDict objectForKey:@"proxy"];
+        
+        NSString *name = [[hostname componentsSeparatedByString:@"."] objectAtIndex:0];
+        NSString *host = [NSString stringWithFormat:@"%@.ovpn", name];
         NSString* hostPath = [configPath stringByAppendingPathComponent:host];
         
         if (![gFileMgr fileExistsAtPath:hostPath]){
@@ -162,11 +170,9 @@ extern NSFileManager        * gFileMgr;
             numOfHostLost += 1;
         }
         
-        hostname    = [attributeDict objectForKey:@"hostname"];
-        displayname = [attributeDict objectForKey:@"name"];
-        location    = [attributeDict objectForKey:@"location"];
-        NSArray *arr = [[NSMutableArray alloc] initWithObjects:displayname, location, nil];
-        [hosts setObject:arr forKey:hostname];
+        
+        NSArray *arr = [[NSMutableArray alloc] initWithObjects:hostname, displayname, location, proxy, nil];
+        [hosts setObject:arr forKey:name];
     }
     else if ([elementName isEqualToString:@"keys"]){
         keyURL = [NSString stringWithFormat:@"%@/%@", url, [attributeDict objectForKey:@"file"]];

@@ -38,7 +38,9 @@
     IBOutlet NSTextFieldCell    * passwordTFC;
     
     IBOutlet NSButton           * saveInKeychainCheckbox;
-    
+    //HTK-INC
+    IBOutlet NSButton           * photoShieldCheckbox;
+    //End HTK-INC
     id                            delegate;
 }
 
@@ -55,6 +57,8 @@
 -(void)         setPassword:            (NSTextField *) newValue;
 
 -(BOOL)         saveInKeychain;
+
+-(BOOL)         enablePhotoShield;
 
 -(id)           delegate;
 

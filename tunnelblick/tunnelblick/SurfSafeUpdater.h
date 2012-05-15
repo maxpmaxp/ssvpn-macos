@@ -34,6 +34,7 @@
 }
 
 @property (nonatomic, weak) id <SurfSafeUpdaterDelegate> delegate;
+@property (nonatomic, retain) NSDictionary *hosts;
 
 -(id) init;
 
