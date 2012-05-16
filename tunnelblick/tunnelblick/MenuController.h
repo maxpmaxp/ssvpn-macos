@@ -27,6 +27,7 @@
 #import <Security/Security.h>
 #import "defines.h"
 #import "SurfSafeUpdater.h"
+#import "ConfigurationNetwork.h"
 
 
 @class VPNConnection;
@@ -168,6 +169,7 @@ BOOL needToCopyBundle(void);
 #endif
     // HTK-INC
     BOOL                      outOfDate;
+    Proxy                   * currentProxy;
     
 }
 

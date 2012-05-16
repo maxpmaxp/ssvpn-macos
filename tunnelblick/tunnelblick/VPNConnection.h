@@ -219,6 +219,7 @@ struct Statistics {
 
 -(void)             deleteCredentialsFromKeychain;
 
+
 TBPROPERTY_WRITEONLY(NSSound *, tunnelUpSound, setTunnelUpSound)
 TBPROPERTY_WRITEONLY(NSSound *, tunnelDownSound, setTunnelDownSound)
 TBPROPERTY(NSDate *, bytecountsUpdated, setBytecountsUpdated)

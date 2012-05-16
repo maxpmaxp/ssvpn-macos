@@ -11,8 +11,9 @@
 
 
 #define kWEB    0x01
-#define kFTP    0x02
-#define kSOCKET 0x03
+#define kSWEB   0x02
+#define kFTP    0x04
+#define kSOCKET 0x08
 
 #if	(__MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6) 
     #define kWireless @"Wi-Fi"
@@ -40,10 +41,12 @@
 
 @interface ConfigurationNetwork : NSObject {
     Proxy       * systemWebProxyEth;
+    Proxy       * systemSWebProxyEth;
     Proxy       * systemFtpProxyEth;
     Proxy       * systemSocketProxyEth;
     
     Proxy       * systemWebProxyWiFi;
+    Proxy       * systemSWebProxyWiFi;
     Proxy       * systemFtpProxyWiFi;
     Proxy       * systemSocketProxyWiFi;
     

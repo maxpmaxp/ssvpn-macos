@@ -27,6 +27,7 @@
 #import "PassphraseWindowController.h"
 
 extern TBUserDefaults  * gTbDefaults;
+extern NSFileManager   * gFileMgr;
 
 @interface AuthAgent()          // PRIVATE METHODS
 
@@ -74,8 +75,6 @@ extern TBUserDefaults  * gTbDefaults;
         passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             @"Global"   ];
         usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    @"Global"   ];
         
-        proxyKeychain           = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Proxy-Enable" withAccountName:@"proxy"];
-        proxyPreferenceKey      = [[NSString alloc] initWithFormat:@"proxy-keychainHasProxy"];
         //End HTK-INC
         
         
@@ -99,11 +98,9 @@ extern TBUserDefaults  * gTbDefaults;
     [passphraseKeychain         release];
     [usernameKeychain           release];
     [passwordKeychain           release];
-    [proxyKeychain              release];
 
     [passphrasePreferenceKey    release];
     [usernamePreferenceKey      release];
-    [proxyPreferenceKey         release];
 
     [super dealloc];
 }
@@ -193,7 +190,7 @@ extern TBUserDefaults  * gTbDefaults;
         // No connection-specific credentials, but universal credentials exist 
         [self setUsernameKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"username"]];
         [self setPasswordKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"password"]];
-        [self setPassphrasePreferenceKey: [[NSString alloc] initWithFormat: @"%@-keychainHasPrivateKey", [self displayName]]];
+        [self setPassphrasePreferenceKey: [[NSString alloc] initWithFormat: @"%@-keychainHasPrivateKey", @"Global"]];
         [self setUsernamePreferenceKey:   [[NSString alloc] initWithFormat: @"keychainHasUniversalUsernameAndPassword"]];
         usernameLocal= [usernameKeychain password]; // Get username and password from Keychain if they've been saved
         if ( usernameLocal ) {
@@ -477,5 +474,6 @@ extern TBUserDefaults  * gTbDefaults;
         usernamePreferenceKey = [newKey retain];
     }
 }
+
 
 @end

@@ -790,6 +790,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [statusScreen release];
     [tunnelUpSound release];
     [tunnelDownSound release];
+    [proxy release];
     
     [super dealloc];
 }
@@ -2652,6 +2653,12 @@ TBSYNTHESIZE_OBJECT(retain, NSDate *, bytecountsUpdated, setBytecountsUpdated)
     struct Statistics stats;
     [self readStatisticsTo: &stats];
     return [NSString stringWithFormat: @"%llu", (unsigned long long) (stats.totalOutBytecount + stats.totalOutByteCountBeforeThisConnection)];
+}
+
+
+- (void) setProxy:(Proxy *)aProxy{
+    [proxy release];
+    proxy = [aProxy retain];
 }
 
 @end

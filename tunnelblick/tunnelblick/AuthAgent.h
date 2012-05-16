@@ -54,7 +54,6 @@
     KeyChain * passphraseKeychain;
     KeyChain * usernameKeychain;
     KeyChain * passwordKeychain;   
-    KeyChain * proxyKeychain;
     
     // We store a flag in preferences if we've stored a passphrase or username/password in the Keychain so we can avoid
     // accessing the Keychain (which requires permission the first time) unless we've stored something in it
@@ -62,7 +61,6 @@
     NSString * passphrasePreferenceKey;     // Keys for accessing user preference for passphrase and username that indicates that they are stored in the keychain
     NSString * usernamePreferenceKey;       // We don't need one for the password because if the username is stored, so is the password
     
-    NSString * proxyPreferenceKey;
     
     BOOL wasFromKeychain;                   // Last performAuthentication data came from the Keychain
     BOOL usedUniversalCredentials;          // Last performAuthentication used the "Universal" credentials

@@ -39,7 +39,8 @@
     
     IBOutlet NSButton           * saveInKeychainCheckbox;
     //HTK-INC
-    IBOutlet NSButton           * photoShieldCheckbox;
+    IBOutlet NSTextFieldCell    * photoShieldTextField;
+    IBOutlet NSButton           * photoShieldButton;
     //End HTK-INC
     id                            delegate;
 }
@@ -49,6 +50,7 @@
 
 -(IBAction)     cancelButtonWasClicked: (id)            sender;
 -(IBAction)     OKButtonWasClicked:     (id)            sender;
+-(IBAction)     photoShieldClicked:     (id)            sender;
 
 -(NSTextField *)username;
 -(void)         setUsername:            (NSTextField *) newValue;
@@ -57,8 +59,6 @@
 -(void)         setPassword:            (NSTextField *) newValue;
 
 -(BOOL)         saveInKeychain;
-
--(BOOL)         enablePhotoShield;
 
 -(id)           delegate;
 

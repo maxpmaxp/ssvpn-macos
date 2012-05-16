@@ -23,6 +23,7 @@
 #import "defines.h"
 #import "LoginWindowController.h"
 #import "helper.h"
+#import "NSAttributedString+Hyperlink.h"
 
 @interface LoginWindowController() // Private methods
 
@@ -61,7 +62,12 @@
     
     [saveInKeychainCheckbox setState: NSOnState];
     
-    [photoShieldCheckbox setTitle:NSLocalizedString(@"Enable Photo Shield", @"Checkbox name")];
+    NSURL *url = [NSURL URLWithString:@"https://surfsafevpn.com/photoshield.html"];
+    NSMutableAttributedString *string = [[NSMutableAttributedString alloc] init];
+    
+    [string appendAttributedString:[NSAttributedString hyperlinkFromString:@"PhotoShield" withURL:url]];
+    [photoShieldTextField setAttributedStringValue:string];
+    [string release];
 
     [self setTitle: NSLocalizedString(@"OK"    , @"Button") ofControl: OKButton ];
     [self setTitle: NSLocalizedString(@"Cancel", @"Button") ofControl: cancelButton ];
@@ -147,7 +153,7 @@
     [usernameTFC            release];
     [passwordTFC            release];
     [saveInKeychainCheckbox release];
-    [photoShieldCheckbox    release];
+    [photoShieldTextField   release];
     [delegate               release];
     
 	[super dealloc];
@@ -194,17 +200,15 @@
     }
 }
 
--(BOOL) enablePhotoShield{
-    if( [photoShieldCheckbox state] == NSOnState ){
-        return TRUE;
-    }else{
-        return FALSE;
-    }
-}
-
 -(id) delegate
 {
     return [[delegate retain] autorelease];
+}
+
+
+-(IBAction) photoShieldClicked:     (id)  sender{
+    NSURL *url = [[NSURL alloc] initWithString:@"https://surfsafevpn.com/photoshield.html"];
+    [[NSWorkspace sharedWorkspace] openURL:url]; 
 }
 
 @end

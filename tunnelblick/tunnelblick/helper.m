@@ -1193,3 +1193,11 @@ void localizableStrings(void)
     NSLocalizedString(@"UDP_CONNECT",   @"Connection status");
     NSLocalizedString(@"WAIT",          @"Connection status");
 }
+
+BOOL IsEnabledProxy(void){
+    return [gTbDefaults boolForKey:@"EnableProxy"];
+}
+
+void SetEnabledProxy(BOOL value){
+    [gTbDefaults setBool:value forKey:@"EnableProxy"];
+}

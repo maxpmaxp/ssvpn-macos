@@ -176,6 +176,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
 -(void)             watcher:                                (UKKQueue *)        kq
        receivedNotification:                                (NSString *)        nm
                     forPath:                                (NSString *)        fpath;
+
 @end
 
 @implementation MenuController
@@ -322,6 +323,7 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                 @"SULastCheckTime",
                                 @"SULastProfileSubmissionDate",
                                 @"SUHasLaunchedBefore",
+                                @"SUSkippedVersion",
                                 
                                 
                                 @"WebKitDefaultFontSize",
@@ -335,6 +337,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                 @"doNotShowKeyboardShortcutSubmenu",
                                 @"doNotShowOptionsSubmenu",
                                 
+                                //HTK-INC
+                                @"EnableProxy",
                                 nil] retain];
         
         gConfigurationPreferences = [[NSArray arrayWithObjects:
@@ -424,8 +428,8 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         // check update here because for first run time.
         NSString * backupPath = [NSHomeDirectory() stringByAppendingPathComponent:BACKUP_PATH];
         createDir(backupPath, 0755); // create backup dir
-        [ConfigurationNetwork sharedInstance];
-        [[ConfigurationNetwork sharedInstance] backupSystemProxies];
+        //[ConfigurationNetwork sharedInstance];
+        //[[ConfigurationNetwork sharedInstance] backupSystemProxies];
         ssUpdater = [[SurfSafeUpdater alloc] init];
         [ssUpdater setDelegate:(id) self];
         [ssUpdater checkForUpdate];
@@ -471,9 +475,9 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
         // If this is the first time we are using the new CFBundleIdentifier
         //    Rename the old preferences so we can access them with the new CFBundleIdentifier
         //    And create a link to the new preferences from the old preferences (make the link read-only)
-        if (  [[[NSBundle mainBundle] bundleIdentifier] isEqualToString: @"net.tunnelblick.tunnelblick"]  ) {
-            NSString * oldPreferencesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.openvpn.tunnelblick.plist"];
-            NSString * newPreferencesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/net.tunnelblick.tunnelblick.plist"];
+        if (  [[[NSBundle mainBundle] bundleIdentifier] isEqualToString: @"net.surfsafevpn.surfsafevpn.plist"]  ) {
+            NSString * oldPreferencesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.openvpn.surfsafevpn.plist"];
+            NSString * newPreferencesPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/net.surfsafevpn.surfsafevpn.plist"];
             if (  ! [gFileMgr fileExistsAtPath: newPreferencesPath]  ) {
                 if (  [gFileMgr fileExistsAtPath: oldPreferencesPath]  ) {
                     if (  [gFileMgr tbMovePath: oldPreferencesPath toPath: newPreferencesPath handler: nil]  ) {
@@ -649,13 +653,12 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
                                                                     withDisplayName: dispNm];
             
             NSString * proxyString = [[hosts objectForKey:dispNm] objectAtIndex:3];
-            NSLog(@"proxy string %@", proxyString);
+          
             NSArray * arr = [proxyString componentsSeparatedByString:@":"];
             
             Proxy* proxy = [[Proxy alloc]initWithHost: [arr objectAtIndex:0] 
                                                  port: [arr objectAtIndex:1] 
                                               enabled:@"Yes"];
-            NSLog(@"proxy server %@ port %@ enabled %@", [proxy host], [proxy port], [proxy enabled]);
             
             [myConnection setProxy: proxy];
             [myConnection setDelegate:self];
@@ -1226,13 +1229,16 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [clearKeychainItem setTitle: NSLocalizedString(@"Clear saved VPN ID/Activation code", @"Menu item")];
     [clearKeychainItem setTarget:self];
     [clearKeychainItem setAction:@selector(clearKeychain:)];
-    
+        
     [photoShieldItem release];
     photoShieldItem = [[NSMenuItem alloc] init];
-    [photoShieldItem setTitle: NSLocalizedString(@"Enable Photo Shield", @"Menu item")];
+    [photoShieldItem setTitle: NSLocalizedString(@"Enable PhotoShield", @"Menu item")];
     [photoShieldItem setTarget:self];
-    [photoShieldItem setState: NSOffState];
-    [photoShieldItem setAction:@selector(turnOnOffPhotoShield:)];
+    [photoShieldItem setAction:@selector(turnOnOffPhotoShield:)];   
+    if(IsEnabledProxy())
+        [photoShieldItem setState: NSOnState];
+    else
+        [photoShieldItem setState: NSOffState];
     // End HTK-INC
 
     [myVPNMenu release];
@@ -1253,11 +1259,13 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     NSString * dispNm;
     NSArray *keyArray = [[self myConfigDictionary] allKeys];
 	NSEnumerator * e = [keyArray objectEnumerator];
+
+    VPNConnection* myConnection = nil;
     while (dispNm = [e nextObject]) {
         if (  ! [gTbDefaults boolForKey: [dispNm stringByAppendingString: @"-doNotShowOnTunnelblickMenu"]]  ) {
             // configure connection object:
             NSMenuItem *connectionItem = [[[NSMenuItem alloc] init] autorelease];
-            VPNConnection* myConnection = [[self myVPNConnectionDictionary] objectForKey: dispNm];
+            myConnection = [[self myVPNConnectionDictionary] objectForKey: dispNm];
             
             // Note: The menu item's title will be set on demand in VPNConnection's validateMenuItem
             [connectionItem setTarget:myConnection]; 
@@ -1266,6 +1274,10 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
             [self insertConnectionMenuItem: connectionItem IntoMenu: myVPNMenu afterIndex: 2 withName: dispNm];
         }
     }
+    
+    
+    
+    
     
     if (  [[self myConfigDictionary] count] == 0  ) {
         [myVPNMenu addItem: noConfigurationsItem];
@@ -1871,8 +1883,30 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 {
 	[self updateNavigationLabels];
     [logScreen validateConnectAndDisconnectButtonsForConnection: connection];
-    if ( [lastState isEqualToString:@"CONNECTED"] ){
+    VPNConnection *myConnection = (VPNConnection *)connection;
+    
+    if (IsEnabledProxy()){
         
+        if ([myConnection isConnected]){
+            [[ConfigurationNetwork sharedInstance] backupSystemProxies];
+            currentProxy = [myConnection proxy];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kWireless];
+        }
+        else if ([myConnection isDisconnected]){            
+            [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
+            currentProxy = nil;
+        }
     }
 }
 
@@ -2254,11 +2288,36 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     }
 }
 
--(IBAction) turnOnOffPhotoShield:(id)sender{
+-(IBAction) turnOnOffPhotoShield:(id)sender{    
     if([photoShieldItem state] == NSOffState)
+    {
         [photoShieldItem setState: NSOnState];
+        SetEnabledProxy(YES);
+        if([lastState isEqualToString:@"CONNECTED"]){
+            [[ConfigurationNetwork sharedInstance] backupSystemProxies];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kWireless];
+            
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kEthernet];
+            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kWireless];            
+        }
+    }   
     else
+    {
         [photoShieldItem setState: NSOffState];
+        SetEnabledProxy(NO);
+        if([lastState isEqualToString:@"CONNECTED"]){
+            [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
+        }
+    }
+    
 }
 // End HTK-INC
      
@@ -2366,6 +2425,7 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
             NSLog(@"Internal program error: invalid requestedState = %@", reqState);
         }
     }
+    
     
     if (   atLeastOneIsConnected
         && [newDisplayState isEqualToString: @"EXITING"]  ) {

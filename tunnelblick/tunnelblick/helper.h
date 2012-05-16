@@ -97,3 +97,5 @@ BOOL           runningOnMountainLionOrNewer(void);
 
 OSStatus       MyGotoHelpPage           (CFStringRef pagePath, 
                                          CFStringRef anchorName);
+BOOL           IsEnabledProxy(void);
+void           SetEnabledProxy(BOOL value);
