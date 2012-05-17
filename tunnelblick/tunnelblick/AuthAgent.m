@@ -68,9 +68,9 @@ extern NSFileManager   * gFileMgr;
         
         
         //HTK-INC
-        passphraseKeychain      = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"privateKey" ];
-        usernameKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"username"   ];
-        passwordKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Global" withAccountName: @"password"   ];
+        passphraseKeychain      = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-PrivateKey" withAccountName: @"privateKey" ];
+        usernameKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Username" withAccountName: @"username"   ];
+        passwordKeychain        = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-Password" withAccountName: @"password"   ];
         
         passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             @"Global"   ];
         usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    @"Global"   ];

@@ -73,6 +73,7 @@ extern NSFileManager        * gFileMgr;
     return self;
 }
 
+
 - (void) backupSystemProxies{
     NSString * backupPath = [NSHomeDirectory() stringByAppendingPathComponent:BACKUP_PATH];
     NSString * proxyBackupPath = [backupPath stringByAppendingPathComponent:@"system.proxy.backup"];
@@ -82,13 +83,13 @@ extern NSFileManager        * gFileMgr;
         }else{
             [self getProxySetting:&systemWebProxyEth protocol:kWEB service:kEthernet];
             [self getProxySetting:&systemSWebProxyEth protocol:kSWEB service:kEthernet];
-            [self getProxySetting:&systemFtpProxyEth protocol:kFTP service:kEthernet];
-            [self getProxySetting:&systemSocketProxyEth protocol:kSOCKET service:kEthernet];
+            //[self getProxySetting:&systemFtpProxyEth protocol:kFTP service:kEthernet];
+            //[self getProxySetting:&systemSocketProxyEth protocol:kSOCKET service:kEthernet];
     
             [self getProxySetting:&systemWebProxyWiFi protocol:kWEB service:kWireless];
             [self getProxySetting:&systemSWebProxyWiFi protocol:kSWEB service:kWireless];
-            [self getProxySetting:&systemFtpProxyWiFi protocol:kFTP service:kWireless];
-            [self getProxySetting:&systemSocketProxyWiFi protocol:kSOCKET service:kWireless];
+            //[self getProxySetting:&systemFtpProxyWiFi protocol:kFTP service:kWireless];
+            //[self getProxySetting:&systemSocketProxyWiFi protocol:kSOCKET service:kWireless];
             
             [self saveProxiesToFile:proxyBackupPath];
         }   
@@ -103,13 +104,13 @@ extern NSFileManager        * gFileMgr;
     if(isBackup){
         [self setProxySetting:systemWebProxyEth protocol:kWEB service:kEthernet];
         [self setProxySetting:systemSWebProxyEth protocol:kSWEB service:kEthernet];
-        [self setProxySetting:systemFtpProxyEth protocol:kFTP service:kEthernet];
-        [self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kEthernet];
+        //[self setProxySetting:systemFtpProxyEth protocol:kFTP service:kEthernet];
+        //[self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kEthernet];
         
         [self setProxySetting:systemWebProxyEth protocol:kWEB service:kWireless];
         [self setProxySetting:systemSWebProxyEth protocol:kSWEB service:kWireless];
-        [self setProxySetting:systemFtpProxyEth protocol:kFTP service:kWireless];
-        [self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kWireless];
+        //[self setProxySetting:systemFtpProxyEth protocol:kFTP service:kWireless];
+        //[self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kWireless];
         
         NSError *err;
         [gFileMgr removeItemAtPath:proxyBackupPath error:&err];
@@ -294,13 +295,13 @@ extern NSFileManager        * gFileMgr;
     
     systemWebProxyEth = [self dict2proxy: [ethDict objectForKey:@"web"]];
     systemSWebProxyEth = [self dict2proxy: [ethDict objectForKey:@"sweb"]]; 
-    systemFtpProxyEth = [self dict2proxy: [ethDict objectForKey:@"ftp"]];
-    systemSocketProxyEth = [self dict2proxy: [ethDict objectForKey:@"socket"]];
+    //systemFtpProxyEth = [self dict2proxy: [ethDict objectForKey:@"ftp"]];
+    //systemSocketProxyEth = [self dict2proxy: [ethDict objectForKey:@"socket"]];
     
     systemWebProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"web"]];
     systemSWebProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"sweb"]];
-    systemFtpProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"ftp"]];
-    systemSocketProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"socket"]];    
+    //systemFtpProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"ftp"]];
+    //systemSocketProxyWiFi = [self dict2proxy: [wiDict objectForKey:@"socket"]];    
 }
 
 - (void) saveProxiesToFile:(NSString *)filename{
@@ -310,13 +311,13 @@ extern NSFileManager        * gFileMgr;
     
     [ethDict setObject: [self proxy2dict: systemWebProxyEth] forKey: @"web"];
     [ethDict setObject: [self proxy2dict: systemSWebProxyEth] forKey: @"sweb"];
-    [ethDict setObject: [self proxy2dict: systemFtpProxyEth] forKey: @"ftp"];
-    [ethDict setObject: [self proxy2dict: systemSocketProxyEth] forKey: @"socket"];
+    //[ethDict setObject: [self proxy2dict: systemFtpProxyEth] forKey: @"ftp"];
+    //[ethDict setObject: [self proxy2dict: systemSocketProxyEth] forKey: @"socket"];
     
     [wiDict setObject: [self proxy2dict: systemWebProxyWiFi] forKey: @"web"];
     [wiDict setObject: [self proxy2dict: systemSWebProxyWiFi] forKey: @"sweb"];
-    [wiDict setObject: [self proxy2dict: systemFtpProxyWiFi] forKey: @"ftp"];
-    [wiDict setObject: [self proxy2dict: systemSocketProxyWiFi] forKey: @"socket"];
+    //[wiDict setObject: [self proxy2dict: systemFtpProxyWiFi] forKey: @"ftp"];
+    //[wiDict setObject: [self proxy2dict: systemSocketProxyWiFi] forKey: @"socket"];
     
     [dict setObject:ethDict forKey:kEthernet];
     [dict setObject:wiDict forKey:kWireless];    
@@ -324,8 +325,8 @@ extern NSFileManager        * gFileMgr;
 }
 
 - (Proxy*) dict2proxy:(NSDictionary *)dict{
-    Proxy *proxy = [[Proxy alloc] initWithHost: [dict objectForKey:@"host"] 
-                                          port: [dict objectForKey:@"port"] 
+    Proxy *proxy = [[Proxy alloc] initWithHost: [dict objectForKey: @"host"] 
+                                          port: [dict objectForKey: @"port"] 
                                        enabled: [dict objectForKey: @"enabled"]];
     return [proxy autorelease];
 }

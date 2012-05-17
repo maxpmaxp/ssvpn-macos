@@ -170,7 +170,7 @@ BOOL needToCopyBundle(void);
     // HTK-INC
     BOOL                      outOfDate;
     Proxy                   * currentProxy;
-    
+    VPNConnection           * currentConnection;
 }
 
 // Menu actions

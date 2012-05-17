@@ -177,6 +177,9 @@ extern BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, NSS
        receivedNotification:                                (NSString *)        nm
                     forPath:                                (NSString *)        fpath;
 
+-(void)             setEnableWebSWebProxies: (Proxy*) proxy;
+-(void)             restoreWebSWebProxies;
+
 @end
 
 @implementation MenuController
@@ -1884,28 +1887,12 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
 	[self updateNavigationLabels];
     [logScreen validateConnectAndDisconnectButtonsForConnection: connection];
     VPNConnection *myConnection = (VPNConnection *)connection;
-    
-    if (IsEnabledProxy()){
-        
-        if ([myConnection isConnected]){
-            [[ConfigurationNetwork sharedInstance] backupSystemProxies];
-            currentProxy = [myConnection proxy];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kWireless];
-        }
-        else if ([myConnection isDisconnected]){            
-            [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
-            currentProxy = nil;
+    if([[currentConnection displayName] isEqualToString: [myConnection displayName]])
+    {
+        if (IsEnabledProxy()){
+            if ([myConnection isDisconnected]){            
+                [self restoreWebSWebProxies];
+            }
         }
     }
 }
@@ -2294,19 +2281,8 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
         [photoShieldItem setState: NSOnState];
         SetEnabledProxy(YES);
         if([lastState isEqualToString:@"CONNECTED"]){
-            [[ConfigurationNetwork sharedInstance] backupSystemProxies];
             
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kWEB service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSWEB service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kFTP service:kWireless];
-            
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kEthernet];
-            [[ConfigurationNetwork sharedInstance] setProxySetting:currentProxy protocol:kSOCKET service:kWireless];            
+            [self setEnableWebSWebProxies: [currentConnection proxy]];
         }
     }   
     else
@@ -2314,7 +2290,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
         [photoShieldItem setState: NSOffState];
         SetEnabledProxy(NO);
         if([lastState isEqualToString:@"CONNECTED"]){
-            [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
+            [self restoreWebSWebProxies];
         }
     }
     
@@ -2352,7 +2328,7 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  ! areLoggingOutOrShuttingDown  ) {
         [NSApp setAutoLaunchOnLogin: NO];
     }
-    
+    [self restoreWebSWebProxies];
     [self cleanup];
 }
 
@@ -2412,6 +2388,9 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
         if     (  [reqState isEqualToString: @"CONNECTED"]  ) {
             if (  [curState isEqualToString: @"CONNECTED"]  ) {
                 atLeastOneIsConnected = TRUE;
+                currentConnection = connection;
+                if (IsEnabledProxy())
+                    [self setEnableWebSWebProxies: [currentConnection proxy]];
             } else if (  ! [curState isEqualToString: @"EXITING"]  ) {
                 newDisplayState = @"ANIMATED";
                 break;
@@ -2431,6 +2410,7 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
         && [newDisplayState isEqualToString: @"EXITING"]  ) {
         newDisplayState = @"CONNECTED";
     }
+    
     
     // Display that unless it is already being displayed
     if (  ![newDisplayState isEqualToString: lastState]  ) {
@@ -3027,6 +3007,7 @@ static void signal_handler(int signalNumber)
         [self installSurfSafeUpdateHandler];
     }
 }
+
 
 // If we haven't set up the updateCheckAutomatically, updateSendProfileInfo, and updateAutomatically preferences,
 // and the corresponding Sparkle preferences have been set, copy Sparkle's settings to ours
@@ -4955,9 +4936,26 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
     }
     if (update)
         outOfDate = YES;
-        
-    
 }
 
+
+//*********************************************************************************************************
+//
+// SurfSafeVPN set restore proxies // HTK-INC
+//
+//*********************************************************************************************************
+-(void) setEnableWebSWebProxies:(Proxy*) proxy{
+    [[ConfigurationNetwork sharedInstance] backupSystemProxies];
+    
+    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kEthernet];
+    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kWireless];
+    
+    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kEthernet];
+    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kWireless];
+}
+
+-(void) restoreWebSWebProxies{
+    [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
+}
 
 @end
