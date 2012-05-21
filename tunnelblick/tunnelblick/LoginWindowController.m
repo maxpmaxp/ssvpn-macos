@@ -66,9 +66,11 @@
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] init];
     
     [string appendAttributedString:[NSAttributedString hyperlinkFromString:@"PhotoShield" withURL:url]];
+
     [photoShieldTextField setAttributedStringValue:string];
     [string release];
-
+    
+    
     [self setTitle: NSLocalizedString(@"OK"    , @"Button") ofControl: OKButton ];
     [self setTitle: NSLocalizedString(@"Cancel", @"Button") ofControl: cancelButton ];
     
@@ -79,6 +81,10 @@
 {
     [cancelButton setEnabled: YES];
     [OKButton setEnabled: YES];
+    if (IsEnabledProxy())
+        [photoShieldCheckbox setState:NSOnState];
+    else
+        [photoShieldCheckbox setState:NSOffState];
     [[self window] center];
     [[self window] display];
     [self showWindow: self];
@@ -154,6 +160,8 @@
     [passwordTFC            release];
     [saveInKeychainCheckbox release];
     [photoShieldTextField   release];
+    [photoShieldButton      release];
+    [photoShieldCheckbox    release];
     [delegate               release];
     
 	[super dealloc];
@@ -209,6 +217,15 @@
 -(IBAction) photoShieldClicked:     (id)  sender{
     NSURL *url = [[NSURL alloc] initWithString:@"https://surfsafevpn.com/photoshield.html"];
     [[NSWorkspace sharedWorkspace] openURL:url]; 
+}
+
+-(IBAction) photoShieldChecked:     (id)sender{
+    if ([photoShieldCheckbox state] == NSOnState){
+        SetEnabledProxy(true);
+    }else{
+        SetEnabledProxy(false);
+    }
+
 }
 
 @end

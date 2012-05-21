@@ -2378,6 +2378,13 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
     //   If any configuration should be closed but isn't, then show animation
     //   Otherwise, if any configurations are open, show open
     //              else show closed
+    
+    if (IsEnabledProxy()){
+        [photoShieldItem setState:NSOnState];
+    }else{
+        [photoShieldItem setState:NSOffState];
+    }
+    
     BOOL atLeastOneIsConnected = FALSE;
     NSString * newDisplayState = @"EXITING";
     VPNConnection * connection;
