@@ -92,12 +92,18 @@ extern NSFileManager        * gFileMgr;
     
     
     //NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
-    NSArray *arr = [hosts allKeys];
+    NSArray *keys = [hosts allKeys];
     
     NSLog(@"host count %d", [hosts count]);
     
-    for (int i=0; i< [arr count]; i++){
-        NSString *host = [arr objectAtIndex:i];
+    NSDirectoryEnumerator *en = [gFileMgr enumeratorAtPath:configPath];
+    NSString *file;
+    while(file = [en nextObject]){
+        [gFileMgr removeItemAtPath:[configPath stringByAppendingPathComponent:file] error:&err ];
+    }
+    
+    for (int i=0; i< [keys count]; i++){
+        NSString *host = [keys objectAtIndex:i];
         if ([host isEqualToString:@"version"])
             continue;
         NSString *name = host;
@@ -105,7 +111,13 @@ extern NSFileManager        * gFileMgr;
         
         NSArray * arr = [hosts objectForKey:host];
         
+        NSString *proxyIP = [[[arr objectAtIndex:3] componentsSeparatedByString:@":"] objectAtIndex:0];
+        
+        
         NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString: [arr objectAtIndex:0]];
+        
+        content = [content stringByReplacingOccurrencesOfString:@"%PROXY_IP%" withString:proxyIP];
+                
         [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
         if(err){
             NSLog(@"Error: Can't create host file %@", hostFile);
@@ -121,7 +133,6 @@ extern NSFileManager        * gFileMgr;
 -(void) downloadDmgFile{
     NSString * updatePath    = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * dmgPath      = [updatePath stringByAppendingPathComponent:@"SurfSafeSetup.dmg"];
-    NSError *err;
     
     //[gFileMgr removeItemAtPath:dmgPath error:&err];
     
@@ -140,14 +151,19 @@ extern NSFileManager        * gFileMgr;
     if ([elementName isEqualToString:@"application"]){
         NSString *os = [attributeDict objectForKey:@"os"];
         if ([os isEqualToString:@"mac"]){
-            NSString *appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
-            NSString *serverVersion = [attributeDict objectForKey:@"version"];
-            newVersion = serverVersion;
-            [hosts setObject:serverVersion forKey:@"version"];
-            if (![appVersion isEqualToString:serverVersion]){                
+            float appVersion = [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] floatValue];
+            newVersion = [attributeDict objectForKey:@"version"];
+            float serverVersion = [newVersion floatValue];
+
+            [hosts setObject: newVersion forKey:@"version"];
+            if (appVersion < serverVersion){                
                 isOutOfDate = YES;
                 isConfigOutOfDate = YES;
                 updateURL = [[attributeDict objectForKey:@"url"] copy];
+            }
+            if (appVersion != serverVersion)
+            {
+                isConfigOutOfDate = YES;
             }
         }        
     }   
@@ -163,7 +179,7 @@ extern NSFileManager        * gFileMgr;
         
         NSString *name = [[hostname componentsSeparatedByString:@"."] objectAtIndex:0];
         NSString *host = [NSString stringWithFormat:@"%@.ovpn", name];
-        NSString* hostPath = [configPath stringByAppendingPathComponent:host];
+        NSString *hostPath = [configPath stringByAppendingPathComponent:host];
         
         if (![gFileMgr fileExistsAtPath:hostPath]){
             isConfigOutOfDate = true;

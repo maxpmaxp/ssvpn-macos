@@ -1302,18 +1302,32 @@ void updateConfigurations(){
 
         
     NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
-    NSArray *arr = [hosts allKeys];
+    NSArray *keys = [hosts allKeys];
+    
+    NSDirectoryEnumerator *en = [gFileMgr enumeratorAtPath:configPath];
+    NSString *file;
+    while(file = [en nextObject]){
+        [gFileMgr removeItemAtPath:[configPath stringByAppendingPathComponent:file] error:&err ];
+    }
     
     //NSLog(@"host count %d", [hosts count]);
     
-    for (int i=0; i< [arr count]; i++){
-        NSString *host = [arr objectAtIndex:i];
+    for (int i=0; i< [keys count]; i++){
+        NSString *host = [keys objectAtIndex:i];
         if ([host isEqualToString:@"version"])
             continue;
         NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
         NSString *hostFile = [NSString stringWithFormat:@"%@/%@.ovpn", configPath, name];
         
-        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString:host];
+        NSArray * arr = [hosts objectForKey:host];
+        
+        NSString *proxyIP = [[[arr objectAtIndex:3] componentsSeparatedByString:@":"] objectAtIndex:0];
+        
+        
+        NSString *content = [template stringByReplacingOccurrencesOfString:@"%ADDRESS%" withString: [arr objectAtIndex:0]];
+        
+        content = [content stringByReplacingOccurrencesOfString:@"%PROXY_IP%" withString:proxyIP];
+        
         [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
         if(err){
             NSLog(@"Erorr: Can't create host file %@", hostFile);
