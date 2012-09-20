@@ -68,6 +68,7 @@
     [string appendAttributedString:[NSAttributedString hyperlinkFromString:@"PhotoShield" withURL:url]];
 
     [photoShieldTextField setAttributedStringValue:string];
+    [photoShieldStatusTF setStringValue:IsEnabledProxy()?@"ON":@"OFF"];
     [string release];
     
     
@@ -162,6 +163,7 @@
     [photoShieldTextField   release];
     [photoShieldButton      release];
     [photoShieldCheckbox    release];
+    [photoShieldStatusTF    release];
     [delegate               release];
     
 	[super dealloc];

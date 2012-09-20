@@ -47,16 +47,19 @@ extern NSFileManager        * gFileMgr;
     if (infoPlist)
     {
         NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
-        NSString *os = @"mac";
+//        NSString *os = @"mac";
         
         NSString *serverListUrl = [infoPlist objectForKey:@"SUServerListURL"];
         
-        NSString *requestURL = [NSString stringWithFormat:@"%@?v=%@&os=%@", serverListUrl, version, os];
+        NSString *requestURL = [NSString stringWithFormat:@"%@?v=%@", serverListUrl, version];
         
         NSLog(@"Check for SurfSafeVPN update %@ ", requestURL);
         
         //NSError *error;
         
+        //HTK-INC1
+        //requestURL = @"http://cfg.surfsafevpn.com/servers.mac.xml";
+        //HTK-INC1
         NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:requestURL]];
         if (data){
             NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
@@ -170,12 +173,20 @@ extern NSFileManager        * gFileMgr;
     else if ([elementName isEqualToString:@"host"]){
         NSString *configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
         //NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
-        NSString *hostname, *displayname, *location, *proxy;
+        NSString *hostname, *displayname, *location, *proxy, *photoshieldEnabled;
         
         hostname    = [attributeDict objectForKey:@"hostname"];
-        displayname = [attributeDict objectForKey:@"name"];
+        //HTK-INC1
+//        displayname = [attributeDict objectForKey:@"name"];
+        displayname = hostname;
         location    = [attributeDict objectForKey:@"location"];
-        proxy       = [attributeDict objectForKey:@"proxy"];
+//        proxy       = [attributeDict objectForKey:@"proxy"];
+        proxy = [attributeDict objectForKey:@"https_proxy"];    //HTK-INC2
+        if (!proxy) {
+            proxy = @"10.235.0.4:3128";
+        }
+        photoshieldEnabled = [attributeDict objectForKey:@"photoshield_enabled"];
+        //END HTK-INC1
         
         NSString *name = [[hostname componentsSeparatedByString:@"."] objectAtIndex:0];
         NSString *host = [NSString stringWithFormat:@"%@.ovpn", name];
@@ -187,7 +198,7 @@ extern NSFileManager        * gFileMgr;
         }
         
         
-        NSArray *arr = [[NSMutableArray alloc] initWithObjects:hostname, displayname, location, proxy, nil];
+        NSArray *arr = [[NSMutableArray alloc] initWithObjects:hostname, displayname, location, proxy, photoshieldEnabled, nil];
         [hosts setObject:arr forKey:name];
     }
     else if ([elementName isEqualToString:@"keys"]){

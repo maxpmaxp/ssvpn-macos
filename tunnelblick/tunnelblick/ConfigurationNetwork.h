@@ -58,7 +58,7 @@
 - (void) backupSystemProxies;
 - (void) restoreSystemProxies;
 
-- (void) setProxyEnable: (int) protocol enabled: (BOOL) enabled;
+- (void) setProxyEnable: (int) protocol enabled: (BOOL) enabled networkservice: (NSString*) networkService;
 - (BOOL) isProxyEnable: (int) protocol;
 - (BOOL) getProxySetting: (Proxy **) proxy protocol: (int) protocol service: (NSString*) service;
 - (BOOL) setProxySetting: (Proxy *) proxy protocol: (int) protocol service: (NSString*) service;

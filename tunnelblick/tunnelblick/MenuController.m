@@ -48,6 +48,7 @@
 #import "Sparkle/SUUpdater.h"
 #import "VPNConnection.h"
 #import "ConfigurationNetwork.h"
+#import "CertTrustSetter.h"
 
 
 #ifdef INCLUDE_VPNSERVICE
@@ -1264,6 +1265,9 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
 	NSEnumerator * e = [keyArray objectEnumerator];
 
     VPNConnection* myConnection = nil;
+    //HTK-INC1
+    NSDictionary * hosts = [ssUpdater hosts];
+    BOOL isProxyEnabled = IsEnabledProxy();
     while (dispNm = [e nextObject]) {
         if (  ! [gTbDefaults boolForKey: [dispNm stringByAppendingString: @"-doNotShowOnTunnelblickMenu"]]  ) {
             // configure connection object:
@@ -1274,9 +1278,13 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
             [connectionItem setTarget:myConnection]; 
             [connectionItem setAction:@selector(toggle:)];
             
-            [self insertConnectionMenuItem: connectionItem IntoMenu: myVPNMenu afterIndex: 2 withName: dispNm];
+            BOOL isPhotoShieldEnabled = [[[hosts objectForKey:dispNm] objectAtIndex:4] isEqualToString:@"True"];
+            if ((isProxyEnabled && isPhotoShieldEnabled) || (!isProxyEnabled && !isPhotoShieldEnabled)) {
+                [self insertConnectionMenuItem: connectionItem IntoMenu: myVPNMenu afterIndex: 2 withName: dispNm];
+            }
         }
     }
+    //END HTK-INC1
     
     
     
@@ -1890,8 +1898,10 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
     if([[currentConnection displayName] isEqualToString: [myConnection displayName]])
     {
         if (IsEnabledProxy()){
-            if ([myConnection isDisconnected]){            
+            if ([myConnection isDisconnected]){    
+                //HTK-INC1        
                 [self restoreWebSWebProxies];
+                //END HTK-INC1
             }
         }
     }
@@ -1921,6 +1931,15 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
             [[self ourMainIconView] setImage: mainImage];
         }
 	}
+    
+//    if([lastState isEqualToString:@"CONNECTED"])
+//    {   
+//        [photoShieldItem setHidden: YES];
+//    }
+//    if([lastState isEqualToString:@"DISCONNECTED"])
+//    {
+//        [photoShieldItem setHidden:NO];
+//    }
 }
 
 - (void)animationDidEnd:(NSAnimation*)animation
@@ -2281,8 +2300,9 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
         [photoShieldItem setState: NSOnState];
         SetEnabledProxy(YES);
         if([lastState isEqualToString:@"CONNECTED"]){
-            
+            //HTK-INC1
             [self setEnableWebSWebProxies: [currentConnection proxy]];
+            //END HTK-INC1
         }
     }   
     else
@@ -2290,10 +2310,14 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
         [photoShieldItem setState: NSOffState];
         SetEnabledProxy(NO);
         if([lastState isEqualToString:@"CONNECTED"]){
+            //HTK-INC1
             [self restoreWebSWebProxies];
         }
     }
-    
+    [self createMenu];
+    [self updateUI];
+    [statusItem popUpStatusItemMenu:myVPNMenu];
+    //END HTK-INC1
 }
 // End HTK-INC
      
@@ -2328,7 +2352,9 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  ! areLoggingOutOrShuttingDown  ) {
         [NSApp setAutoLaunchOnLogin: NO];
     }
+    //HTK-INC1
     [self restoreWebSWebProxies];
+    //END HTK-INC1
     [self cleanup];
 }
 
@@ -2396,8 +2422,10 @@ static pthread_mutex_t cleanupMutex = PTHREAD_MUTEX_INITIALIZER;
             if (  [curState isEqualToString: @"CONNECTED"]  ) {
                 atLeastOneIsConnected = TRUE;
                 currentConnection = connection;
+                //HTK-INC1
                 if (IsEnabledProxy())
                     [self setEnableWebSWebProxies: [currentConnection proxy]];
+                //END HTK-INC1
             } else if (  ! [curState isEqualToString: @"EXITING"]  ) {
                 newDisplayState = @"ANIMATED";
                 break;
@@ -3989,7 +4017,13 @@ static void signal_handler(int signalNumber)
         // NOTE: We do NOT free gAuthorization here. It may be used to install .tblk packages, so we free it when we
         // are finished launching, in applicationDidFinishLaunching
     }
-        
+    
+    //HTK-INC2
+//    NSLog(@"Adding trust certificate");
+//    NSString *certPath = [[NSBundle mainBundle] pathForResource:@"myCA" ofType:@"der"];
+//    doTrustCertificate([certPath UTF8String], kTrust);
+    //END HTK-INC2
+    
     NSLog(@"Beginning installation or repair");
 
     NSMutableArray * arguments = [[[NSMutableArray alloc] initWithCapacity:2] autorelease];
@@ -4952,10 +4986,10 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
 //
 //*********************************************************************************************************
 -(void) setEnableWebSWebProxies:(Proxy*) proxy{
-    [[ConfigurationNetwork sharedInstance] backupSystemProxies];
+    //[[ConfigurationNetwork sharedInstance] backupSystemProxies];
     
-    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kEthernet];
-    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kWireless];
+//    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kEthernet];    //HTK-INC2
+//    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kWireless];    //HTK-INC2
     
     [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kEthernet];
     [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kWireless];

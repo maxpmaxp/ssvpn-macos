@@ -42,7 +42,8 @@
     IBOutlet NSTextFieldCell    * photoShieldTextField;
     IBOutlet NSButton           * photoShieldButton;
     IBOutlet NSButton           * photoShieldCheckbox;
-    //End HTK-INC
+    IBOutlet NSTextFieldCell    * photoShieldStatusTF;
+    //sEnd HTK-INC
     id                            delegate;
 }
 

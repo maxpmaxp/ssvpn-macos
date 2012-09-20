@@ -78,9 +78,9 @@ extern NSFileManager        * gFileMgr;
     NSString * backupPath = [NSHomeDirectory() stringByAppendingPathComponent:BACKUP_PATH];
     NSString * proxyBackupPath = [backupPath stringByAppendingPathComponent:@"system.proxy.backup"];
     if(!isBackup){
-        if([gFileMgr fileExistsAtPath:proxyBackupPath]){
+        //if([gFileMgr fileExistsAtPath:proxyBackupPath]){
             [self loadProxiesFromFile: proxyBackupPath];
-        }else{
+        //}else{
             [self getProxySetting:&systemWebProxyEth protocol:kWEB service:kEthernet];
             [self getProxySetting:&systemSWebProxyEth protocol:kSWEB service:kEthernet];
             //[self getProxySetting:&systemFtpProxyEth protocol:kFTP service:kEthernet];
@@ -92,7 +92,7 @@ extern NSFileManager        * gFileMgr;
             //[self getProxySetting:&systemSocketProxyWiFi protocol:kSOCKET service:kWireless];
             
             [self saveProxiesToFile:proxyBackupPath];
-        }   
+        //}   
     }
     isBackup = YES;
 }
@@ -102,12 +102,12 @@ extern NSFileManager        * gFileMgr;
     NSString * proxyBackupPath = [backupPath stringByAppendingPathComponent:@"system.proxy.backup"];
     
     if(isBackup){
-        [self setProxySetting:systemWebProxyEth protocol:kWEB service:kEthernet];
+//        [self setProxySetting:systemWebProxyEth protocol:kWEB service:kEthernet]; //HTK-INC2
         [self setProxySetting:systemSWebProxyEth protocol:kSWEB service:kEthernet];
         //[self setProxySetting:systemFtpProxyEth protocol:kFTP service:kEthernet];
         //[self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kEthernet];
         
-        [self setProxySetting:systemWebProxyEth protocol:kWEB service:kWireless];
+//        [self setProxySetting:systemWebProxyEth protocol:kWEB service:kWireless]; //HTK-INC2
         [self setProxySetting:systemSWebProxyEth protocol:kSWEB service:kWireless];
         //[self setProxySetting:systemFtpProxyEth protocol:kFTP service:kWireless];
         //[self setProxySetting:systemSocketProxyEth protocol:kSOCKET service:kWireless];
@@ -173,10 +173,10 @@ extern NSFileManager        * gFileMgr;
     return NO;
 }
 
-- (void) setProxyEnable:(int)protocol enabled:(BOOL)enabled{
+- (void) setProxyEnable:(int)protocol enabled:(BOOL)enabled networkservice: (NSString*) networkService{
     NSString *cmd;
     NSString *state;
-    NSString *networkService = [self networkService];
+    //NSString *networkService = [self networkService];
     
     switch (protocol) {
         case kWEB:
@@ -227,9 +227,9 @@ extern NSFileManager        * gFileMgr;
     NSArray *args = [[NSArray alloc] initWithObjects:cmd, networkService, [proxy host], [proxy port], nil];    
     [self dotask:args];
     if ([[proxy enabled] isEqualToString:@"Yes"]){
-        [self setProxyEnable:protocol enabled:YES];
+        [self setProxyEnable:protocol enabled:YES networkservice:networkService];
     }else{
-        [self setProxyEnable:protocol enabled:NO];
+        [self setProxyEnable:protocol enabled:NO networkservice:networkService];
     }
     return YES;
 }
