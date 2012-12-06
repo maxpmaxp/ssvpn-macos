@@ -658,7 +658,7 @@ dnl check for LZO library
 dnl
 
 if test "$LZO" = "yes"; then
-LIBS="$LIBS -lz"
+   LIBS="$LIBS -lz"
    LZO_H=""
    AC_CHECKING([for LZO Library and Header files])
    AC_CHECK_HEADER(lzo/lzo1x.h,
