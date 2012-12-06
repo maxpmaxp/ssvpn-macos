@@ -8,10 +8,19 @@
 
 #import <Foundation/Foundation.h>
 #include "minizip/unzip.h"
+#include "minizip/zip.h"
 
 @protocol SSZipArchiveDelegate;
 
 @interface SSZipArchive : NSObject
+{
+	NSString *_path;
+	NSString *_filename;
+    zipFile _zip;
+}
+@property(nonatomic, retain) NSString *_path;
+@property(nonatomic, retain) NSString *_filename;
+@property(nonatomic) zipFile _zip;
 
 // Unzip
 + (BOOL)unzipFileAtPath:(NSString *)path toDestination:(NSString *)destination;

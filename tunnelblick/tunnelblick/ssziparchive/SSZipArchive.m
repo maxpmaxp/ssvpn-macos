@@ -20,11 +20,7 @@
 @end
 
 
-@implementation SSZipArchive {
-	NSString *_path;
-	NSString *_filename;
-    zipFile _zip;
-}
+@implementation SSZipArchive
 
 
 #pragma mark - Unzipping
