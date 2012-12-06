@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		181B749F1670BF4D00551FD2 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */; };
+		181B74A01670BF6F00551FD2 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -251,6 +253,8 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		181B749D1670BF4D00551FD2 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
+		181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -533,6 +537,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				181B749D1670BF4D00551FD2 /* ConfigurationNetwork.h */,
+				181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */,
 				63DAFD5311CBA9F4002F9F91 /* defines.h */,
 				6185E73E0E76045D0009C2FD /* helper.h */,
 				6185E73F0E76045D0009C2FD /* helper.m */,
@@ -1183,6 +1189,7 @@
 			files = (
 				61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */,
 				63F2AD9C12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
+				181B749F1670BF4D00551FD2 /* ConfigurationNetwork.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1228,6 +1235,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				181B74A01670BF6F00551FD2 /* ConfigurationNetwork.m in Sources */,
 				CE8E6D271550E5F80087E9D2 /* main.m in Sources */,
 				CE8E6D281550E5F80087E9D2 /* VPNConnection.m in Sources */,
 				CE8E6D291550E5F80087E9D2 /* NSArray+cArray.m in Sources */,
