@@ -48,7 +48,7 @@
 #import "Sparkle/SUUpdater.h"
 #import "VPNConnection.h"
 #import "ConfigurationNetwork.h"
-#import "CertTrustSetter.h"
+//#import "CertTrustSetter.h"
 
 
 #ifdef INCLUDE_VPNSERVICE
