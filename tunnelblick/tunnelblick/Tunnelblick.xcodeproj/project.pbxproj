@@ -164,7 +164,6 @@
 		CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */ = {isa = PBXBuildFile; fileRef = CEB1B1E915526E58000BC247 /* Readme.markdown */; };
 		CEB1B1F415526E58000BC247 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1EB15526E58000BC247 /* SSZipArchive.m */; };
 		CEB1B1F815527278000BC247 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB1B1F715527278000BC247 /* libz.dylib */; };
-		CEB1B1FA1552A15E000BC247 /* version.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = CEB1B1F91552A15E000BC247 /* version.xcconfig */; };
 		CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEC3830415537C4B0036B237 /* SurfSafe-Info.plist */; };
 		CECE45CE155A58C700779AA0 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1EB15526E58000BC247 /* SSZipArchive.m */; };
 		CECE45D0155A58D000779AA0 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E115526E58000BC247 /* ioapi.c */; };
@@ -1141,7 +1140,6 @@
 				CE8E6D251550E5F80087E9D2 /* SurfSafeVPN.sdef in Resources */,
 				CE8E6D7B15511CB10087E9D2 /* logo.png in Resources */,
 				CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */,
-				CEB1B1FA1552A15E000BC247 /* version.xcconfig in Resources */,
 				CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
