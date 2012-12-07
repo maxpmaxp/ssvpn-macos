@@ -165,16 +165,16 @@ tuntap-patch:
 
 tuntap: tuntap-patch
 	$(MAKE) -C tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/; \
-	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tap.kext tap-pre-lion.kext; \
-	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tun.kext tun-pre-lion.kext; \
+	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tap.kext tap-20090913.kext; \
+	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tun.kext tun-20090913.kext; \
 	$(MAKE) -C tuntap/$(TUNTAP_LION_DIR)/tuntap/; \
 	mv tuntap/$(TUNTAP_LION_DIR)/tuntap/tap.kext tap.kext; \
 	mv tuntap/$(TUNTAP_LION_DIR)/tuntap/tun.kext tun.kext
 
 tuntap-clean:
 	$(MAKE) -C tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/ clean; \
-	rm -f -R tap-pre-lion.kext; \
-	rm -f -R tun-pre-lion.kext; \
+	rm -f -R tap-20090913.kext; \
+	rm -f -R tun-20090913.kext; \
 	$(MAKE) -C tuntap/$(TUNTAP_LION_DIR)/tuntap/ clean; \
 	rm -f -R tap.kext; \
 	rm -f -R tun.kext
