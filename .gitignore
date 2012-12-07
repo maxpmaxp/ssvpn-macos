@@ -19,10 +19,12 @@ DerivedData
 #from c-code  .gitignore file
 # Object files
 *.o
+*.lo
 
 # Libraries
 *.lib
 *.a
+*.la
 
 # Shared objects (inc. Windows DLLs)
 *.dll
