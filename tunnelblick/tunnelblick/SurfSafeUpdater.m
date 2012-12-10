@@ -46,20 +46,14 @@ extern NSFileManager        * gFileMgr;
     NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
     if (infoPlist)
     {
-        NSString *version = [infoPlist objectForKey:@"CFBundleVersion"];
-//        NSString *os = @"mac";
         
-        NSString *serverListUrl = [infoPlist objectForKey:@"SUServerListURL"];
-        
-        NSString *requestURL = [NSString stringWithFormat:@"%@?v=%@", serverListUrl, version];
+        NSString *requestURL = @"http://cfg.surfsafevpn.com/servers.mac.xml";
         
         NSLog(@"Check for SurfSafeVPN update %@ ", requestURL);
         
         //NSError *error;
-        
-        //HTK-INC1
-        //requestURL = @"http://cfg.surfsafevpn.com/servers.mac.xml";
-        //HTK-INC1
+
+
         NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:requestURL]];
         if (data){
             NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
