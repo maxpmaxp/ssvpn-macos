@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		181B749F1670BF4D00551FD2 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */; };
 		181B74A01670BF6F00551FD2 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */; };
+		183661781675C86C00143582 /* Ico.icns in Resources */ = {isa = PBXBuildFile; fileRef = 183661761675C84B00143582 /* Ico.icns */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -255,6 +256,7 @@
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		181B749D1670BF4D00551FD2 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
 		181B749E1670BF4D00551FD2 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
+		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -666,6 +668,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				183661761675C84B00143582 /* Ico.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				63EA8CD913A3DB1E0034F47C /* Images */,
 				63EA8CDC13A3DBD50034F47C /* Scripts */,
@@ -1074,6 +1077,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				183661781675C86C00143582 /* Ico.icns in Resources */,
 				CE8E6CD81550E5F80087E9D2 /* InfoPlist.strings in Resources */,
 				CE8E6CD91550E5F80087E9D2 /* MainMenu.xib in Resources */,
 				CE8E6CDA1550E5F80087E9D2 /* openvpn.conf in Resources */,
