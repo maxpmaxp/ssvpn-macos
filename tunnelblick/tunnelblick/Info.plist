@@ -42,11 +42,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.5rc1</string>
 	<key>CFBundleSignature</key>
 	<string>OVPN</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.5rc1</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>NSAppleScriptEnabled</key>
