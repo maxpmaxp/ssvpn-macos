@@ -233,6 +233,7 @@ BOOL needToCopyBundle(void);
 
 // Getters and Setters
 
+-(NSString*)        getLastState; // used for correct hide of configures
 -(NSArray *)        animImages;
 -(NSImage *)        connectedImage;
 -(NSImage *)        mainImage;

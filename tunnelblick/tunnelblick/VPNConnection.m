@@ -2457,10 +2457,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 	return resultPort;
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)anItem 
+- (BOOL)validateMenuItem:(NSMenuItem *)anItem
 {
+ 
     SEL action = [anItem action];
-	
+
     if (action == @selector(toggle:)) 
     {
         VPNConnection *connection = [anItem target];
@@ -2475,6 +2476,12 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         else if ([connection isDisconnected]) 
         {
             state = NSOffState;
+            if (![[[NSApp delegate] getLastState] isEqualToString:(@"EXITING" )]){
+                [anItem setHidden:YES];
+            }
+            else{
+                [anItem setHidden:NO];
+            }
         }
         
         [anItem setState:state];

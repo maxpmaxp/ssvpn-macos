@@ -4857,6 +4857,11 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
     return [[largeMainImage retain] autorelease];
 }
 
+-(NSString*) getLastState
+{
+    return [[lastState retain] autorelease];
+}
+
 -(NSArray *) animImages
 {
     return [[animImages retain] autorelease];
