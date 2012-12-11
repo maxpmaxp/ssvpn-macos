@@ -4990,13 +4990,14 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
     
 //    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kEthernet];    //HTK-INC2
 //    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kWEB service:kWireless];    //HTK-INC2
-    
-    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kEthernet];
-    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kWireless];
+//11.12.2012 disabled setProxySetting call by Valik-Plunk
+/*    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kEthernet];
+    [[ConfigurationNetwork sharedInstance] setProxySetting:proxy protocol:kSWEB service:kWireless];*/
 }
 
 -(void) restoreWebSWebProxies{
-    [[ConfigurationNetwork sharedInstance] restoreSystemProxies];
+//11.12.2012 disabled setProxySetting call by Valik-Plunk
+    //[[ConfigurationNetwork sharedInstance] restoreSystemProxies];
 }
 
 @end
