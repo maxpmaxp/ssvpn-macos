@@ -174,6 +174,8 @@ struct Statistics {
 
 -(BOOL)             logFilesMayExist;
 
+-(void)             setLogFilesMayExist:(BOOL)newState;
+
 -(NSArray *)        modifyNameserverOptionList;
 
 -(void)             netsocket:                  (NetSocket *)   socket

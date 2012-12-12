@@ -4661,15 +4661,31 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
 }
 
 -(void) statisticsWindowsShow: (BOOL) showThem {
-
     NSEnumerator * e = [myVPNConnectionDictionary objectEnumerator];
     VPNConnection * connection;
     BOOL showingAny = FALSE;
     while (  connection = [e nextObject]  ) {
         if (  [connection logFilesMayExist]  ) {
             if (  showThem  ) {
-                [connection showStatusWindow];
-                showingAny = TRUE;
+                //vpl changes
+                if([lastState isEqualToString:(@"CONNECTED")]){
+                    VPNConnection *tmp = (VPNConnection *)[connectionArray objectAtIndex:0];
+                    if([[tmp displayName] isEqualToString:([connection displayName])]){
+                        [connection showStatusWindow];
+                        showingAny = TRUE;
+                    }
+                    else{
+                        [connection setLogFilesMayExist:NO];
+                    }
+                }
+                else if([lastState isEqualToString:(@"ANIMATED")]){
+                    [connection setLogFilesMayExist:NO];
+                }
+                else{
+                    [connection showStatusWindow];
+                    showingAny = TRUE;
+                }
+                //vpl changes end
             } else {
                 if (   [connection isConnected]
                     || [connection isDisconnected]  ) {
@@ -4695,8 +4711,8 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
 }
 
 -(void) showStatisticsWindows {
-
-    [self statisticsWindowsShow: YES];
+    if(mouseIsInMainIcon)
+        [self statisticsWindowsShow: YES];
 }
 
 -(void) hideStatisticsWindows {

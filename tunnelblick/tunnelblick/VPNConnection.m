@@ -2478,6 +2478,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             state = NSOffState;
             if (![[[NSApp delegate] getLastState] isEqualToString:(@"EXITING" )]){
                 [anItem setHidden:YES];
+                logFilesMayExist = NO;
             }
             else{
                 [anItem setHidden:NO];
@@ -2609,6 +2610,9 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     return logFilesMayExist;
 }
 
+-(void) setLogFilesMayExist:(BOOL)newState {
+    logFilesMayExist = newState;
+}
 TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelUpSound,   setTunnelUpSound)
 
 TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelDownSound, setTunnelDownSound)
