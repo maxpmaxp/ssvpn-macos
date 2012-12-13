@@ -10,6 +10,7 @@
 		183661781675C86C00143582 /* Ico.icns in Resources */ = {isa = PBXBuildFile; fileRef = 183661761675C84B00143582 /* Ico.icns */; };
 		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
+		18B588BE167A7E2800720E40 /* easy-rsa-Tunnelblick in Resources */ = {isa = PBXBuildFile; fileRef = 18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -257,6 +258,7 @@
 		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
 		1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
 		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
+		18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-Tunnelblick"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -668,6 +670,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */,
 				183661761675C84B00143582 /* Ico.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				63EA8CD913A3DB1E0034F47C /* Images */,
@@ -1151,6 +1154,7 @@
 				CE8E6D7B15511CB10087E9D2 /* logo.png in Resources */,
 				CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */,
 				CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */,
+				18B588BE167A7E2800720E40 /* easy-rsa-Tunnelblick in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

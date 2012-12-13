@@ -68,6 +68,6 @@
 	<key>SUServerListURL</key>
 	<string>http://surfsafevpn.com/servers.xml</string>
 	<key>SurfSafeURL</key>
-	<string>http://surfsafevpn.com</string>
+	<string>http://cfg.surfsafevpn.com</string>
 </dict>
 </plist>

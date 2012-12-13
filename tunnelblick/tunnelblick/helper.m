@@ -1103,7 +1103,7 @@ void updateEasyRsa(BOOL silently) {
         return;
     }
     
-    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-SurfSafeVPN" ofType: @""];
+    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-Tunnelblick" ofType: @""];
     
     // Standard copies of OS X doesn't include "make", so we simulate a little bit of it here.
     
