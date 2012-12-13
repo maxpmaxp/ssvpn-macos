@@ -1814,7 +1814,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         } else if ([command isEqualToString:@"NEED-OK"]) {
             // NEED-OK: MSG:Please insert TOKEN
             if ([line rangeOfString: @"Need 'token-insertion-request' confirmation"].length) {
-                /*if (NSDebugEnabled)*/ NSLog(@"Server wants token.");
+                if (NSDebugEnabled) NSLog(@"Server wants token.");
                 NSRange tokenNameRange = [parameterString rangeOfString: @"MSG:"];
                 NSString* tokenName = [parameterString substringFromIndex: tokenNameRange.location+4];
                 int needButtonReturn = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@",
@@ -1825,10 +1825,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                                                        NSLocalizedString(@"Cancel", @"Button"),
                                                        nil);
                 if (needButtonReturn == NSAlertDefaultReturn) {
-                    /*if (NSDebugEnabled)*/ NSLog(@"Write need ok.");
+                    if (NSDebugEnabled) NSLog(@"Write need ok.");
                     [managementSocket writeString:[NSString stringWithFormat:@"needok 'token-insertion-request' ok\r\n"] encoding:NSASCIIStringEncoding];
                 } else {
-                    /*if (NSDebugEnabled)*/ NSLog(@"Write need cancel.");
+                    if (NSDebugEnabled) NSLog(@"Write need cancel.");
                     [managementSocket writeString:[NSString stringWithFormat:@"needok 'token-insertion-request' cancel\r\n"] encoding:NSASCIIStringEncoding];
                 }
             }
