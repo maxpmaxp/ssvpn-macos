@@ -4687,8 +4687,8 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
                 }
                 //vpl changes end
             } else {
-                if (   [connection isConnected]
-                    || [connection isDisconnected]  ) {
+                /*if (   [connection isConnected]
+                    || [connection isDisconnected]  )*/ {
                     [connection fadeAway];
                 }
             }
@@ -4795,6 +4795,12 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
             [connection disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];
         } else if (  choice == statusWindowControllerConnectChoice  ) {
             [connection addToLog: @"*SurfSafeVPN: Connecting; Connect button pressed"];
+            if(![lastState isEqualToString:@"EXITING"]){
+                //disabled multi connection
+                //hide view
+                [connection fadeAway];
+                return;
+            }
             [connection connect: self userKnows: YES];
         } else {
             NSLog(@"Invalid choice -- statusWindowController:finishedWithChoice: %d forDisplayName: %@", choice, theName);

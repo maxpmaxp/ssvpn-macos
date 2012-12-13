@@ -115,6 +115,7 @@ struct Statistics {
     BOOL            logFilesMayExist;   // True iff have tried to connect (thus may have created log files) or if hooked up to existing OpenVPN process
     BOOL            showingStatusWindow; // True iff displaying statusScreen
     Proxy         * proxy;
+    unsigned int  stateAuthRecievedTimes; //stores number of "STATE:...,AUTH" comands recived via OpenVPN Management Interface
 }
 
 

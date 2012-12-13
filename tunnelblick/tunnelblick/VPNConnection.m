@@ -1656,6 +1656,45 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     }
 }
 
+-(void) authFailedFromServer: (NSString*)parameterString withLine:(NSString*)line
+{
+    authFailed = TRUE;
+    userWantsState = userWantsUndecided;
+    credentialsAskedFor = FALSE;
+    
+    id buttonWithDifferentCredentials = nil;
+    if (  [myAuthAgent authMode]  ) {               // Handle "auto-login" --  we were never asked for credentials, so authMode was never set
+        if ([myAuthAgent keychainHasCredentials]) { //                         so credentials in Keychain (if any) were never used, so we needn't delete them to rery
+            buttonWithDifferentCredentials = NSLocalizedString(@"Try again with different credentials", @"Button");
+        }
+    }
+    int alertVal = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@", [self displayName], NSLocalizedString(@"Authentication failed", @"Window title")],
+                                   NSLocalizedString(@"The credentials (passphrase or username/password) were not accepted by the remote VPN server.", @"Window text"),
+                                   NSLocalizedString(@"Try again", @"Button"),  // Default
+                                   buttonWithDifferentCredentials,              // Alternate
+                                   NSLocalizedString(@"Cancel", @"Button"));    // Other
+    if (alertVal == NSAlertDefaultReturn) {
+        userWantsState = userWantsRetry;                // User wants to retry
+        
+    } else if (alertVal == NSAlertAlternateReturn) {
+        [myAuthAgent deleteCredentialsFromKeychain];    // User wants to retry after deleting credentials
+        [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES]; //in other case same behaviour as in simple retry
+        userWantsState = userWantsRetry;
+    } else {
+        userWantsState = userWantsAbandon;              // User wants to cancel or an error happened, so disconnect
+        [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
+        [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      // (User requested it by cancelling)
+    }
+    
+    [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
+                                     target: self
+                                   selector: @selector(afterFailureHandler:)
+                                   userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
+                                              parameterString, @"parameterString",
+                                              line, @"line", nil]
+                                    repeats: NO];
+}
+
 -(void) processState: (NSString *) newState dated: (NSString *) dateTime
 {
     if ([newState isEqualToString: @"EXITING"]) {
@@ -1719,9 +1758,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         [self setStateFromLine:line];
 		return;
 	}
-
+    
     // "Real time" output from OpenVPN.
-     NSRange separatorRange = [line rangeOfString: @":"];
+    
+    NSRange separatorRange = [line rangeOfString: @":"];
     if (separatorRange.length) {
         NSRange commandRange = NSMakeRange(1, separatorRange.location-1);
         NSString* command = [line substringWithRange: commandRange];
@@ -1732,46 +1772,24 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             NSArray* parameters = [parameterString componentsSeparatedByString: @","];
             NSString* state = [parameters objectAtIndex: 1];
             [self processState: state dated: nil];
+            if ([state isEqualToString:@"AUTH"]) {
+                //count auth calls
+                stateAuthRecievedTimes++;
+                //set 3 tryies to connect 
+                if(stateAuthRecievedTimes > 3){
+                    stateAuthRecievedTimes = 0;
+                    //start the same routine as on Auth Failed
+                    [self authFailedFromServer:parameterString withLine:line];
+                }
+            }
             
         } else if ([command isEqualToString: @"PASSWORD"]) {
             if (   [line rangeOfString: @"Failed"].length
                 || [line rangeOfString: @"failed"].length  ) {
                 
-                authFailed = TRUE;
-                userWantsState = userWantsUndecided;
-                credentialsAskedFor = FALSE;
-                
-                id buttonWithDifferentCredentials = nil;
-                if (  [myAuthAgent authMode]  ) {               // Handle "auto-login" --  we were never asked for credentials, so authMode was never set
-                    if ([myAuthAgent keychainHasCredentials]) { //                         so credentials in Keychain (if any) were never used, so we needn't delete them to rery
-                        buttonWithDifferentCredentials = NSLocalizedString(@"Try again with different credentials", @"Button");
-                    }
-                }
-                int alertVal = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@", [self displayName], NSLocalizedString(@"Authentication failed", @"Window title")],
-                                               NSLocalizedString(@"The credentials (passphrase or username/password) were not accepted by the remote VPN server.", @"Window text"),
-                                               NSLocalizedString(@"Try again", @"Button"),  // Default
-                                               buttonWithDifferentCredentials,              // Alternate
-                                               NSLocalizedString(@"Cancel", @"Button"));    // Other
-                if (alertVal == NSAlertDefaultReturn) {
-                    userWantsState = userWantsRetry;                // User wants to retry
-                    
-                } else if (alertVal == NSAlertAlternateReturn) {
-                    [myAuthAgent deleteCredentialsFromKeychain];    // User wants to retry after deleting credentials
-                    userWantsState = userWantsRetry;
-                } else {
-                    userWantsState = userWantsAbandon;              // User wants to cancel or an error happened, so disconnect
-                    [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
-                    [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      // (User requested it by cancelling)
-                }
-                
-                [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
-                                                 target: self
-                                               selector: @selector(afterFailureHandler:)
-                                               userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
-                                                          parameterString, @"parameterString",
-                                                          line, @"line", nil]
-                                                repeats: NO];
-            } else {
+                [self authFailedFromServer:parameterString withLine:line];
+            }
+            else {
                 // Password request from server.
                 if (  authFailed  ) {
                     if (  userWantsState == userWantsUndecided  ) {
@@ -1796,7 +1814,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         } else if ([command isEqualToString:@"NEED-OK"]) {
             // NEED-OK: MSG:Please insert TOKEN
             if ([line rangeOfString: @"Need 'token-insertion-request' confirmation"].length) {
-                if (NSDebugEnabled) NSLog(@"Server wants token.");
+                /*if (NSDebugEnabled)*/ NSLog(@"Server wants token.");
                 NSRange tokenNameRange = [parameterString rangeOfString: @"MSG:"];
                 NSString* tokenName = [parameterString substringFromIndex: tokenNameRange.location+4];
                 int needButtonReturn = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@",
@@ -1807,10 +1825,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                                                        NSLocalizedString(@"Cancel", @"Button"),
                                                        nil);
                 if (needButtonReturn == NSAlertDefaultReturn) {
-                    if (NSDebugEnabled) NSLog(@"Write need ok.");
+                    /*if (NSDebugEnabled)*/ NSLog(@"Write need ok.");
                     [managementSocket writeString:[NSString stringWithFormat:@"needok 'token-insertion-request' ok\r\n"] encoding:NSASCIIStringEncoding];
                 } else {
-                    if (NSDebugEnabled) NSLog(@"Write need cancel.");
+                    /*if (NSDebugEnabled)*/ NSLog(@"Write need cancel.");
                     [managementSocket writeString:[NSString stringWithFormat:@"needok 'token-insertion-request' cancel\r\n"] encoding:NSASCIIStringEncoding];
                 }
             }
@@ -2419,7 +2437,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                 break;
             }
         }
-        if (  [[NSApp delegate] mouseIsInsideAnyView]  ) {
+        if (  [[NSApp delegate] mouseIsInsideAnyView] ) {
+            okToFade = FALSE;
+        }
+        if ([[[NSApp delegate] getLastState] isEqualToString:(@"ANIMATED")]){
             okToFade = FALSE;
         }
         
