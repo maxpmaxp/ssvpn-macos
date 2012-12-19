@@ -7,7 +7,7 @@ INCLUDE=-I../..
 
 CC=gcc
 MACOSX_DEPLOYMENT_TARGET=10.6
-OSX_VERSION=10.7
+OSX_VERSION=10.8
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VERSION).sdk
 
 CC_FLAGS=-Wall -isysroot $(SDKROOT) -Os -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET) -arch i386

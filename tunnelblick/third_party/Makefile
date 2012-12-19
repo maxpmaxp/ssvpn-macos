@@ -3,7 +3,7 @@
 
 CC=gcc
 MACOSX_DEPLOYMENT_TARGET=10.6
-OSX_VERSION=10.7
+OSX_VERSION=10.8
 #looking for xcode sdk in a new folder for sdks (xcode.app/...)
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VERSION).sdk
 #SDKROOT=/Developer/SDKs/MacOSX10.6.sdk
