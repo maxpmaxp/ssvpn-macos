@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Jonathan Bullard
+ * Copyright 2012 Jonathan K. Bullard
  *
  *  This file is part of Tunnelblick.
  *
@@ -19,24 +19,12 @@
  *  or see http://www.gnu.org/licenses/.
  */
 
-
 #import <Cocoa/Cocoa.h>
-#import "Sparkle/SUUpdater.h"
 
+NSString *	easyRsaPathToUse                (BOOL mustExistAndBeADir);
 
-@interface ConfigurationUpdater : NSObject {
-    NSString            * cfgBundlePath;
-    SUUpdater           * cfgUpdater;
-    NSBundle            * cfgBundle;
-    NSURL               * cfgFeedURL;
-    NSTimeInterval        cfgCheckInterval;
-}
+void		installOrUpdateOurEasyRsa       (void);
 
-// Sets up the updater for later use
--(void) setup;
+void        openTerminalWithEasyRsaFolder   (NSString * userPath);
 
-// Starts the updater checking for updates
-// withUI should be TRUE to present the UI, FALSE to check in the background
--(void) startWithUI: (BOOL) withUI;
-
-@end
+void		secureOurEasyRsa                (void);

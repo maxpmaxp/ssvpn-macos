@@ -45,12 +45,17 @@
 #endif
 
 
-BOOL needToRunInstaller(BOOL * changeOwnershipAndOrPermissions,
-                        BOOL * moveLibraryOpenVPN,
-                        BOOL * restoreDeploy,
-                        BOOL * needsPkgRepair,
-                        BOOL * needsBundleCopy,
-                        BOOL inApplications); 
+enum TerminationReason {
+    terminatingForUnknownReason    = 0,
+    terminatingBecauseOfLogout     = 1,
+    terminatingBecauseOfShutdown   = 2,
+    terminatingBecauseOfRestart    = 3,
+    terminatingBecauseOfQuit       = 4,
+    terminatingBecauseOfError      = 5,
+    terminatingBecauseOfFatalError = 6
+};
+
+unsigned needToRunInstaller(BOOL inApplications);
 
 BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications);
 BOOL needToMoveLibraryOpenVPN(void);
@@ -107,6 +112,9 @@ BOOL needToCopyBundle(void);
     
     NSMutableArray          * pIDsWeAreTryingToHookUpTo;    // List of process IDs for processes we are trying to hookup to
     
+    NSMutableArray          * activeIPCheckThreads;         // List of threadIDs of active IPCheck threads that have not been queued for cancellation
+    NSMutableArray          * cancellingIPCheckThreads;     // List of threadIDs of IPCheck threads that have been queued for cancellation
+    
     NSString                * lastState;                    // Most recent state of connection (EXITING, SLEEP, etc.)
     
     UKKQueue                * myQueue;                      // UKKQueue item for monitoring the configuration file folder
@@ -147,6 +155,8 @@ BOOL needToCopyBundle(void);
     BOOL                      mouseIsInMainIcon;            // Indicates that the mouse is over the Tunnelblick (not tracked unless preference says to)
     BOOL                      mouseIsInStatusWindow;        // Indicates that the mouse is over the icon or a status window
     
+	BOOL					  signatureIsInvalid;			// Indicates the app is digitally signed but the signature does not check out
+	
     unsigned                  tapCount;                     // # of instances of openvpn that are using our tap kext
     unsigned                  tunCount;                     // # of instances of openvpn that are using our tun kext
     
@@ -154,7 +164,7 @@ BOOL needToCopyBundle(void);
     EventHotKeyRef            hotKeyRef;                    // Reference for the current hot key
     UInt32                    hotKeyKeyCode;                // Current hot key: Virtual key code
     UInt32                    hotKeyModifierKeys;           //                  Modifier keys code or 0 to indicate no hot key active
-    int                       hotKeyCurrentIndex;           // Index of the hot key that is currently in use (0 = none, else 1...12)
+    unsigned                  hotKeyCurrentIndex;           // Index of the hot key that is currently in use (0 = none, else 1...MAX_HOTKEY_IX)
 
     NSMutableArray          * customMenuScripts;            // Array of paths to the scripts for custom menu items
     int                       customMenuScriptIndex;        // Index used while building the customMenuScripts array
@@ -188,11 +198,11 @@ BOOL needToCopyBundle(void);
 -(void)             changedDisplayConnectionTimersSettings;
 -(void)             changedMonitorConfigurationFoldersSettings;
 -(void)             checkForUpdates:                        (id)                sender;
--(void)             cleanup;
--(void)             createLinkToApp;
+-(BOOL)             cleanup;
 -(void)             createMenu;
 -(void)             createStatusItem;
 -(unsigned)         decrementTapCount;
+-(NSURL *)          getIPCheckURL;
 -(void)             installConfigurationsUpdateInBundleAtPathHandler: (NSString *)path;
 -(void)             installConfigurationsUpdateInBundleAtPath: (NSString *)     path;
 -(void)             installSurfSafeUpdateHandler;
@@ -217,8 +227,15 @@ BOOL needToCopyBundle(void);
 -(NSString *)       openVPNLogHeader;
 -(void)             reconnectAfterBecomeActiveUser;
 -(void)             removeConnection:                       (id)                sender;
+-(BOOL)             runInstaller:                           (unsigned)          installerFlags
+                  extraArguments:                           (NSArray *)         extraArguments;
+
+-(BOOL)             runInstaller: (unsigned) installFlags
+                  extraArguments: (NSArray *) extraArguments
+                 usingAuthRefPtr: (AuthorizationRef *) authRef
+                         message: (NSString *) message;
 -(void)             saveConnectionsToRestoreOnRelaunch;
--(void)             setHotKeyIndex:                         (int)               newIndex;
+-(void)             setHotKeyIndex:                         (unsigned)          newIndex;
 -(void)             setState:                               (NSString *)        newState;
 -(void)             setupSparklePreferences;
 -(NSArray *)        sortedSounds;
@@ -230,6 +247,13 @@ BOOL needToCopyBundle(void);
 -(void)             showStatisticsWindows;
 -(void)             hideStatisticsWindows;
 -(void)             updateUI;
+-(void)             terminateBecause:                       (enum TerminationReason) reason;
+
+-(void) addActiveIPCheckThread: (NSString *) threadID;
+-(void) cancelIPCheckThread: (NSString *) threadID;
+-(void) cancelAllIPCheckThreadsForConnection: (VPNConnection *) connection;
+-(BOOL) isOnCancellingListIPCheckThread: (NSString *) threadID;
+-(void) haveFinishedIPCheckThread: (NSString *) threadID;
 
 // Getters and Setters
 
@@ -264,6 +288,9 @@ BOOL needToCopyBundle(void);
 -(NSArray *)        applescriptConfigurationList;
 
 TBPROPERTY_READONLY(NSStatusItem *, statusItem)
+TBPROPERTY_READONLY(NSMenu *,		myVPNMenu)
+TBPROPERTY_READONLY(NSMutableArray *, activeIPCheckThreads)
+TBPROPERTY_READONLY(NSMutableArray *, cancellingIPCheckThreads)
 
 TBPROPERTY(MainIconView *, ourMainIconView,           setOurMainIconView)
 TBPROPERTY(NSDictionary *, myVPNConnectionDictionary, setMyVPNConnectionDictionary)

@@ -69,5 +69,7 @@
 	<string>http://surfsafevpn.com/servers.xml</string>
 	<key>SurfSafeURL</key>
 	<string>http://cfg.surfsafevpn.com</string>
+	<key>IPCheckURL</key>
+	<string>http://tunnelblick.net/ipinfo</string>
 </dict>
 </plist>

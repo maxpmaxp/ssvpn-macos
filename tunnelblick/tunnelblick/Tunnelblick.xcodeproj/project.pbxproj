@@ -8,8 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		183661781675C86C00143582 /* Ico.icns in Resources */ = {isa = PBXBuildFile; fileRef = 183661761675C84B00143582 /* Ico.icns */; };
+		184CB7421696CC80006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7451696D258006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7491696FB6B006541D4 /* easyRsa.m in Sources */ = {isa = PBXBuildFile; fileRef = 184CB7471696FB65006541D4 /* easyRsa.m */; };
 		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
+		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		18B588BE167A7E2800720E40 /* easy-rsa-Tunnelblick in Resources */ = {isa = PBXBuildFile; fileRef = 18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
@@ -256,8 +261,12 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
+		184CB7461696FB65006541D4 /* easyRsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easyRsa.h; sourceTree = "<group>"; };
+		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
 		1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
 		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
+		18A4C32416847276006F3BC0 /* sharedRoutines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedRoutines.h; sourceTree = "<group>"; };
+		18A4C32516847276006F3BC0 /* sharedRoutines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sharedRoutines.m; sourceTree = "<group>"; };
 		18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-Tunnelblick"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
@@ -541,6 +550,10 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				184CB7461696FB65006541D4 /* easyRsa.h */,
+				184CB7471696FB65006541D4 /* easyRsa.m */,
+				18A4C32416847276006F3BC0 /* sharedRoutines.h */,
+				18A4C32516847276006F3BC0 /* sharedRoutines.m */,
 				1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */,
 				1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */,
 				63DAFD5311CBA9F4002F9F91 /* defines.h */,
@@ -1195,6 +1208,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7451696D258006541D4 /* sharedRoutines.m in Sources */,
 				61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */,
 				63F2AD9C12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
 				1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */,
@@ -1205,6 +1219,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */,
 				61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */,
 				63F2AD9D12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
 				CECE45CE155A58C700779AA0 /* SSZipArchive.m in Sources */,
@@ -1218,6 +1233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7421696CC80006541D4 /* sharedRoutines.m in Sources */,
 				63179444118D7EC20057ACAF /* atsystemstart.m in Sources */,
 				63F2AD9E12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
 			);
@@ -1243,6 +1259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7491696FB6B006541D4 /* easyRsa.m in Sources */,
 				1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */,
 				CE8E6D271550E5F80087E9D2 /* main.m in Sources */,
 				CE8E6D281550E5F80087E9D2 /* VPNConnection.m in Sources */,
@@ -1299,6 +1316,7 @@
 				CEB1B1F215526E58000BC247 /* zip.c in Sources */,
 				CEB1B1F415526E58000BC247 /* SSZipArchive.m in Sources */,
 				CECE45D7155A6F5700779AA0 /* SurfSafeUpdater.m in Sources */,
+				18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -44,12 +44,12 @@
 
 -(BOOL)                     copyConfigPath:             (NSString *)                sourcePath
                                     toPath:             (NSString *)                targetPath
-                              usingAuthRef:             (AuthorizationRef)          authRef
+                           usingAuthRefPtr:             (AuthorizationRef *)        authRefPtr
                                 warnDialog:             (BOOL)                      warn
                                moveNotCopy:             (BOOL)                      moveInstead;
 
 -(BOOL)                     deleteConfigPath:           (NSString *)        targetPath
-                                usingAuthRef:           (AuthorizationRef)  authRef
+                             usingAuthRefPtr:           (AuthorizationRef *) authRefPtr
                                   warnDialog:           (BOOL)              warn;
 
 -(void)                     editConfigurationAtPath:    (NSString *)        thePath
@@ -59,11 +59,7 @@
 
 -(NSMutableDictionary *)    getConfigurations;
 
--(NSString *)               getConfigurationToUse:      (NSString *)        cfgPath
-                                            orAlt:      (NSString *)        altCfgPath;
-
--(NSString *)               makeTemporarySampleTblkWithName: (NSString *)   name
-                                         andKey:        (NSString *)        key;
+-(NSString *)               makeTemporarySampleTblkWithName: (NSString *)   name;
 
 -(void)                     openDotTblkPackages:        (NSArray *)         filePaths
                                       usingAuth:        (AuthorizationRef)  authRef
@@ -78,6 +74,5 @@
 -(BOOL)                     unprotectConfigurationFile: (NSString *)        filePath;
 
 -(BOOL)                     userCanEditConfiguration:   (NSString *)        filePath;
-
 
 @end

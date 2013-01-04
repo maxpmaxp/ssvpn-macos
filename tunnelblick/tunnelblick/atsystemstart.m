@@ -39,6 +39,7 @@
 #import <Foundation/Foundation.h>
 #import <sys/stat.h>
 #import "defines.h"
+#import "sharedRoutines.h"
 #import "NSFileManager+TB.h"
 
 // Indices into argv[] for items we use. The first is an argument to this program; the other two are arguments to openvpnstart
@@ -47,6 +48,7 @@
 #define ARG_CFG_LOC      7
 
 NSAutoreleasePool   * pool;
+NSString *            gDeployPath;
 
 void        setNoStart(NSString * plistPath);
 void        setStart(NSString * plistPath, NSString * daemonDescription, NSString * daemonLabel, int argc, char* argv[]);
@@ -58,6 +60,34 @@ void        deleteFlagFile(void);
 int main(int argc, char* argv[])
 {
     pool = [[NSAutoreleasePool alloc] init];
+    
+    NSBundle * ourBundle     = [NSBundle mainBundle];
+    NSString * resourcesPath = [ourBundle bundlePath];
+    NSArray  * execComponents = [resourcesPath pathComponents];
+    if (  [execComponents count] < 3  ) {
+        NSLog(@"Tunnelblick: too few execComponents; resourcesPath = %@", resourcesPath);
+        errorExit();
+    }
+	NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 3];
+	if (  [ourAppName hasSuffix: @".app"]  ) {
+		ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+	}
+	gDeployPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
+	
+#ifdef TBDebug
+    NSLog(@"Tunnelblick: WARNING: This is an insecure copy of atsystemstart to be used for debugging only!");
+#else
+    if (   ([execComponents count] != 5)
+        || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
+        || [[execComponents objectAtIndex: 1] isNotEqualTo: @"Applications"]
+        //                                                  Allow any name for Tunnelblick.app
+        || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
+        || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
+        ) {
+        NSLog(@"SurfsafeVPN must be in /Applications (bundlePath = %@)", resourcesPath);
+        errorExit();
+    }
+#endif
     
     // Validate our arguments
     if (   (argc < 5)
@@ -98,6 +128,11 @@ int main(int argc, char* argv[])
     exit(EXIT_SUCCESS);
 }
 
+void appendLog(NSString * msg)
+{
+    NSLog(@"%@", msg);
+}
+
 void setNoStart(NSString * plistPath)
 {
     NSFileManager * fm = [NSFileManager defaultManager];
@@ -125,8 +160,8 @@ void setStart(NSString * plistPath, NSString * daemonDescription, NSString * dae
     NSString * openvpnstartPath = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
     
     NSMutableArray * arguments = [NSMutableArray arrayWithObject: openvpnstartPath];
-    int i;
-    for (i=2; i<argc; i++) {
+    unsigned i;
+    for (i=2; i< (unsigned) argc; i++) {
         [arguments addObject: [NSString stringWithUTF8String: argv[i]]];
     }
     
@@ -166,14 +201,13 @@ NSString * getWorkingDirectory(int argc, char* argv[])
     
     unsigned  cfgLocCode = 0;
     if (  argc > ARG_CFG_LOC  ) {
-        cfgLocCode = atoi(argv[ARG_CFG_LOC]);
+        cfgLocCode = cvt_atou(argv[ARG_CFG_LOC], @"cfgLocCode");
     }
     
     if (  cfgLocCode == CFG_LOC_DEPLOY  ) {
-        NSString * deployDirectory = [[NSBundle mainBundle] pathForResource: @"Deploy" ofType: nil];
-        cfgPath = [deployDirectory stringByAppendingPathComponent: cfgFile];
+        cfgPath = [gDeployPath stringByAppendingPathComponent: cfgFile];
     } else if (cfgLocCode == CFG_LOC_SHARED  ) {
-        cfgPath = [@"/Library/Application Support/SurfsafeVPN/Shared" stringByAppendingPathComponent: cfgFile];
+        cfgPath = [L_AS_T_SHARED stringByAppendingPathComponent: cfgFile];
     } else {
         NSLog(@"SurfsafeVPN atsystemstart: Invalid cfgLocCode = %d", cfgLocCode);
         errorExit();

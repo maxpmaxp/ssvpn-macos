@@ -460,7 +460,7 @@ extern TBUserDefaults * gTbDefaults;
     NSString * encodedPassword     = [self encode: password];
     NSString * encodedCaptcha      = [self encode: captcha];
     
-    NSString * encodedVersion = [self encode: tunnelblickVersion([NSBundle mainBundle])];
+    NSString * encodedVersion = [self encode: surfsafevpnVersion([NSBundle mainBundle])];
     
     NSString * getRegisteredURL = [NSString stringWithFormat: @"%@/api/register.php?code=%@&sid=%@&email=%@&password=%@&tos=%@&client=mac&version=%@",
                                    baseUrlString,
