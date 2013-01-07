@@ -46,16 +46,11 @@
 //     INSTALLER_COPY_APP:      set to copy this app to /Applications/SurfsafeVPN.app
 //                                  (Any existing /Applications/SurfsafeVPN.app will be moved to the Trash)
 //
+//     INSTALLER_SECURE_APP:    set to secure SurfsafeVPN.app and all of its contents and update L_AS_T/Deploy if appropriate
+//                                  (also set if INSTALLER_COPY_APP)
 //     INSTALLER_COPY_BUNDLE:   set to copy this app's Resources/SurfsafeVPN Configurations.bundle to /Library/Application Support/SurfsafeVPN/Configuration Updates
 //                                  (Will only be done if this app's SurfsafeVPN Configurations.bundle's version # is higher, or INSTALLER_COPY_APP is set)
 //
-//     INSTALLER_SET_VERSION:   set to store bundleVersion as a new value for CFBundleVersion 
-//                                       and bundleVersionString as a new value for CFBundleShortVersionString
-//                                     in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
-//                                     and remove Contents/Installer of the bundle
-//
-//     INSTALLER_SECURE_APP:    set to secure SurfsafeVPN.app and all of its contents
-//                                  (also set if INSTALLER_COPY_APP)
 //
 //     INSTALLER_SECURE_TBLKS:  set to secure all .tblk packages in Configurations, Shared, and the alternate configuration path
 //
@@ -63,6 +58,10 @@
 //
 //     INSTALLER_DELETE:        set to delete target path
 //
+//     INSTALLER_SET_VERSION:   set to store bundleVersion as a new value for CFBundleVersion 
+//                                       and bundleVersionString as a new value for CFBundleShortVersionString
+//                                     in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
+//                                     and remove Contents/Installer of the bundle
 //
 // bundleVersion       is a string to replace the CFBundleVersion
 // bundleVersionString is a string to replace the CFBundleShortVersionString
@@ -72,31 +71,34 @@
 // sourcePath          is the path to be copied or moved to targetPath before securing targetPath
 //
 // It does the following:
-//      (1) If INSTALLER_COPY_APP, copies this app to /Applications
-//      (2) Restores the /Deploy folder from the backup copy if it does not exist and a backup copy does
-//      (3) Moves the contents of the old configuration folder at ~/Library/openvpn to ~/Library/Application Support/SurfsafeVPN/Configurations
-//      (4) Creates /Library/Application Support/SurfsafeVPN/Shared if it doesn't exist and makes sure it is secured
-//      (5) Creates the log directory if it doesn't exist and makes sure it is secured
-//      (6) If INSTALLER_COPY_BUNDLE, if /Resources/SurfsafeVPN Configurations.bundle exists, copies it to /Library/Application Support/T/Configuration Updates
-//      (7) If INSTALLER_SECURE_APP, secures SurfsafeVPN.app by setting the ownership and permissions of its components.
-//      (8) If INSTALLER_SECURE_APP, makes a backup of the /Deploy folder if it exists and is not empty.
-//          If it exists and is empty (except for invisible files), all existing backups for the /Deploy folder for this application's location are deleted.
-//      (9) If INSTALLER_SECURE_TBLKS, secures all .tblk packages in the following folders:
-//           /Library/Application Support/SurfsafeVPN/Shared
-//           /Library/Application Support/SurfsafeVPN/Users/<username>
-//           ~/Library/Application Support/SurfsafeVPN/Configurations
-//     (10) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and sourcePath is given,
+//      (1) ALWAYS creates directories or repair their ownership/permissions as needed
+//      (2) if INSTALLER_MOVE_LIBRARY_OPENVPN, moves the contents of the old configuration folder
+//          at ~/Library/openvpn to ~/Library/Application Support/SurfsafeVPN/Configurations
+//          and replaces it with a symlink to the new location.
+//
+//      (4) If INSTALLER_COPY_APP, this app is copied to /Applications
+//      (5) If INSTALLER_COPY_BUNDLE, if /Resources/SurfsafeVPN Configurations.bundle exists, copies it to /Library/Application Support/T/Configuration Updates
+//      (6) If INSTALLER_SECURE_APP, secures SurfsafeVPN.app by setting the ownership and permissions of its components.
+//      (7) If INSTALLER_COPY_APP or INSTALLER_SECURE_APP, or INSTALLER_UPDATE_DEPLOY, deals with Deploy:
+//             * Prunes any duplicate copies of Deploy in L_AS_T/Backup
+//             * If exactly one copy of Deploy is in L_AS_T/Backup, copies it to gDeployPath and removes L_AS_T/Backup
+//             * Updates the gDeployPath folder from this app if appropriate (using version # or modification date) and secures it
+//      (8) If INSTALLER_SECURE_TBLKS, secures all .tblk packages in the following folders:
+//           /Library/Application Support/Tunnelblick/Shared
+//           ~/Library/Application Support/Tunnelblick/Configurations
+//           /Library/Application Support/Tunnelblick/Users/<username>
+//
+//      (9) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and sourcePath is given,
 //             copies or moves sourcePath to targetPath. Copies unless INSTALLER_MOVE_NOT_COPY is set.  (Also copies or moves the shadow copy if deleting a private configuration)
-//     (11) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and targetPath is given,
+//     (10) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is clear and targetPath is given,
 //             secures the .ovpn or .conf file or a .tblk package at targetPath
-//     (12) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is set and targetPath is given,
+//     (11) If INSTALLER_SET_VERSION is clear and INSTALLER_DELETE is set and targetPath is given,
 //             deletes the .ovpn or .conf file or .tblk package at targetPath (also deletes the shadow copy if deleting a private configuration)
-//     (13) If INSTALLER_SET_VERSION is set, copies the bundleVersion into the CFBundleVersion entry and bundleShortVersionString into the CFBundleShortVersionString entry
+//     (12) If INSTALLER_SET_VERSION is set, copies the bundleVersion into the CFBundleVersion entry and bundleShortVersionString into the CFBundleShortVersionString entry
 //                                           in /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Into.plist
 //
 // When finished (or if an error occurs), the file /tmp/surfsafevpn-authorized-running is deleted to indicate the program has finished
 //
-// Notes: (2), (3), (4), and (5) are done each time this command is invoked if they are needed (self-repair).
 //        (10) is done when creating a shadow configuration file
 //                     or copying a .tblk to install it
 //                     or moving a .tblk to make it private or shared
@@ -349,6 +351,7 @@ int main(int argc, char *argv[])
         if ( secureTblks ) {
             errorExit();
         }
+    }
     }
     
 //**************************************************************************************************************************
@@ -924,7 +927,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    }
+    
     //**************************************************************************************************************************
     // DONE
     
