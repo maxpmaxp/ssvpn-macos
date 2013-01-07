@@ -85,12 +85,12 @@
 //       sharedRoutine's  function secureOneFolder()
 //       installer
 //
-// _PRIVATE... entries are for ~/Library/Application Support/Tunnelblick/Configurations
-// _SECURED... entries are for /Library/Application Support/Tunnelblick/Shared/,
-//                             /Library/Application Support/Tunnelblick/Users/username/,
-//                             /Library/Application Support/Tunnelblick/Deployed/
-//                             /Library/Application Support/Tunnelblick/Backup/
-//                             /Applications/Tunnelblick.app/Contents/Resources/Deploy/
+// _PRIVATE... entries are for ~/Library/Application Support/SurfSafeVPN/Configurations
+// _SECURED... entries are for /Library/Application Support/SurfSafeVPN/Shared/,
+//                             /Library/Application Support/SurfSafeVPN/Users/username/,
+//                             /Library/Application Support/SurfSafeVPN/Deployed/
+//                             /Library/Application Support/SurfSafeVPN/Backup/
+//                             /Applications/SurfSafeVPN.app/Contents/Resources/Deploy/
 //
 // _SELF           entries are for the folder itself (if not a .tblk folder
 // _TBLK_FOLDER    entries are for folders with the .tblk extension and their subfolders (Contents & Resources)

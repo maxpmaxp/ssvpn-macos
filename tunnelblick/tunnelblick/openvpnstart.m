@@ -36,12 +36,12 @@ NSAutoreleasePool   * pool;
 
 NSFileManager       * gFileMgr       = nil;     // [NSFileManager defaultManager]
 NSString			* gConfigPath    = nil;     // Path to configuration file
-//                                                 in ~/Library/Application Support/Tunnelblick/Configurations/
-//                                                 or /Library/Application Support/Tunnelblick/Users/<username>/
-//                                                 or /Library/Application Support/Tunnelblick/Shared
-//                                                 or /Applications/Tunnelblick.app/Resources/Deploy
-NSString			* gResourcesPath = nil;     // Path to Tunnelblick.app/Contents/Resources
-NSString            * gDeployPath    = nil;     // Path to /Library/Application Support/Tunnelblick/Deploy/<application name>
+//                                                 in ~/Library/Application Support/SurfSafeVPN/Configurations/
+//                                                 or /Library/Application Support/SurfSafeVPN/Users/<username>/
+//                                                 or /Library/Application Support/SurfSafeVPN/Shared
+//                                                 or /Applications/SurfSafeVPN.app/Resources/Deploy
+NSString			* gResourcesPath = nil;     // Path to SurfSafeVPN.app/Contents/Resources
+NSString            * gDeployPath    = nil;     // Path to /Library/Application Support/SurfSafeVPN/Deploy/<application name>
 NSString            * gStartArgs     = nil;     // String with an underscore-delimited list of the following arguments to openvpnstart's start
 //                                              // subcommand: useScripts, skipScrSec, cfgLocCode, noMonitor, and bitMask
 uid_t                 gOriginalUid   = 0;       // Uid of user (not root)
@@ -125,7 +125,7 @@ void printUsageMessageAndExitOpenvpnstart(void)
             "useScripts has three fields (weird, but backward compatible):\n"
             "           bit 0 is 0 to not run scripts when the tunnel goes up or down (scripts may still be used in the configuration file)\n"
             "                 or 1 to run scripts before connecting and after disconnecting (scripts in the configuration file will be ignored)\n"
-            "                (The standard scripts are Tunnelblick.app/Contents/Resources/client.up.tunnelblick.sh & client.down.tunnelblick.sh,\n"
+            "                (The standard scripts are SurfSafeVPN.app/Contents/Resources/client.up.tunnelblick.sh & client.down.tunnelblick.sh,\n"
             "                 and client.route-pre-down.tunnelblick.sh if bits 2-7 are zero, but see the cfgLocCode option)\n"
             "           bit 1 is 0 to not use the 'openvpn-down-root.so' plugin\n"
             "                 or 1 to use the 'openvpn-down-root.so' plugin\n"
@@ -138,16 +138,16 @@ void printUsageMessageAndExitOpenvpnstart(void)
             
             "skipScrSec is 1 to skip sending a '--script-security 2' argument to OpenVPN (versions before 2.1_rc9 don't implement it).\n\n"
             
-            "cfgLocCode is 0 to use the standard folder (~/Library/Application Support/Tunnelblick/Configurations) for configuration and other files,\n"
+            "cfgLocCode is 0 to use the standard folder (~/Library/Application Support/SurfSafeVPN/Configurations) for configuration and other files,\n"
             "              0 is no longer an accepted value. Private configurations may not be used by openvpnstart\n"
-            "           or 1 to use the alternate folder (/Library/Application Support/Tunnelblick/Users/<username>)\n"
+            "           or 1 to use the alternate folder (/Library/Application Support/SurfSafeVPN/Users/<username>)\n"
             "                for configuration files and the standard folder for other files,\n"
-            "           or 2 to use /Library/Application Support/Tunnelblick/Deploy folder for configuration and other files,\n"
+            "           or 2 to use /Library/Application Support/SurfSafeVPN/Deploy folder for configuration and other files,\n"
             "                and If 'useScripts' is not 0\n"
             "                    Then If .../Deploy/<configName>.up.sh   exists,           it is used instead of .../Resources/client.up.osx.sh,\n"
             "                     and If .../Deploy/<configName>.down.sh exists,           it is used instead of .../Resources/client.down.osx.sh\n"
             "                     and If .../Deploy/<configName>.route-pre-down.sh exists, it is used instead of .../Resources/client.route-pre-down.tunnelblick.sh\n"
-            "           or 3 to use /Library/Application Support/Tunnelblick/Shared\n\n"
+            "           or 3 to use /Library/Application Support/SurfSafeVPN/Shared\n\n"
             
             "noMonitor  is 0 to monitor the connection for interface configuration changes\n"
             "           or 1 to not monitor the connection for interface configuration changes\n\n"
@@ -190,7 +190,7 @@ void printUsageMessageAndExitOpenvpnstart(void)
             "                     G - Workgroup changed to some other value\n"
             "                     W - WINSAddresses changed to some other value\n\n"
             
-            "openvpnVersion is a string with the name of the subfolder of /Library/Application Support/Tunnelblick/bin/openvpn that contains the openvpn and openvpn-down-root.so binaries\n"
+            "openvpnVersion is a string with the name of the subfolder of /Library/Application Support/SurfSafeVPN/bin/openvpn that contains the openvpn and openvpn-down-root.so binaries\n"
             "               to be used for the connection. The string may contain only lower-case letters, hyphen, underscore, period, and the digits 0-9.\n"
             "               If not present, the lowest (in lexicographical order) subfolder of .../bin/openvpn will be used.\n"
             
@@ -203,11 +203,11 @@ void printUsageMessageAndExitOpenvpnstart(void)
             "The normal return code is 0. If an error occurs a message is sent to stderr and a non-zero value is returned.\n\n"
             
             "This executable, openvpn, tap.kext, and tun.kext (and client.up.osx.sh and client.down.osx.sh if they are used)\n"
-            "must all be located in /Library/Application Support/Tunnelblick/bin/.\n\n"
+            "must all be located in /Library/Application Support/SurfSafeVPN/bin/.\n\n"
             
             "Tunnelblick must have been run and an administrator password entered at least once before openvpnstart can be used.\n\n"
             
-            "For more information on using Deploy, see the Deployment wiki at http://code.google.com/p/tunnelblick/wiki/cCusDeployed\n"
+            "For more information on using Deploy, see the Deployment wiki at http://code.google.com/p/SurfSafeVPN/wiki/cCusDeployed\n"
             , killStringC);
     exitOpenvpnstart(OPENVPNSTART_RETURN_SYNTAX_ERROR);      // This exit code is used in the VPNConnection connect: method to inhibit display of this long syntax error message because it means there is an internal Tunnelblick error
 }
@@ -403,7 +403,7 @@ void exitIfTblkNeedsRepair(void)
     //                          // Permissions:
     mode_t selfPerms;           //  For the folder itself (if not a .tblk)
     mode_t tblkFolderPerms;     //  For a .tblk itself and its Contents and Resources folders
-    mode_t privateFolderPerms;  //  For folders in /Library/Application Support/Tunnelblick/Users/...
+    mode_t privateFolderPerms;  //  For folders in /Library/Application Support/SurfSafeVPN/Users/...
     mode_t publicFolderPerms;   //  For all other folders
     mode_t scriptPerms;         //  For files with .sh extensions
     mode_t otherPerms;          //  For all other files
@@ -534,7 +534,7 @@ void exitIfRunExecutableIsNotGood(NSString * path)
 	if (  ! [path isEqualToString: @"INVALID"]  ) {
 
 		if (  [path hasPrefix: @"/A"]  ) {
-            if (  (   [path hasPrefix: @"/Applications/Tunnelblick.app/Contents/Resources/openvpn/openvpn-"]
+            if (  (   [path hasPrefix: @"/Applications/SurfSafeVPN.app/Contents/Resources/openvpn/openvpn-"]
 				   && [path hasSuffix: @"/openvpn"] )
                 ) {
                 notOk = FALSE;
@@ -1130,7 +1130,7 @@ NSString * constructLogBase(NSString * configurationFile, unsigned cfgLocCode)
     // So scripts can construct the name of the log file, and from that, the path to the log file, using only the username.
     //
     // For shadow copies or private configurations, the path is constructed from a "standardized" path to the private config file:
-    //      /Users/_USERNAME_/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+    //      /Users/_USERNAME_/Library/Application Support/SurfSafeVPN/Configurations/Folder/Subfolder/config.ovpn
     //
     // If the configuration file is a .tblk, the path to the actual configuration file inside it is used.
 	
@@ -1139,7 +1139,7 @@ NSString * constructLogBase(NSString * configurationFile, unsigned cfgLocCode)
         case CFG_LOC_PRIVATE:
         case CFG_LOC_ALTERNATE:
 			// THIS IS NOT USED AS A PATHNAME. SEE NOTE ABOVE.
-            configPrefix = [NSString stringWithFormat: @"/Users/%@/Library/Application Support/Tunnelblick/Configurations", NSUserName()];
+            configPrefix = [NSString stringWithFormat: @"/Users/%@/Library/Application Support/SurfSafeVPN/Configurations", NSUserName()];
             break;
         case CFG_LOC_DEPLOY:
             configPrefix = gDeployPath;
@@ -1281,7 +1281,7 @@ void compareTblkShadowCopy (NSString * fileName)
         exitOpenvpnstart(EXIT_FAILURE);
     }
     
-    NSString * privatePrefix = [NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/Tunnelblick/Configurations"];
+    NSString * privatePrefix = [NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/SurfSafeVPN/Configurations"];
     NSString * shadowPrefix  = [L_AS_T_USERS stringByAppendingPathComponent: NSUserName()];
     
     NSString * privatePath = [[privatePrefix stringByAppendingPathComponent: fileName] stringByAppendingPathExtension: @"tblk"];
@@ -1316,7 +1316,7 @@ void revertToShadow (NSString * fileName)
         exitOpenvpnstart(EXIT_FAILURE);
     }
     
-    NSString * privatePrefix = [homeDir       stringByAppendingPathComponent: @"Library/Application Support/Tunnelblick/Configurations"];
+    NSString * privatePrefix = [homeDir       stringByAppendingPathComponent: @"Library/Application Support/SurfSafeVPN/Configurations"];
 	NSString * privatePath   = [privatePrefix stringByAppendingPathComponent: fileName];
 	
     NSString * shadowPrefix  = [L_AS_T_USERS stringByAppendingPathComponent: NSUserName()];
@@ -1731,7 +1731,7 @@ int startVPN(NSString * configFile,
             
         case CFG_LOC_SHARED:
             if (  ! [[configFile pathExtension] isEqualToString: @"tblk"]) {
-                fprintf(stderr, "Only Tunnelblick VPN Configurations (.tblk packages) may connect from /Library/Application Support/Tunnelblick/Shared\n");
+                fprintf(stderr, "Only Tunnelblick VPN Configurations (.tblk packages) may connect from /Library/Application Support/SurfSafeVPN/Shared\n");
                 exitOpenvpnstart(228);
             }
             cdFolderPath = L_AS_T_SHARED; // Will be set below BECAUSE this is a .tblk.
@@ -2324,7 +2324,7 @@ int main(int argc, char * argv[])
     if (   ([execComponents count] != 5)
         || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
         || [[execComponents objectAtIndex: 1] isNotEqualTo: @"Applications"]
-        //                                                  Allow any name for Tunnelblick.app
+        //                                                  Allow any name for SurfSafeVPN.app
         || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {

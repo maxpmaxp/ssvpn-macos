@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     if (   ([execComponents count] != 5)
         || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
         || [[execComponents objectAtIndex: 1] isNotEqualTo: @"Applications"]
-        //                                                  Allow any name for Tunnelblick.app
+        //                                                  Allow any name for SurfSafeVPN.app
         || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {

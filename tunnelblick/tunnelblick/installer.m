@@ -104,9 +104,9 @@
 
 FILE          * gLogFile;					  // FILE for log
 NSFileManager * gFileMgr;                     // [NSFileManager defaultManager]
-NSString      * gPrivatePath;                 // Path to ~/Library/Application Support/Tunnelblick/Configurations
-NSString      * gDeployPath;                  // Path to /Library/Application Support/Tunnelblick/Deploy/<application-name>
-NSString      * gAppConfigurationsBundlePath; // Path to Tunnelblick.app/Contents/Resources/Tunnelblick Configurations.bundle (after copy if INSTALLER_COPY_APP is set)
+NSString      * gPrivatePath;                 // Path to ~/Library/Application Support/SurfSafeVPN/Configurations
+NSString      * gDeployPath;                  // Path to /Library/Application Support/SurfSafeVPN/Deploy/<application-name>
+NSString      * gAppConfigurationsBundlePath; // Path to SurfSafeVPN.app/Contents/Resources/Tunnelblick Configurations.bundle (after copy if INSTALLER_COPY_APP is set)
 uid_t           gRealUserID;                  // User ID & Group ID for the real user (i.e., not "root:wheel", which is what we are running as)
 gid_t           gRealGroupID;
 NSAutoreleasePool * pool;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     if (   ([execComponents count] != 5)
         || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
         || [[execComponents objectAtIndex: 1] isNotEqualTo: @"Applications"]
-        //                                                  Allow any name for Tunnelblick.app
+        //                                                  Allow any name for SurfSafeVPN.app
         || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 #endif
     
     gFileMgr = [NSFileManager defaultManager];
-    gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Tunnelblick/Configurations/"] copy];
+    gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfSafeVPN/Configurations/"] copy];
 	
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
@@ -354,17 +354,17 @@ int main(int argc, char *argv[])
 //**************************************************************************************************************************
     // (4)
     // If INSTALLER_COPY_APP is set:
-    //    Move /Applications/Tunnelblick.app to the Trash, then copy this app to /Applications/Tunnelblick.app
+    //    Move /Applications/SurfSafeVPN.app to the Trash, then copy this app to /Applications/SurfSafeVPN.app
     
     if (  copyApp  ) {
         NSString * currentPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-        NSString * targetPath = @"/Applications/Tunnelblick.app";
+        NSString * targetPath = @"/Applications/SurfSafeVPN.app";
         if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
             errorExitIfAnySymlinkInPath(targetPath, 1);
             if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
                                                                source: @"/Applications"
                                                           destination: @""
-                                                                files: [NSArray arrayWithObject:@"Tunnelblick.app"]
+                                                                files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
                                                                   tag: nil]  ) {
                 appendLog([NSString stringWithFormat: @"Moved %@ to the Trash", targetPath]);
             } else {

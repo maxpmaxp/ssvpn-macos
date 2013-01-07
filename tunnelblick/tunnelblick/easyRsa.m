@@ -236,7 +236,7 @@ void installOrUpdateOurEasyRsa(void) {
 	
     NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-Tunnelblick" ofType: @""];
     if (  ! appEasyRsaPath  ) {
-        easyRsaInstallFailed(NSLocalizedString(@"Could not find easy-rsa in Tunnelblick.app", @"Window text"));
+        easyRsaInstallFailed(NSLocalizedString(@"Could not find easy-rsa in SurfSafeVPN.app", @"Window text"));
         return;
     }
     
@@ -247,7 +247,7 @@ void installOrUpdateOurEasyRsa(void) {
 		
 	}
     if (  ! appEasyRsaVersion  ) {
-        easyRsaInstallFailed(NSLocalizedString(@"Could not find easy-rsa version information in Tunnelblick.app", @"Window text"));
+        easyRsaInstallFailed(NSLocalizedString(@"Could not find easy-rsa version information in SurfSafeVPN.app", @"Window text"));
         return;
     }
     

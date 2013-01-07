@@ -4074,7 +4074,7 @@ BOOL anyNonTblkConfigs(void)
 		signatureIsInvalid = FALSE;	// (But it might not have one)
 	}
 	
-    // Move or copy Tunnelblick.app to /Applications if it isn't already there
+    // Move or copy SurfSafeVPN.app to /Applications if it isn't already there
     
 	NSString * currentPath = [[NSBundle mainBundle] bundlePath];
         
@@ -4155,7 +4155,7 @@ BOOL anyNonTblkConfigs(void)
     
     // Set up messages to get authorization and notify of success
 	NSString * appVersion   = surfsafevpnVersion([NSBundle mainBundle]);
-    NSString * tbInApplicationsPath = @"/Applications/Tunnelblick.app";
+    NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
         NSString * applicationsPath = @"/Applications";
         NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
         NSString * applicationsDisplayName = [[gFileMgr componentsToDisplayForPath: applicationsPath] componentsJoinedByString: @"/"];

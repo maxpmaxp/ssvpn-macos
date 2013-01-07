@@ -317,7 +317,7 @@ BOOL secureOneFolder(NSString * path, BOOL isPrivate)
     // Permissions:
     mode_t selfPerms;           //  For the folder itself (if not a .tblk)
     mode_t tblkFolderPerms;     //  For a .tblk itself and its Contents and Resources folders
-    mode_t privateFolderPerms;  //  For folders in /Library/Application Support/Tunnelblick/Users/...
+    mode_t privateFolderPerms;  //  For folders in /Library/Application Support/SurfSafeVPN/Users/...
     mode_t publicFolderPerms;   //  For all other folders
     mode_t scriptPerms;         //  For files with .sh extensions
     mode_t executablePerms;     //  For files with .executable extensions (only appear in a Deploy folder

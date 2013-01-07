@@ -993,28 +993,28 @@ done
 readonly ARG_MONITOR_NETWORK_CONFIGURATION ARG_RESTORE_ON_DNS_RESET ARG_RESTORE_ON_WINS_RESET ARG_TAP ARG_PREPEND_DOMAIN_NAME ARG_FLUSH_DNS_CACHE ARG_IGNORE_OPTION_FLAGS
 
 # Note: The script log path name is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/SurfSafeVPN/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/SurfSafeVPN/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # Note: "/Users/..." works even if the home directory has a different path; it is used in the name of the log file, and is not used as a path to get to anything.
-readonly TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+readonly TBALTPREFIX="/Library/Application Support/SurfSafeVPN/Users/"
 readonly TBALTPREFIXLEN="${#TBALTPREFIX}"
 readonly TBCONFIGSTART="${config:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
 	readonly TBBASE="${config:$TBALTPREFIXLEN}"
 	readonly TBSUFFIX="${TBBASE#*/}"
 	readonly TBUSERNAME="${TBBASE%%/*}"
-	readonly TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+	readonly TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/SurfSafeVPN/Configurations/$TBSUFFIX"
 else
     readonly TBCONFIG="${config}"
 fi
 
 readonly CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-readonly SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+readonly SCRIPT_LOG_FILE="/Library/Application Support/SurfSafeVPN/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 readonly TB_RESOURCE_PATH=$(dirname "${0}")
 
-LEASEWATCHER_PLIST_PATH="/Library/Application Support/Tunnelblick/LeaseWatch.plist"
+LEASEWATCHER_PLIST_PATH="/Library/Application Support/SurfSafeVPN/LeaseWatch.plist"
 
 set +e # "grep" will return error status (1) if no matches are found, so don't fail on individual errors
 readonly OSVER="$(sw_vers | grep 'ProductVersion:' | grep -o '10\.[0-9]*')"
