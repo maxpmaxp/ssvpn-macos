@@ -510,7 +510,7 @@ int TBRunAlertPanelExtended(NSString * title,
     
     NSMutableDictionary * dict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                   msg,  kCFUserNotificationAlertMessageKey,
-                                  [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"tunnelblick" ofType: @"icns"]],
+                                  [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"SurfSafeVPN_32x32_active" ofType: @"icns"]],
                                         kCFUserNotificationIconURLKey,
                                   nil];
     if ( title ) {
