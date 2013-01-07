@@ -24,50 +24,84 @@
 #include "MenuController.h"
 #include "TBUserDefaults.h"
 
-extern  NSTimeInterval   gDelayToHideStatistics;
 extern  TBUserDefaults * gTbDefaults;
+extern BOOL              gShuttingDownWorkspace;
 
 @implementation MainIconView
 
 // *******************************************************************************************
-// Getters & Setters
+// General Methods
 
-TBSYNTHESIZE_OBJECT_GET(retain, NSView *, imageView)
+-(void) mouseDownMainThread: (NSEvent *) theEvent
+{
+    // Invoked in the main thread only
+
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
+
+	// Detect a triple-click:
+	//        First click comes here and pops up the menu
+	//        Second click pops the menu back (it does not come here)
+	//        Third click comes here and (if within 1 second of first click) opens VPN Details… window
+	NSTimeInterval thisTime = [theEvent timestamp];
+	if (  (mainIconLastClickTime + 1.0) > thisTime  ) {
+		[[NSApp delegate] openPreferencesWindow: self];
+	} else {
+		NSStatusItem * statusI = [[NSApp delegate] statusItem];
+		NSMenu       * menu    = [[NSApp delegate] myVPNMenu];
+		[statusI popUpStatusItemMenu: menu];
+	}
+        
+	mainIconLastClickTime = thisTime;
+}
+
+-(void) setOrRemoveTrackingRect
+{
+	if (  [gTbDefaults boolForKey: @"doNotShowNotificationWindowOnMouseover"]  ) {
+        if (  mainIconTrackingRectTagIsValid  ) {
+            [self removeTrackingRect: mainIconTrackingRectTag];
+			mainIconTrackingRectTagIsValid = FALSE;
+        }
+	} else {
+        if (  ! mainIconTrackingRectTagIsValid  ) {
+			NSRect frame = [self frame];
+			NSRect trackingRect = NSMakeRect(frame.origin.x + 1.0f, frame.origin.y, frame.size.width - 1.0f, frame.size.height);
+            mainIconTrackingRectTag = [self addTrackingRect: trackingRect
+                                                      owner: self
+                                                   userData: nil
+                                               assumeInside: NO];
+			mainIconTrackingRectTagIsValid = TRUE;
+        }
+    }
+}
+
+    
+-(void) changedDoNotShowNotificationWindowOnMouseover
+{
+	[self setOrRemoveTrackingRect];
+}
 
 
 // *******************************************************************************************
 // init and dealloc
 
--(id) initWithFrame: (NSRect) frame {
+-(id) initWithFrame: (NSRect) frame
+{
+
     self = [super initWithFrame: frame];
     if (self) {
-        imageView = [[[NSImageView alloc] initWithFrame: frame] retain];
-        
-        iconImage = nil;
+		mainIconTrackingRectTagIsValid = FALSE;
+}
 
-        if ( ! [gTbDefaults boolForKey: @"doNotShowNotificationWindowOnMouseover"] ) {
-            NSRect trackingRect = NSMakeRect(frame.origin.x + 1.0, frame.origin.y, frame.size.width - 1.0, frame.size.height);
-            mainIconTrackingRectTag = [self addTrackingRect: trackingRect
-                                                      owner: self
-                                                   userData: nil
-                                               assumeInside: NO];
-        } else {
-            mainIconTrackingRectTag = 0;
-        }
-
-        
-        [self setSubviews: [NSArray arrayWithObject: imageView]];
-    }
     return self;
 }
 
--(void) dealloc {
-    [imageView release];
-    [iconImage release];
-    
-    if ( mainIconTrackingRectTag != 0  ) {
-        [self removeTrackingRect: mainIconTrackingRectTag];
-        mainIconTrackingRectTag = 0;
+-(void) dealloc
+{
+    if (  mainIconTrackingRectTagIsValid  ) {
+            [self removeTrackingRect: mainIconTrackingRectTag];
+		mainIconTrackingRectTagIsValid = FALSE;
     }
     
     [[NSApp delegate] mouseExitedMainIcon: self event: nil];
@@ -76,64 +110,49 @@ TBSYNTHESIZE_OBJECT_GET(retain, NSView *, imageView)
 
 
 // *******************************************************************************************
-// General Methods
-
--(void) setImage: (NSImage *) newImage {
-    [imageView setImage: newImage];
-    [self display];
-}
-
--(void) mouseDownMainThread: (NSEvent *) theEvent {
-    // Invoked in the main thread only
-    NSStatusItem * statusI = [[NSApp delegate] statusItem];
-    [statusI popUpStatusItemMenu: [statusI menu]];
-}
-
--(void) changedDoNotShowNotificationWindowOnMouseover {
-    if ( [gTbDefaults boolForKey: @"doNotShowNotificationWindowOnMouseover"] ) {
-        if ( mainIconTrackingRectTag != 0  ) {
-            [self removeTrackingRect: mainIconTrackingRectTag];
-            mainIconTrackingRectTag = 0;
-        }
-    } else {
-        if (  mainIconTrackingRectTag == 0  ) {
-            NSRect frame = [[self imageView] frame];
-            NSRect trackingRect = NSMakeRect(frame.origin.x + 1.0, frame.origin.y, frame.size.width - 1.0, frame.size.height);
-            mainIconTrackingRectTag = [self addTrackingRect: trackingRect
-                                                      owner: self
-                                                   userData: nil
-                                               assumeInside: NO];
-        }
-    }
-}
-
-
-// *******************************************************************************************
 // Event Handlers
 
--(void) mouseEntered: (NSEvent *) theEvent {
+-(void) mouseEntered: (NSEvent *) theEvent
+{
     // Event handler; NOT on MainThread
     // Mouse entered the tracking area of the Tunnelblick icon
+    
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
     
     [[NSApp delegate] mouseEnteredMainIcon: self event: theEvent];
 }
 
--(void) mouseExited: (NSEvent *) theEvent {
+-(void) mouseExited: (NSEvent *) theEvent
+{
     // Event handler; NOT on MainThread
     // Mouse exited the tracking area of the Tunnelblick icon
+    
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
     
     [[NSApp delegate] mouseExitedMainIcon: self event: theEvent];
 }
 
--(void) mouseDown: (NSEvent *) theEvent {
+-(void) mouseDown: (NSEvent *) theEvent
+{
     // Event handler; NOT on MainThread
+
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
+    
     [self performSelectorOnMainThread: @selector(mouseDownMainThread:) withObject: theEvent waitUntilDone: NO];
 }
 
--(void) mouseUp: (NSEvent *) theEvent {
+-(void) mouseUp: (NSEvent *) theEvent
+{
     // Event handler; NOT on MainThread
 
-    ;   // We needn't do anything
+	(void) theEvent;	// We don't do anything
+	
 }
 
 @end

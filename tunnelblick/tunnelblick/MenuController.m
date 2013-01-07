@@ -2245,9 +2245,12 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     if (   ignoreNoConfigs
         || ( [[self myConfigDictionary] count] != 0 )
+        || (   ([gConfigDirs count] != 0)
+            && [[gConfigDirs objectAtIndex: 0] isEqualToString: gDeployPath] ) // True only if we had configurations in Deploy when launched
         ) {
         return;
     }
+    
     
     // Make sure we notice any configurations that have just been installed
     checkingForNoConfigs = TRUE;    // Avoid infinite recursion
