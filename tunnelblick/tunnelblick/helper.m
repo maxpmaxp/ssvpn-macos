@@ -231,6 +231,65 @@ NSString * tblkPathFromConfigPath(NSString * path)
     return nil;
 }
 
+BOOL folderContentsNeedToBeSecuredAtPath(NSString * theDirPath)
+{
+    NSArray * keyAndCrtExtensions = KEY_AND_CRT_EXTENSIONS;
+    NSString * file;
+    BOOL isDir;
+    
+    // If it isn't an existing folder, then it can't be secured!
+    if (  ! (   [gFileMgr fileExistsAtPath: theDirPath isDirectory: &isDir]
+             && isDir )  ) {
+        return YES;
+    }
+    
+    uid_t realUid = getuid();
+    gid_t realGid = getgid();
+    NSDirectoryEnumerator *dirEnum = [gFileMgr enumeratorAtPath: theDirPath];
+    while (file = [dirEnum nextObject]) {
+        NSString * filePath = [theDirPath stringByAppendingPathComponent: file];
+        if (  itemIsVisible(filePath)  ) {
+            NSString * ext  = [file pathExtension];
+            if (   [gFileMgr fileExistsAtPath: filePath isDirectory: &isDir]
+                && isDir  ) {
+                if (  [filePath hasPrefix: gPrivatePath]  ) {
+                    if (   [ext isEqualToString: @"tblk"]
+                        || [filePath hasSuffix: @".tblk/Contents/Resources"]  ) {
+                        if (  ! checkOwnerAndPermissions(filePath, realUid, realGid, 755)  ) {   // .tblk and .tblk/Contents/Resource in private folder owned by user
+                            return YES;
+                        }
+                    } else {
+                        if (  ! checkOwnerAndPermissions(filePath, 0, 0, 755)  ) {               // other folders owned by root
+                            return YES;
+                        }
+                    }
+                } else {
+                    if (  ! checkOwnerAndPermissions(filePath, 0, 0, 755)  ) {   // other folders are 755
+                        return YES; // NSLog already called
+                    }
+                }
+            } else if ( [ext isEqualToString:@"executable"]  ) {
+                if (  ! checkOwnerAndPermissions(filePath, 0, 0, 755)  ) {       // executable files for custom menu commands are 755
+                    return YES; // NSLog already called
+                }
+            } else if ( [ext isEqualToString:@"sh"]  ) {
+                if (  ! checkOwnerAndPermissions(filePath, 0, 0, 744)  ) {       // shell scripts are 744
+                    return YES; // NSLog already called
+                }
+            } else if (  [keyAndCrtExtensions containsObject: ext]  ) {     // keys, certs, etc. are 640 and owned by root:admin
+                if (  ! checkOwnerAndPermissions(filePath, 0, 80, 640)  ) {      // (So that admins can easily copy, move, or back them up)
+                    return YES; // NSLog already called
+                }
+            } else { // including .conf and .ovpn
+                if (  ! checkOwnerAndPermissions(filePath, 0, 0,  644)  ) {      // everything else is 644
+                    return YES; // NSLog already called
+                }
+            }
+        }
+    }
+    return NO;
+}
+
 // Returns YES if file doesn't exist, or has the specified ownership and permissions
 BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, mode_t permsShouldHave)
 {

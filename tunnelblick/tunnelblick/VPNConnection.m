@@ -1507,10 +1507,11 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     NSString *cfgPath = [self configPath];
     
-    if (   [cfgPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
-        if (  ! [self shadowIsIdenticalMakeItSo: YES]  ) {
+    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/SurfSafeVPN/Users/%@/%@",
+                         NSUserName(), lastPartOfPath(configPath)];
+    
+    if ( ! (cfgPath = [[ConfigurationManager defaultManager] getConfigurationToUse: cfgPath orAlt: altPath]) ) {
         return nil;
-    }
     }
     
     BOOL useShadowCopy = [cfgPath hasPrefix: [gPrivatePath  stringByAppendingString: @"/"]];
