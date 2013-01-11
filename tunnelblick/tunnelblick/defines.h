@@ -296,3 +296,8 @@ typedef enum
 //*************************************************************************************************
 // Comment out (with "//") the following line to EXclude the VPNService feature
 //#define INCLUDE_VPNSERVICE 1
+
+//*************************************************************************************************
+// Section for enable debug mode
+//#define TBDebug 1
+
