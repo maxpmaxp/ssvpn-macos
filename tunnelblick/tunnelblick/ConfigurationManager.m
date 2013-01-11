@@ -29,6 +29,7 @@
 #import "NSApplication+LoginItem.h"
 #import "TBUserDefaults.h"
 #import "NSFileManager+TB.h"
+#import "ConfigurationConverter.h"
 
 extern NSMutableArray       * gConfigDirs;
 extern NSString             * gPrivatePath;
@@ -39,7 +40,6 @@ extern AuthorizationRef       gAuthorization;
 
 extern NSString * firstPartOfPath(NSString * thePath);
 extern NSString * lastPartOfPath(NSString * thePath);
-extern BOOL       folderContentsNeedToBeSecuredAtPath(NSString * theDirPath);
 
 enum state_t {                      // These are the "states" of the guideState state machine
     entryNoConfigurations,
@@ -58,13 +58,6 @@ enum state_t {                      // These are the "states" of the guideState 
                    thatArePackages:         (BOOL)                      onlyPkgs
                             toDict:         (NSMutableDictionary * )    dict
                       searchDeeply:         (BOOL)                      deep;
-
--(BOOL)         checkPermissions:           (NSString *)                permsShouldHave
-                         forPath:           (NSString *)                path;
-
--(BOOL)         configNotProtected:         (NSString *)                configFile;
-
--(OSStatus)     compareTblkShadowCopy:      (NSString *)                configurationFile;
 
 -(NSString *)   displayNameForPath:         (NSString *)                thePath;
 
@@ -1506,162 +1499,6 @@ enum state_t {                      // These are the "states" of the guideState 
     return tempTblk;
 }
 
-// Given paths to a configuration (either a .conf or .ovpn file, or a .tblk package) in one of the gConfigDirs
-// (~/Library/Application Support/SurfsafeVPN/Configurations, /Library/Application Support/SurfsafeVPN/Shared, or /Resources/Deploy,
-// and an alternate config in /Library/Application Support/SurfsafeVPN/Users/<username>/
-// Returns the path to use, or nil if can't use either one
--(NSString *) getConfigurationToUse:(NSString *)cfgPath orAlt:(NSString *)altCfgPath
-{
-    if (  [[ConfigurationManager defaultManager] isSampleConfigurationAtPath: cfgPath]  ) {             // Don't use the sample configuration file
-        return nil;
-    }
-    
-    if (  ! [self configNotProtected:cfgPath]  ) {                              // If config is protected
-        if (  ! [gTbDefaults boolForKey:@"useShadowConfigurationFiles"]  ) {    //    If not using shadow configuration files
-            return cfgPath;                                                     //    Then use it
-        } else { 
-            NSString * folder = firstPartOfPath(cfgPath);                       //    Or if are using shadow configuration files
-            if (  ! [folder isEqualToString: gPrivatePath]  ) {                 //    And in Shared or Deploy (even if using shadow copies)
-                return cfgPath;                                                 //    Then use it (we don't need to shadow copy them)
-            }
-        }
-    }
-    
-    // Repair the configuration file or use the alternate
-    AuthorizationRef authRef;
-    if (   (! [self onRemoteVolume:cfgPath] )
-        && (! [gTbDefaults boolForKey:@"useShadowConfigurationFiles"] )  ) {
-        
-        // We don't use a shadow configuration file
-		NSLog(@"Configuration file %@ needs ownership/permissions repair", cfgPath);
-        authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the configuration file to secure it.", @"Window text")]; // Try to repair regular config
-        if ( authRef == nil ) {
-            NSLog(@"Repair authorization cancelled by user");
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-            return nil;
-        }
-        if( ! [[ConfigurationManager defaultManager] protectConfigurationFile:cfgPath usingAuth:authRef] ) {
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-            return nil;
-        }
-        AuthorizationFree(authRef, kAuthorizationFlagDefaults);                         // Repair worked, so return the regular conf
-        return cfgPath;
-    } else {
-        
-        // We should use a shadow configuration file
-        if ( [gFileMgr fileExistsAtPath:altCfgPath] ) {                                 // See if alt config exists
-            // Alt config exists
-            BOOL isSame;
-            if (  [[altCfgPath pathExtension] isEqualToString: @"tblk"]  ) {
-                // We must run as root to see if the two .tblk packages are identical because the permissions
-                // on any .crt files are no-access except to root.
-                NSString * displayName = [lastPartOfPath(altCfgPath) stringByDeletingPathExtension];
-                OSStatus status = [self compareTblkShadowCopy: displayName];
-                if (  status == OPENVPNSTART_COMPARE_CONFIG_SAME  ) {
-                    isSame = TRUE;
-                } else if (  status == OPENVPNSTART_COMPARE_CONFIG_DIFFERENT  ) {
-                    isSame = FALSE;
-                } else {
-                    NSLog(@"compareShadowCopy returned %ld", (long) status);
-                    return nil;
-                }
-            } else {
-                // For a .ovpn or .conf, which we have read-only access to, we can just compare running as the user
-                isSame = [gFileMgr contentsEqualAtPath: cfgPath andPath: altCfgPath];
-            }
-            if (  isSame  ) {
-                // Alt config exists and is the same as regular config
-                if ( [self configNotProtected:altCfgPath] ) {                            // Check ownership/permissions
-                    // Alt config needs repair
-                    NSLog(@"The shadow copy of configuration file %@ needs ownership/permissions repair", cfgPath);
-                    authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.", @"Window text")]; // Repair if necessary
-                    if ( authRef == nil ) {
-                        NSLog(@"Repair authorization cancelled by user");
-                        AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                        return nil;
-                    }
-                    if(  ! [[ConfigurationManager defaultManager] protectConfigurationFile:altCfgPath usingAuth:authRef]  ) {
-                        AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                        return nil;                                                     // Couldn't repair alt file
-                    }
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                }
-                return altCfgPath;                                                      // Return the alt config
-            } else {
-                // Alt config exists but is different
-                NSLog(@"The shadow copy of configuration file %@ needs to be updated from the original", cfgPath);
-                authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to update the shadow copy of the configuration file from the original.", @"Window text")];// Overwrite it with the standard one and set ownership & permissions
-                if ( authRef == nil ) {
-                    NSLog(@"Authorization for update of shadow copy cancelled by user");
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-                    return nil;
-                }
-                if ( [self copyConfigPath: cfgPath toPath: altCfgPath usingAuthRef: authRef warnDialog: YES moveNotCopy: NO] ) {
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                    if (  [self configNotProtected: altCfgPath]  ) {
-                        NSLog(@"Unable to secure alternate configuration");
-                        return nil;
-                    }
-                    return altCfgPath;                                                  // And return the alt config
-                } else {
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);             // Couldn't overwrite alt file with regular one
-                    return nil;
-                }
-            }
-        } else {
-            // Alt config doesn't exist. We must create it (and maybe the folders that contain it)
-            NSLog(@"Creating shadow copy of configuration file %@", cfgPath);
-            
-            // Folder creation code below needs alt config to be in /Library/Application Support/SurfsafeVPN/Users/<username>/xxx.conf
-            NSString * altCfgFolderPath  = [altCfgPath stringByDeletingLastPathComponent]; // Strip off xxx.conf to get path to folder that holds it
-            //                                                                             // (But leave any subfolders) 
-            if (  ! [altCfgFolderPath hasPrefix: [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users", NSUserName()]]  ) {
-                NSLog(@"Internal SurfsafeVPN error: altCfgPath\n%@\nmust be in\n/Library/Application Support/SurfsafeVPN/Users/<username>", altCfgFolderPath);
-                return nil;
-            }
-            
-            authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to create a shadow copy of the configuration file.", @"Window text")]; // Create folders if they don't exist:
-            if ( authRef == nil ) {
-                NSLog(@"Authorization to create a shadow copy of the configuration file cancelled by user.");
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-                return nil;
-            }
-            if ( ! [self makeSureFolderExistsAtPath: altCfgFolderPath usingAuth: authRef] ) {     // /Library/.../<username>/[subdirs...]
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                return nil;
-            }
-            if ( [self copyConfigPath: cfgPath toPath: altCfgPath usingAuthRef: authRef warnDialog: YES moveNotCopy: NO] ) {    // Copy the config to the alt config
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                if (  [self configNotProtected: altCfgPath]  ) {
-                    NSLog(@"Unable to secure alternate configuration");
-                    return nil;
-                }
-                return altCfgPath;                                                              // Return the alt config
-            }
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);                             // Couldn't make alt file
-            return nil;
-        }
-    }
-}
-
-
-// Runs as root to compare the private and shadow copies of a .tblk
-// Used because .crt files in a .tblk are no-access except to root
--(OSStatus) compareTblkShadowCopy: (NSString *) displayName
-{
-    NSString* path = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
-    NSArray *arguments = [NSArray arrayWithObjects:@"compareTblkShadowCopy", displayName, nil];
-    
-    NSTask* task = [[[NSTask alloc] init] autorelease];
-    [task setLaunchPath: path]; 
-    [task setArguments:arguments];
-    [task setCurrentDirectoryPath: @"/tmp"];    // Won't be used, but we need to specify something
-    [task launch];
-    [task waitUntilExit];
-    return [task terminationStatus];
-}
-
-
 -(BOOL) isSampleConfigurationAtPath: (NSString *) cfgPath
 {
     NSString * samplePath = [[NSBundle mainBundle] pathForResource: @"openvpn" ofType: @"conf"];
@@ -1685,114 +1522,6 @@ enum state_t {                      // These are the "states" of the guideState 
 		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://openvpn.net/index.php/open-source/documentation.html"]];
 	}
     
-    return TRUE;
-}
-
-// Checks ownership and permisions of .tblk package, or .ovpn or .conf file
-// Returns YES if not secure, NO if secure
--(BOOL)configNotProtected:(NSString *)configFile 
-{
-    if (  [[configFile pathExtension] isEqualToString: @"tblk"]  ) {
-        BOOL isDir;
-        if (  [gFileMgr fileExistsAtPath: configFile isDirectory: &isDir]
-            && isDir  ) {
-            return folderContentsNeedToBeSecuredAtPath(configFile);
-        } else {
-            return YES;
-        }
-    }
-    
-    NSDictionary *fileAttributes = [gFileMgr tbFileAttributesAtPath:configFile traverseLink:YES];
-    unsigned long perms = [fileAttributes filePosixPermissions];
-    NSString *octalString = [NSString stringWithFormat:@"%lo",perms];
-    NSNumber *fileOwner = [fileAttributes fileOwnerAccountID];
-    
-    if ( (![octalString isEqualToString:@"644"])  || (![fileOwner isEqualToNumber:[NSNumber numberWithInt:0]])) {
-        // NSLog(@"Configuration file %@ has permissions: 0%@, is owned by %@ and needs repair",configFile,octalString,fileOwner);
-        return YES;
-    }
-    return NO;
-}
-
--(BOOL) checkPermissions: (NSString *) permsShouldHave forPath: (NSString *) path
-{
-    NSDictionary *fileAttributes = [[NSFileManager defaultManager] tbFileAttributesAtPath: path traverseLink:YES];
-    unsigned long perms = [fileAttributes filePosixPermissions];
-    NSString *octalString = [NSString stringWithFormat:@"%lo",perms];
-    
-    return [octalString isEqualToString: permsShouldHave];
-}
-
-// Returns TRUE if a file is on a remote volume or statfs on it fails, FALSE otherwise
--(BOOL) onRemoteVolume:(NSString *)cfgPath
-{
-    const char * fileName = [gFileMgr fileSystemRepresentationWithPath: cfgPath];
-    struct statfs stats_buf;
-    
-    if (  0 == statfs(fileName, &stats_buf)  ) {
-        if (  (stats_buf.f_flags & MNT_LOCAL) == MNT_LOCAL  ) {
-            return FALSE;
-        }
-    } else {
-        NSLog(@"statfs on %@ failed; assuming it is a remote volume\nError was '%s'", cfgPath, strerror(errno));
-    }
-    return TRUE;   // Network volume or error accessing the file's data.
-}
-
-// Attempts to protect a configuration file
-// Returns TRUE if succeeded, FALSE if failed, having already output an error message to the console log
--(BOOL)protectConfigurationFile: (NSString *) configFilePath usingAuth: (AuthorizationRef) authRef
-{
-    NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
-
-    NSArray * arguments = [NSArray arrayWithObjects: @"0", configFilePath, nil];
-    
-    NSLog(@"Securing configuration file %@", configFilePath);
-    
-    BOOL okNow = FALSE; // Assume failure
-    int i;
-    for (i=0; i<5; i++) {
-        if (  i != 0  ) {
-            usleep( i * 500000 );
-            NSLog(@"Retrying execution of installer");
-        }
-
-        if (  [NSApplication waitForExecuteAuthorized: launchPath withArguments: arguments withAuthorizationRef: authRef] ) {
-            // Try for up to 6.35 seconds to verify that installer succeeded -- sleeping .05 seconds first, then .1, .2, .4, .8, 1.6,
-            // and 3.2 seconds (totals 6.35 seconds) between tries as a cheap and easy throttling mechanism for a heavily loaded computer
-            useconds_t sleepTime;
-            for (sleepTime=50000; sleepTime < 7000000; sleepTime=sleepTime*2) {
-                usleep(sleepTime);
-                
-                if (  (okNow = ( ! [self configNotProtected: configFilePath] )) ) {
-                    break;
-                }
-            }
-            
-            if (  okNow  ) {
-                break;
-            } else {
-                NSLog(@"Timed out waiting for installer execution to succeed");
-            }
-        } else {
-            NSLog(@"Failed to execute %@: %@", launchPath, arguments);
-        }
-    }
-        
-    if (   ( ! okNow )
-        && [self configNotProtected: configFilePath]  ) {
-        NSLog(@"Could not change ownership and/or permissions of configuration file %@", configFilePath);
-        TBRunAlertPanel([NSString stringWithFormat:@"%@: %@",
-                         [self displayNameForPath: configFilePath],
-                         NSLocalizedString(@"Not connecting", @"Window title")],
-                        NSLocalizedString(@"SurfSafeVPN could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.", @"Window text"),
-                        nil,
-                        nil,
-                        nil);
-        return FALSE;
-    }
-    
-    NSLog(@"Secured configuration file %@", configFilePath);
     return TRUE;
 }
 
