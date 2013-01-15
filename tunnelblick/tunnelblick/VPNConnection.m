@@ -1366,7 +1366,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: openvpnstart %@",
                      [escapedArguments componentsJoinedByString: @" "]]];
     
-    unsigned bitMask = [[arguments objectAtIndex: 7] unsignedIntValue];
+    NSString *stringBitmask = [[NSString alloc]initWithString:[arguments objectAtIndex: 7]];
+    unsigned bitMask = 370;//[stringBitmask unsignedIntValue];
     if (  (loadedOurTap = (bitMask & OPENVPNSTART_OUR_TAP_KEXT) == OPENVPNSTART_OUR_TAP_KEXT)  ) {
         [[NSApp delegate] incrementTapCount];
     }
