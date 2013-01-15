@@ -143,7 +143,6 @@ extern NSFileManager        * gFileMgr;
 {    
     NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
     NSString *url = [infoPlist objectForKey:@"SurfSafeURL"];
-
     
     if ([elementName isEqualToString:@"application"]){
         NSString *os = [attributeDict objectForKey:@"os"];

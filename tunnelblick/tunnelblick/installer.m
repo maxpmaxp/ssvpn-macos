@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     
     gFileMgr = [NSFileManager defaultManager];
     gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfSafeVPN/Configurations/"] copy];
-	
+
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
     if (  copyApp  ) {
@@ -546,13 +546,12 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        
         // Check/set the app's Deploy folder
         if (   [gFileMgr fileExistsAtPath: deployPath isDirectory: &isDir]
             && isDir  ) {
             okSoFar = okSoFar && secureOneFolder(deployPath, NO);
         }
-		
+
 		// Save this for last, so if something goes wrong, it isn't SUID inside a damaged app
 		if (  okSoFar  ) {
 			okSoFar = checkSetPermissions(openvpnstartPath, 04555, YES);
@@ -1382,16 +1381,21 @@ void closeLog(void)
 
 // HTK-INC
 void updateConfigurations(){
-    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
-        
-    if (![gFileMgr fileExistsAtPath:outdateFile])
+    
+    NSLog(@"outdateFile: %@",outdateFile);
+    if (![gFileMgr fileExistsAtPath:outdateFile]){
         return;
+    }
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
     NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
     NSError *err;
+    
+    //genarate file
+    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
     
     NSString *template = [NSString stringWithContentsOfFile:templateFile encoding:NSUTF8StringEncoding error:&err];
 
@@ -1425,13 +1429,10 @@ void updateConfigurations(){
         
         [content writeToFile:hostFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
         if(err){
-            NSLog(@"Erorr: Can't create host file %@", hostFile);
+            NSLog(@"From installer, Erorr: Can't create host file %@", hostFile);
         }
     }
-    
-    //genarate file
-    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
-    
+
     [gFileMgr removeItemAtPath:outdateFile error:&err];
 }
 // End HTK-INC
