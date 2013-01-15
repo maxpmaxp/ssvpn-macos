@@ -224,7 +224,6 @@ BOOL checkOwnedByRootWheel(NSString * path);
         gPrivatePath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/SurfSafeVPN/Configurations"] copy];
         createDir(gPrivatePath, PERMS_PRIVATE_SELF);     // Create private configurations folder if necessary
         
-        
 		gConfigDirs = [[NSMutableArray alloc] initWithCapacity: 2];
         
 		[NSApp setDelegate: self];
@@ -424,7 +423,26 @@ BOOL checkOwnedByRootWheel(NSString * path);
 
                                       @"-doNotShowOnTunnelblickMenu",
                                       nil] retain];
+
+                // Create private configurations folder if necessary
+        createDir(gPrivatePath, 0755);
         
+                        //HTK-INC
+        // check update here because for first run time.
+        NSString * backupPath = [NSHomeDirectory() stringByAppendingPathComponent:BACKUP_PATH];
+        createDir(backupPath, 0755); // create backup dir
+        //[ConfigurationNetwork sharedInstance];
+        //[[ConfigurationNetwork sharedInstance] backupSystemProxies];
+        ssUpdater = [[SurfSafeUpdater alloc] init];
+        [ssUpdater setDelegate:(id) self];
+        [ssUpdater checkForUpdate];
+        //end HTK-INC
+        
+        //[self dmgCheck];    // If running from a place that can't do suid (e.g., a disk image), THIS METHOD DOES NOT RETURN
+        
+        //HTK-INC
+        //[self installCheck];
+        //end HTK-INC
         // If this is the first time we are using the new CFBundleIdentifier
         //    Rename the old preferences so we can access them with the new CFBundleIdentifier
         //    And create a link to the new preferences from the old preferences (make the link read-only)
@@ -4812,7 +4830,7 @@ BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
             return YES;
         }
     }
-    
+
     // check permissions of files in the master Deploy folder
     if (  [gFileMgr fileExistsAtPath: gDeployPath isDirectory: &isDir]
         && isDir  ) {

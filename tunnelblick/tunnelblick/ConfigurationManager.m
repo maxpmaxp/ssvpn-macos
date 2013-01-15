@@ -107,7 +107,6 @@ enum state_t {                      // These are the "states" of the guideState 
     noneIgnored = [self addConfigsFromPath: gDeployPath  thatArePackages: NO  toDict: dict searchDeeply: YES ] && noneIgnored;
     noneIgnored = [self addConfigsFromPath: L_AS_T_SHARED  thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
     noneIgnored = [self addConfigsFromPath: gPrivatePath thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
-    noneIgnored = [self addConfigsFromPath: gPrivatePath thatArePackages: NO toDict: dict searchDeeply: YES ] && noneIgnored;
     
     if (  ! noneIgnored  ) {
         TBRunAlertPanelExtended(NSLocalizedString(@"Configuration(s) Ignored", @"Window title"),
