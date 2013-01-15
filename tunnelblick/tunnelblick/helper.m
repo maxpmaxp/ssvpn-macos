@@ -931,7 +931,7 @@ NSString * copyrightNotice()
     [dateFormat setDateFormat:@"YYYY"];
     NSString * year = [dateFormat stringFromDate: [NSDate date]];
     return [NSString stringWithFormat:
-            NSLocalizedString(@"2012 SurfSafeVPN", @"Window text"),
+            NSLocalizedString(@"2013 SurfSafeVPN", @"Window text"),
             year];
 }
 
