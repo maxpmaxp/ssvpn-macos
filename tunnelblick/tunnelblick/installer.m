@@ -1432,7 +1432,8 @@ void updateConfigurations(){
             NSLog(@"From installer, Erorr: Can't create host file %@", hostFile);
         }
     }
-
+    //genarate file
+    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
     [gFileMgr removeItemAtPath:outdateFile error:&err];
 }
 // End HTK-INC
