@@ -381,7 +381,7 @@ void exitIfWrongOwnerOrPermissions(NSString * fPath, uid_t uid, gid_t gid, NSStr
         return;
     }
     
-    fprintf(stderr, "File %s has permissions: %s, is owned by %d:%d and needs repair\n", [fPath UTF8String], [permissionsOctal UTF8String], [fileOwner intValue], [fileGroup intValue]);
+    fprintf(stderr, "File %s has permissions: %s, is owned by %d:%d and needs repair; req permissions %s\n", [fPath UTF8String], [permissionsOctal UTF8String], [fileOwner intValue], [fileGroup intValue], [permsShouldHave UTF8String]);
     exitOpenvpnstart(201);
 }
 
@@ -1683,7 +1683,7 @@ int startVPN(NSString * configFile,
              NSString * openvpnVersion)
 {
 	//Tries to start an openvpn connection
-	
+
 	BOOL isDir;
 	
 	NSString * openvpnPath  = openvpnToUsePath([gResourcesPath stringByAppendingPathComponent: @"openvpn"], openvpnVersion);    
@@ -1726,7 +1726,7 @@ int startVPN(NSString * configFile,
             
         case CFG_LOC_DEPLOY:
             cdFolderPath = gDeployPath; // Will be set below IF this is a .tblk.
-            gConfigPath   = [gDeployPath stringByAppendingPathComponent: configFile];
+            gConfigPath   = [cdFolderPath stringByAppendingPathComponent: configFile];
             break;
             
         case CFG_LOC_SHARED:
