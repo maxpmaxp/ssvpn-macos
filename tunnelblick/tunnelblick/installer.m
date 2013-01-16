@@ -1385,14 +1385,13 @@ void updateConfigurations(){
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
-    NSLog(@"outdateFile: %@",outdateFile);
     if (![gFileMgr fileExistsAtPath:outdateFile]){
         return;
     }
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
     NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
-    NSError *err;
+    NSError *err = nil;
     
     //genarate file
     [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];

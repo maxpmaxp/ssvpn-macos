@@ -72,18 +72,22 @@ extern NSFileManager        * gFileMgr;
 }
 
 -(void) generateFiles{
-    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent: CONFIGURATION_PATH];
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
-    if (![gFileMgr fileExistsAtPath:outdateFile])
+    if (![gFileMgr fileExistsAtPath:outdateFile]){
         return;
+    }
     
     
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
     //NSString *hostFile = [updatePath stringByAppendingPathComponent:@"hosts"];
-    NSError *err;
+    NSError *err = nil;
+    
+    //genarate file
+    [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
     
     NSString *template = [NSString stringWithContentsOfFile:templateFile encoding:NSUTF8StringEncoding error:&err];
     
@@ -91,7 +95,7 @@ extern NSFileManager        * gFileMgr;
     //NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
     NSArray *keys = [hosts allKeys];
     
-    NSLog(@"host count %d", [hosts count]);
+    //NSLog(@"host count %d", [hosts count]);
     
     NSDirectoryEnumerator *en = [gFileMgr enumeratorAtPath:configPath];
     NSString *file;
@@ -145,8 +149,8 @@ extern NSFileManager        * gFileMgr;
     NSString *url = [infoPlist objectForKey:@"SurfSafeURL"];
     
     if ([elementName isEqualToString:@"application"]){
-        NSString *os = [attributeDict objectForKey:@"os"];
-        if ([os isEqualToString:@"mac"]){
+        //NSString *os = [attributeDict objectForKey:@"os"];
+        //if ([os isEqualToString:@"mac"]){
             float appVersion = [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] floatValue];
             newVersion = [attributeDict objectForKey:@"version"];
             float serverVersion = [newVersion floatValue];
@@ -161,7 +165,7 @@ extern NSFileManager        * gFileMgr;
             {
                 isConfigOutOfDate = YES;
             }
-        }        
+        //}
     }   
     else if ([elementName isEqualToString:@"host"]){
         NSString *configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
@@ -218,7 +222,7 @@ extern NSFileManager        * gFileMgr;
         [gFileMgr removeItemAtPath:hostsPath error:&err];
         
         [hosts writeToFile:hostsPath atomically:YES];
-        NSError *err;
+        NSError *err = nil;
         [@" " writeToFile:outdateFile atomically:NO encoding:NSUTF8StringEncoding error:&err];
 
         [gFileMgr removeItemAtPath:keyPath error:&err];
