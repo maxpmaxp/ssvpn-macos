@@ -244,11 +244,11 @@ extern NSFileManager        * gFileMgr;
     
     
     //if( [delegate respondsToSelector:@selector(checkForUpdateFinished:)]){
-    //    NSUInteger hostCount = [hosts count];
-    //    if (numOfHostLost == hostCount)
+        NSUInteger hostCount = [hosts count];
+        if (numOfHostLost == hostCount)
             [delegate checkForUpdateFinished: isOutOfDate generateFiles:YES];
-    //    else
-    //        [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
+        else
+            [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
     //}
 }
 

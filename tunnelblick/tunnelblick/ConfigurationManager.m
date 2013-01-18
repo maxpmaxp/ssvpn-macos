@@ -1637,8 +1637,9 @@ enum state_t {                      // These are the "states" of the guideState 
                     if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
                                             extraArguments: nil]  ) {
                         
-                        button = TBRunAlertPanel(@"Welcome to SurfSafeVPN",
-                                                 @"Failed to forced update",
+                                 TBRunAlertPanel(@"Welcome to SurfSafeVPN",
+                                                 @"Failed to get Configurations from server.\n"
+                                                 "Please, check your internet connection.",
                                                  nil,nil,nil);
                         [[NSApp delegate] terminateBecause: terminatingBecauseOfQuit];
                     }

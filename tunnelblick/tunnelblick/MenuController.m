@@ -5940,7 +5940,13 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
 - (void) checkForUpdateFinished: (BOOL) update generateFiles:(BOOL)gen{
     NSLog(@"Finished check update");
     if (gen){
-        [ssUpdater generateFiles];
+        /*if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
+                                extraArguments: nil]  ) {
+            
+            TBRunAlertPanel(@"Welcome to SurfSafeVPN",
+                            @"Failed to update Configuration files from server.\n",
+                            nil,nil,nil);
+        }*/
     }
     if (update)
         outOfDate = YES;

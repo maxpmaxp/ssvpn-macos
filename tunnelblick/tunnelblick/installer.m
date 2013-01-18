@@ -133,7 +133,7 @@ NSArray * pathsForDeployBackups(void);
 BOOL convertAllPrivateOvpnAndConfToTblk(void);
 BOOL tunnelblickTestPrivateOnlyHasTblks(void);
 //HTK-INC
-void updateConfigurations();
+void updateConfigurations(BOOL isForced);
 //End HTK-INC
 
 int main(int argc, char *argv[]) 
@@ -683,10 +683,12 @@ int main(int argc, char *argv[])
     }
     
     //HTK-INC
+    BOOL iSForced = NO;
     if( forcedGetConfig){
-        updateConfigurations();
-        secureL_AS_T_DEPLOY();
+        iSForced = YES;
     }
+    updateConfigurations(iSForced);
+    secureL_AS_T_DEPLOY();
     //End HTK-INC
     
     //**************************************************************************************************************************
@@ -1408,14 +1410,17 @@ void closeLog(void)
 }
 
 // HTK-INC
-void updateConfigurations(){
+void updateConfigurations(BOOL isForced){
     
     NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
-    if (![gFileMgr fileExistsAtPath:outdateFile]){
-//        return;
+    //in the forced case run installer
+    if(!isForced){
+        if (![gFileMgr fileExistsAtPath:outdateFile]){
+            return;
+        }
     }
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
