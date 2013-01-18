@@ -14,6 +14,7 @@
 #import "NSFileManager+TB.h"
 #import "helper.h"
 #import "SSZipArchive.h"
+#import "ConfigurationManager.h"
 
 extern NSFileManager        * gFileMgr;
 
@@ -72,14 +73,14 @@ extern NSFileManager        * gFileMgr;
 }
 
 -(void) generateFiles{
-    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
+    NSString * configPath2 = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
     if (![gFileMgr fileExistsAtPath:outdateFile]){
         return;
     }
-    
     
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
@@ -123,7 +124,9 @@ extern NSFileManager        * gFileMgr;
         if(err){
             NSLog(@"Error: Can't create host file %@", hostFile);
         }
+
     }
+    
     
     //genarate file
     [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
@@ -240,13 +243,13 @@ extern NSFileManager        * gFileMgr;
     }
     
     
-    if( [delegate respondsToSelector:@selector(checkForUpdateFinished:)]){
-        NSUInteger hostCount = [hosts count];
-        if (numOfHostLost == hostCount)
+    //if( [delegate respondsToSelector:@selector(checkForUpdateFinished:)]){
+    //    NSUInteger hostCount = [hosts count];
+    //    if (numOfHostLost == hostCount)
             [delegate checkForUpdateFinished: isOutOfDate generateFiles:YES];
-        else
-            [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
-    }
+    //    else
+    //        [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
+    //}
 }
 
 @end

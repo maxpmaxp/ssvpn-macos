@@ -1621,33 +1621,33 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 // No configuration files (entry from haveNoConfigurationsGuild)
                 button = TBRunAlertPanel(NSLocalizedString(@"Welcome to SurfSafeVPN", @"Window title"),
-                                         NSLocalizedString(@"There are no VPN configurations installed.\n\n"
+                                                          @"There are no VPN configurations installed.\n\n"
                                                            "SurfSafeVPN needs one or more installed configurations to connect to a VPN. "
-                                                           "Configurations are installed from files that are usually supplied to you by your network manager "
-                                                           "or VPN service provider. The files must be installed to be used.\n\n"
-                                                           "Configuration files have extensions of .tblk, .ovpn, or .conf.\n\n"
-                                                           "(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\n"
-                                                           "Do you have any configuration files?\n",
-                                                           @"Window text"),
-                                         NSLocalizedString(@"I have configuration files", @"Button"),       // Default button
+                                                           "Do you want to get configurations freom the web?\n",
+                                         NSLocalizedString(@"Get Configurations", @"Button"),       // Default button
                                          NSLocalizedString(@"Quit", @"Button"),                             // Alternate button
-                                         NSLocalizedString(@"I DO NOT have configuration files", @"Button") // Other button
+                                         nil//NSLocalizedString(@"I DO NOT have configuration files", @"Button") // Other button
                                          );
                 
                 if (  button == NSAlertAlternateReturn  ) {
                     // User selected QUIT
                     [[NSApp delegate] terminateBecause: terminatingBecauseOfQuit];
                 }
-                
                 if (  button == NSAlertDefaultReturn  ) {
-                    // User has configuration files and wishes to add them
-                    nextState = stateHasConfigurations;
-                    break;
+                    if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
+                                            extraArguments: nil]  ) {
+                        
+                        button = TBRunAlertPanel(@"Welcome to SurfSafeVPN",
+                                                 @"Failed to forced update",
+                                                 nil,nil,nil);
+                        [[NSApp delegate] terminateBecause: terminatingBecauseOfQuit];
+                    }
+                    return;
                 }
                 
-                // User does not have configuration files
+                /*// User does not have configuration files
                 nextState = stateHasNoConfigurations;
-                break;
+                break;*/
                 
                 
             case stateHasNoConfigurations:

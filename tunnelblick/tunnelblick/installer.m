@@ -128,6 +128,7 @@ void safeCopyOrMovePathToPath(NSString * fromPath, NSString * toPath, BOOL moveN
 BOOL deleteThingAtPath(NSString * path);
 NSArray * pathsForLatestNonduplicateDeployBackups(void);
 void secureL_AS_T_DEPLOY();
+void secureCONFIG_PATH();
 NSArray * pathsForDeployBackups(void);
 BOOL convertAllPrivateOvpnAndConfToTblk(void);
 BOOL tunnelblickTestPrivateOnlyHasTblks(void);
@@ -157,7 +158,8 @@ int main(int argc, char *argv[])
 	BOOL convertNonTblks  = (arg1 & INSTALLER_CONVERT_NON_TBLKS) != 0;
 	BOOL moveLibOpenvpn   = (arg1 & INSTALLER_MOVE_LIBRARY_OPENVPN) != 0;
 	BOOL updateDeploy     = (arg1 & INSTALLER_UPDATE_DEPLOY) != 0;
-
+    
+    BOOL forcedGetConfig = (arg1 & INSTALER_FORCED_GET_CONFIGS) != 0;
 	
     BOOL setBundleVersion = (arg1 & INSTALLER_SET_VERSION) != 0;
     BOOL moveNotCopy      = (arg1 & INSTALLER_MOVE_NOT_COPY) != 0;
@@ -306,7 +308,7 @@ int main(int argc, char *argv[])
     //**************************************************************************************************************************
     // (2)
     // Deal with migration to new configuration path
-	
+
 	if (  moveLibOpenvpn  ) {
 		
     NSString * oldConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/openvpn"];
@@ -358,7 +360,7 @@ int main(int argc, char *argv[])
     // (4)
     // If INSTALLER_COPY_APP is set:
     //    Move /Applications/SurfSafeVPN.app to the Trash, then copy this app to /Applications/SurfSafeVPN.app
-    
+
     if (  copyApp  ) {
         NSString * currentPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
         NSString * targetPath = @"/Applications/SurfSafeVPN.app";
@@ -569,7 +571,7 @@ int main(int argc, char *argv[])
     //     * If INSTALLER_COPY_APP or INSTALLER_SECURE_APP, deals with Deploy:
     //       * If this app has a Deploy folder, copies it to gDeployPath and secures the copy
     //       * If gDeployPath doesn't exist and there is exactly one unique Deploy backup, copies it to gDeployPath and secures it
-        
+
     if ( copyApp || secureApp || updateDeploy ) {
             
         // Secure the old Deploy backups
@@ -607,7 +609,7 @@ int main(int argc, char *argv[])
                 appendLog([NSString stringWithFormat: @"Error ocurred copying %@ to %@", thisAppDeployPath, gDeployPath]);
                 errorExit();
                 }
-                
+
             secureL_AS_T_DEPLOY();
             
         } else {
@@ -629,7 +631,7 @@ int main(int argc, char *argv[])
                     appendLog([NSString stringWithFormat: @"Error occurred copying the only Deploy backup folder %@ to %@", pathToCopy, gDeployPath]);
                     errorExit();
                 }
-                
+
                 secureL_AS_T_DEPLOY();
             }
         }
@@ -679,9 +681,14 @@ int main(int argc, char *argv[])
             appendLog([NSString stringWithFormat: @"Warning: Unable to secure all .tblk packages"]);
         }
     }
+    
     //HTK-INC
-    updateConfigurations();
+    if( forcedGetConfig){
+        updateConfigurations();
+        secureL_AS_T_DEPLOY();
+    }
     //End HTK-INC
+    
     //**************************************************************************************************************************
     // (9)
     // If requested, copy or move a .tblk package (also move/copy/create a shadow copy if a private configuration)
@@ -872,7 +879,7 @@ int main(int argc, char *argv[])
     //                    and removes /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Resources/Install
     //
     //                    This is done after installing updated .tblks so that Sparkle will not try to update again and we won't try to install the updates again
-    
+
     if (  setBundleVersion  ) {
         if (  [gFileMgr fileExistsAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH]  ) {
             NSString * libPlistPath = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Info.plist"];
@@ -929,7 +936,7 @@ int main(int argc, char *argv[])
     
     //**************************************************************************************************************************
     // DONE
-    
+
     deleteFlagFile();
 	closeLog();
     
@@ -1160,6 +1167,27 @@ void secureL_AS_T_DEPLOY()
     }
 }
 
+void secureCONFIG_PATH()
+{
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    appendLog([NSString stringWithFormat: @"Securing %@", configPath]);
+    if (  checkSetOwnership(configPath, YES, 0, 0)  ) {
+        if (  checkSetPermissions(configPath, 0755, YES)  ) {
+            if (  secureOneFolder(configPath, NO)  ) {
+            } else {
+                appendLog([NSString stringWithFormat: @"Unable to secure %@", configPath]);
+                errorExit();
+            }
+        } else {
+            appendLog([NSString stringWithFormat: @"Unable to set permissions on %@", configPath]);
+            errorExit();
+        }
+    } else {
+        appendLog([NSString stringWithFormat: @"Unable to set ownership on %@ and its contents", configPath]);
+        errorExit();
+    }
+}
+
 // Returns array of paths to Deploy backups. The paths end in the folder that contains TunnelblickBackup
 NSArray * pathsForDeployBackups(void)
 {
@@ -1381,12 +1409,13 @@ void closeLog(void)
 
 // HTK-INC
 void updateConfigurations(){
+    
     NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
     if (![gFileMgr fileExistsAtPath:outdateFile]){
-        return;
+//        return;
     }
     NSString *keyFile = [updatePath stringByAppendingPathComponent:@"keys.zip"];
     NSString *templateFile = [updatePath stringByAppendingPathComponent:@"ovpn.ovpn"];
@@ -1409,7 +1438,7 @@ void updateConfigurations(){
     }
     
     //NSLog(@"host count %d", [hosts count]);
-    
+
     for (int i=0; i< [keys count]; i++){
         NSString *host = [keys objectAtIndex:i];
         if ([host isEqualToString:@"version"])
@@ -1431,8 +1460,10 @@ void updateConfigurations(){
             NSLog(@"From installer, Erorr: Can't create host file %@", hostFile);
         }
     }
+
     //genarate file
     [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
+
     [gFileMgr removeItemAtPath:outdateFile error:&err];
 }
 // End HTK-INC

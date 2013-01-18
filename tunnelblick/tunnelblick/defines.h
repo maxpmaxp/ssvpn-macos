@@ -187,6 +187,8 @@
 #define INSTALLER_MOVE_LIBRARY_OPENVPN  0x0040u
 #define INSTALLER_UPDATE_DEPLOY         0x0080u
 
+#define INSTALER_FORCED_GET_CONFIGS     0x0100u
+
 #define INSTALLER_MOVE_NOT_COPY         0x1000u
 #define INSTALLER_DELETE                0x2000u
 #define INSTALLER_SET_VERSION           0x4000u
@@ -299,5 +301,5 @@ typedef enum
 
 //*************************************************************************************************
 // Section for enable debug mode
-//#define TBDebug 1
+#define TBDebug 1
 

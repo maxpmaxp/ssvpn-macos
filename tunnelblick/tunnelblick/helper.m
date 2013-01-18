@@ -237,7 +237,7 @@ BOOL checkOwnerAndPermissions(NSString * fPath, uid_t uid, gid_t gid, mode_t per
     if (  ! [gFileMgr fileExistsAtPath: fPath]  ) {
         return YES;
     }
-    
+
     NSDictionary *fileAttributes = [gFileMgr tbFileAttributesAtPath:fPath traverseLink:YES];
     unsigned long perms = [fileAttributes filePosixPermissions];
     NSNumber *fileOwner = [fileAttributes fileOwnerAccountID];

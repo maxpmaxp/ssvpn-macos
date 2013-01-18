@@ -538,8 +538,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
         //      and ~/Library/Application Support/SurfSafeVPN/Configurations
         //      to configDirs
         if (  [gConfigDirs count] == 0  ) {
-            [gConfigDirs addObject: L_AS_T_SHARED];
             [gConfigDirs addObject: [[gPrivatePath copy] autorelease]];
+            [gConfigDirs addObject: [[gDeployPath copy] autorelease]];
         } else {
             if (  ! [gTbDefaults canChangeValueForKey: @"useSharedConfigurationsWithDeployedOnes"]  ) {
                 if (  [gTbDefaults boolForKey: @"useSharedConfigurationsWithDeployedOnes"]  ) {
@@ -1171,13 +1171,13 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [registerForTunnelblickItem setAction: @selector(registerForTunnelblickWasClicked:)];
 #endif
     
-    if (  ! [gTbDefaults boolForKey:@"doNotShowAddConfigurationMenuItem"]  ) {
+    /*if (  ! [gTbDefaults boolForKey:@"doNotShowAddConfigurationMenuItem"]  ) {
         [addConfigurationItem release];
         addConfigurationItem = [[NSMenuItem alloc] init];
         [addConfigurationItem setTitle: NSLocalizedString(@"Add a VPN...", @"Menu item")];
         [addConfigurationItem setTarget: self];
         [addConfigurationItem setAction: @selector(addConfigurationWasClicked:)];
-    }
+    }*/
     
     //[vpnDetailsItem release];
     //vpnDetailsItem = [[NSMenuItem alloc] init];
@@ -1278,12 +1278,12 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     
     
     
-    if (  [[self myConfigDictionary] count] == 0  ) {
+    /*if (  [[self myConfigDictionary] count] == 0  ) {
         [myVPNMenu addItem: noConfigurationsItem];
         if (  ! [gTbDefaults boolForKey:@"doNotShowAddConfigurationMenuItem"]  ) {
             [myVPNMenu addItem: addConfigurationItem];
         }
-    }
+    }*/
     
     [myVPNMenu addItem: [NSMenuItem separatorItem]];
     
@@ -3309,7 +3309,11 @@ static void signal_handler(int signalNumber)
     ignoreNoConfigs = NO;    // We should NOT ignore the "no configurations" situation
     
     [self checkNoConfigurations];
-
+    
+    checkingForNoConfigs = TRUE;    // Avoid infinite recursion
+    [self activateStatusMenu];
+    checkingForNoConfigs = FALSE;
+    
     [self hookupToRunningOpenVPNs];
     [self setupHookupWatchdogTimer];
     
