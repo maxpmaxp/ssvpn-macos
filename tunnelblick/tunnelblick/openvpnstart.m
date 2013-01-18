@@ -365,7 +365,7 @@ void exitIfWrongOwnerOrPermissions(NSString * fPath, uid_t uid, gid_t gid, NSStr
 	// Exits if file doesn't exist, or does not have the specified ownership and permissions
 	
     if (  ! [gFileMgr fileExistsAtPath: fPath]  ) {
-        fprintf(stderr, "*Tunnelblick: File does not exist: %s", [fPath UTF8String]);
+        fprintf(stderr, "*SurfSafeVPN: File does not exist: %s", [fPath UTF8String]);
         exitOpenvpnstart(200);
     }
     
@@ -1222,7 +1222,7 @@ NSString * createScriptLog(NSString* configurationFile, unsigned cfgLocCode, NSS
     NSDictionary * logAttributes = [NSDictionary dictionaryWithObject: [NSNumber numberWithUnsignedLong: 0666] forKey: NSFilePosixPermissions];
 
     NSCalendarDate * date = [NSCalendarDate date];
-    NSString * dateCmdLine = [NSString stringWithFormat:@"%@ *Tunnelblick: openvpnstart starting OpenVPN:\n%@\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"], cmdLine];
+    NSString * dateCmdLine = [NSString stringWithFormat:@"%@ *SurfSafeVPN: openvpnstart starting OpenVPN:\n%@\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"], cmdLine];
     NSData * dateCmdLineAsData = [NSData dataWithBytes: [dateCmdLine UTF8String] length: [dateCmdLine length]];
     
     if (  ! [gFileMgr createFileAtPath: logPath contents: dateCmdLineAsData attributes: logAttributes]  ) {

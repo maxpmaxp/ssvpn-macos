@@ -1088,11 +1088,11 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 -(BOOL) checkForChangedIPAddress: (NSString *) beforeConnect andIPAddress: (NSString *) afterConnect
 {
 	if (  [beforeConnect isEqualToString: afterConnect]  ) {
-		[self addToLog: [NSString stringWithFormat: @"*Tunnelblick: This computer's apparent public IP address (%@) was unchanged after the connection was made", beforeConnect]];
+		[self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: This computer's apparent public IP address (%@) was unchanged after the connection was made", beforeConnect]];
 		[self ipInfoNoChangeDialogBefore: beforeConnect];
 		return FALSE;
 	} else {
-		[self addToLog: [NSString stringWithFormat: @"*Tunnelblick: This computer's apparent public IP address changed from %@ before connection to %@ after connection", beforeConnect, afterConnect]];
+		[self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: This computer's apparent public IP address changed from %@ before connection to %@ after connection", beforeConnect, afterConnect]];
 		return TRUE;
 	}
 }	
@@ -1158,7 +1158,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         NSLog(@"DEBUG: An error occured fetching IP address information after connecting");
         NSLog(@"An error occured fetching IP address information after connecting");
         [self performSelectorOnMainThread: @selector(checkIPAddressErrorResultLogMessage:)
-                               withObject: @"*Tunnelblick: An error occured fetching IP address information after connecting"
+                               withObject: @"*SurfSafeVPN: An error occured fetching IP address information after connecting"
                             waitUntilDone: NO];
         [[NSApp delegate] haveFinishedIPCheckThread: threadID];
         [threadPool drain];
@@ -1180,7 +1180,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         // URL was already numeric, so it isn't a DNS problem
         NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's IP address");
         [self performSelectorOnMainThread: @selector(checkIPAddressBadResultLogMessage:)
-                               withObject: [NSString stringWithFormat: @"*Tunnelblick: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
+                               withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
 		                    waitUntilDone: NO];
         [[NSApp delegate] haveFinishedIPCheckThread: threadID];
         [threadPool drain];
@@ -1191,7 +1191,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's name; retrying by IP address");
 
     [self performSelectorOnMainThread: @selector(addToLog:)
-                           withObject: [NSString stringWithFormat: @"*Tunnelblick: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's name after connecting.", (double) timeoutToUse]
+                           withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's name after connecting.", (double) timeoutToUse]
                         waitUntilDone: NO];
 
     ipInfo = [self currentIPInfoWithIPAddress: YES timeoutInterval: timeoutToUse];
@@ -1206,7 +1206,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         NSLog(@"DEBUG: An error occured fetching IP address information after connecting");
         NSLog(@"An error occured fetching IP address information after connecting");
         [self performSelectorOnMainThread: @selector(checkIPAddressErrorResultLogMessage:)
-                               withObject: @"*Tunnelblick: An error occured fetching IP address information using the ipInfo host's IP address after connecting"
+                               withObject: @"*SurfSafeVPN: An error occured fetching IP address information using the ipInfo host's IP address after connecting"
                             waitUntilDone: NO];
         [[NSApp delegate] haveFinishedIPCheckThread: threadID];
         [threadPool drain];
@@ -1216,7 +1216,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  [ipInfo count] == 0  ) {
         NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's IP address");
         [self performSelectorOnMainThread: @selector(checkIPAddressBadResultLogMessage:)
-                               withObject: [NSString stringWithFormat: @"*Tunnelblick: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
+                               withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
 		                    waitUntilDone: NO];
         [[NSApp delegate] haveFinishedIPCheckThread: threadID];
         [threadPool drain];
@@ -1226,7 +1226,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     // Got IP address, even though DNS isn't working
     NSLog(@"DEBUG: checkIPAddressAfterConnectedThread: fetched IP address %@ using the ipInfo host's IP address", [ipInfo objectAtIndex:0]);
     [self performSelectorOnMainThread: @selector(checkIPAddressNoDNSLogMessage:)
-                           withObject: [NSString stringWithFormat: @"*Tunnelblick: fetched IP address information using the ipInfo host's IP address after connecting."]
+                           withObject: [NSString stringWithFormat: @"*SurfSafeVPN: fetched IP address information using the ipInfo host's IP address after connecting."]
                         waitUntilDone: NO];
     [[NSApp delegate] haveFinishedIPCheckThread: threadID];
     [threadPool drain];
@@ -1433,7 +1433,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             requestedState = oldRequestedState;
         }
     } else {
-        openvpnstartOutput = stringForLog(errOut, @"*Tunnelblick: openvpnstart log:\n");
+        openvpnstartOutput = stringForLog(errOut, @"*SurfSafeVPN: openvpnstart log:\n");
         if (  openvpnstartOutput  ) {
             if (  [openvpnstartOutput length] != 0  ) {
                 [self addToLog: openvpnstartOutput];
@@ -2916,7 +2916,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                 NSString * msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' executing…", scriptName];
                 [self addToLog: msg];
                 OSStatus status = runOpenvpnstart(arguments, nil, nil);
-                msg = [NSString stringWithFormat: @"*Tunnelblick: '%@.sh' returned with status %ld", scriptName, (long)status];
+                msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' returned with status %ld", scriptName, (long)status];
                 [self addToLog: msg];
                 if (   (status != 0)
                     && ( ! [scriptName isEqualToString: @"post-disconnect"] )  ) {

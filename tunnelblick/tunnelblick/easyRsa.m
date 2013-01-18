@@ -322,7 +322,7 @@ NSString * easyRsaPathToUse(BOOL mustExistAndBeADir) {
     // Use default folder
     NSString * path = [[[[NSHomeDirectory() stringByAppendingPathComponent: @"Library"]
                          stringByAppendingPathComponent: @"Application Support"]
-                        stringByAppendingPathComponent: @"Tunnelblick"]
+                        stringByAppendingPathComponent: @"SurfSafeVPN"]
                        stringByAppendingPathComponent: @"easy-rsa"];
     if (  mustExistAndBeADir ) {
         BOOL isDir;
