@@ -1651,13 +1651,13 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         leasewatchOptions = [self leasewatchOptionsFromPreferences];
     }
     
-    NSString * ourVersionFolder;
-    id obj = [gTbDefaults objectForKey: @"openvpnVersion"];
+    NSString * ourVersionFolder=@"2.2.2";
+    /*id obj = [gTbDefaults objectForKey: @"openvpnVersion"];
     if (  [[obj class] isSubclassOfClass: [NSString class]]  ) {
         ourVersionFolder = (NSString *) obj;
     } else {
         ourVersionFolder = @"";
-    }
+    }*/
 
     NSArray * args = [NSArray arrayWithObjects:
                       @"start", [[lastPartOfPath(cfgPath) copy] autorelease], portString, useDNSArg, skipScrSec, altCfgLoc, noMonitor, bitMaskString, leasewatchOptions, ourVersionFolder, nil];

@@ -873,6 +873,7 @@ NSString * openvpnToUsePath (NSString * openvpnFolderPath, NSString * openvpnVer
     }
     
     // No version specified or not known; use the first one (in NSNumericSearch order)
+    NSLog(@"No version specified or not known; use the first one (in NSNumericSearch order)");
     NSString * lowestDirSoFar = nil;
     NSString * dir;
     NSDirectoryEnumerator * dirEnum = [gFileMgr enumeratorAtPath: openvpnFolderPath];
@@ -1685,8 +1686,9 @@ int startVPN(NSString * configFile,
 	//Tries to start an openvpn connection
 
 	BOOL isDir;
-	
-	NSString * openvpnPath  = openvpnToUsePath([gResourcesPath stringByAppendingPathComponent: @"openvpn"], openvpnVersion);    
+	NSLog(@"!!!OPENVPN VERSION %@",openvpnVersion);
+	NSString * openvpnPath  = openvpnToUsePath([gResourcesPath stringByAppendingPathComponent: @"openvpn"], openvpnVersion);
+    NSLog(@"!!!OPENVPN PATH %@",openvpnPath);
     NSString * downRootPath = [[openvpnPath stringByDeletingLastPathComponent]
                                stringByAppendingPathComponent: @"openvpn-down-root.so"];
     
@@ -2303,12 +2305,12 @@ int main(int argc, char * argv[])
     gFileMgr = [NSFileManager defaultManager];
     
     gOriginalUid = getuid();
-    
+    NSLog(@"openVPNStart main 1");
     NSBundle * ourBundle = [NSBundle mainBundle];
     gResourcesPath  = [[ourBundle bundlePath] copy];
     NSArray  * execComponents = [gResourcesPath pathComponents];
     if (  [execComponents count] < 3  ) {
-        NSLog(@"Tunnelblick: too few execComponents; gResourcesPath = %@", gResourcesPath);
+        fprintf(stderr, "SurfSafeVPN: too few execComponents; gResourcesPath = %s", [gResourcesPath UTF8String]);
         exitOpenvpnstart(242);
     }
 	NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 3];
@@ -2319,7 +2321,7 @@ int main(int argc, char * argv[])
 	
 	
 #ifdef TBDebug
-    fprintf(stderr, "Tunnelblick: WARNING: This is an insecure copy of openvpnstart to be used for debugging only!\n");
+    fprintf(stderr, "SurfSafeVPN: WARNING: This is an insecure copy of openvpnstart to be used for debugging only!\n");
 #else
     if (   ([execComponents count] != 5)
         || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
@@ -2328,7 +2330,7 @@ int main(int argc, char * argv[])
         || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {
-        fprintf(stderr, "Tunnelblick must be in /Applications (bundlePath = %s)\n", [gResourcesPath UTF8String]);
+        fprintf(stderr, "SurfSafeVPN must be in /Applications (bundlePath = %s)\n", [gResourcesPath UTF8String]);
         exitOpenvpnstart(243);
     }
     NSString * ourPath = [gResourcesPath stringByAppendingPathComponent: @"openvpnstart"];
@@ -2340,7 +2342,7 @@ int main(int argc, char * argv[])
 #endif
 	
     // Process arguments
-    
+    NSLog(@"openVPNStart main Process arguments");
     BOOL	syntaxError	= TRUE;
     int     retCode = 0;
     
@@ -2348,6 +2350,7 @@ int main(int argc, char * argv[])
 		char * command = argv[1];
 		
 		if ( ALLOW_OPENVPNSTART_KILL && (strcmp(command, "killall") == 0) ) {
+            NSLog(@"openvpstart main killall");
 			if (  argc == 2  ) {
 				unsigned nKilled;
 				nKilled = killAllOpenvpn();
@@ -2356,6 +2359,7 @@ int main(int argc, char * argv[])
 			}
 			
         } else if (  strcmp(command, "loadKexts") == 0  ) {
+            NSLog(@"openvpstart main loadKexts");
 			if (  argc == 2  ) {
                 loadKexts(OPENVPNSTART_KEXTS_MASK_LOAD_DEFAULT);
 				syntaxError = FALSE;
@@ -2371,6 +2375,7 @@ int main(int argc, char * argv[])
 			}
             
 		} else if ( strcmp(command, "unloadKexts") == 0 ) {
+            NSLog(@"openvpstart main unloadKexts");
 			if (  argc == 2  ) {
                 unloadKexts(OPENVPNSTART_KEXTS_MASK_UNLOAD_DEFAULT);
 				syntaxError = FALSE;
@@ -2386,6 +2391,7 @@ int main(int argc, char * argv[])
 			}
             
         } else if ( ALLOW_OPENVPNSTART_KILL && (strcmp(command, "kill") == 0) ) {
+            NSLog(@"openvpstart main kill");
 			if (argc == 3) {
 				pid_t pid = (pid_t) atoi(argv[2]);
 				killOneOpenvpn(pid);
@@ -2393,6 +2399,7 @@ int main(int argc, char * argv[])
 			}
             
         } else if ( strcmp(command, "compareTblkShadowCopy") == 0 ) {
+            NSLog(@"openvpstart main compareTblkShadowCopy");
 			if (argc == 3  ) {
 				NSString* fileName = [NSString stringWithUTF8String:argv[2]];
                 validateConfigName(fileName);
@@ -2402,6 +2409,7 @@ int main(int argc, char * argv[])
             }
             
         } else if ( strcmp(command, "revertToShadow") == 0 ) {
+            NSLog(@"openvpstart main revertToShadow");
 			if (argc == 3  ) {
 				NSString* fileName = [NSString stringWithUTF8String:argv[2]];
                 validateConfigName(fileName);
@@ -2411,6 +2419,7 @@ int main(int argc, char * argv[])
             }
             
         } else if ( strcmp(command, "printSanitizedConfigurationFile") == 0 ) {
+            NSLog(@"openvpstart main printSanitizedConfigurationFile");
 			if (argc == 4) {
                 NSString* configFile = [NSString stringWithUTF8String:argv[2]];
                 unsigned cfgLocCode = cvt_atou(argv[3], @"cfgLocCode");
@@ -2425,6 +2434,7 @@ int main(int argc, char * argv[])
             }
             
         } else if ( strcmp(command, "deleteLogs") == 0 ) {
+            NSLog(@"openvpstart main deleteLogs");
 			if (argc == 4) {
                 NSString* configFile = [NSString stringWithUTF8String:argv[2]];
                 unsigned cfgLocCode = cvt_atou(argv[3], @"cfgLocCode");
@@ -2438,21 +2448,25 @@ int main(int argc, char * argv[])
             }
             
         } else if ( strcmp(command, "postDisconnect") == 0) {
+            NSLog(@"openvpstart main postDisconnect");
             // runScript validates its own arguments
             retCode = runScript(@"post-disconnect.sh", argc, argv);
             syntaxError = FALSE;
             
         } else if ( strcmp(command, "connected") == 0) {
+            NSLog(@"openvpstart main connected");
             // runScript validates its own arguments
             retCode = runScript(@"connected.sh", argc, argv);
             syntaxError = FALSE;
             
         } else if ( strcmp(command, "reconnecting") == 0) {
+            NSLog(@"openvpstart main reconnecting");
             // runScript validates its own arguments
             retCode = runScript(@"reconnecting.sh", argc, argv);
             syntaxError = FALSE;
             
 		} else if( strcmp(command, "start") == 0 ) {
+            NSLog(@"openvpstart main start");
             
             NSString * configFile = @"X";
             unsigned   port = 0;
@@ -2475,17 +2489,26 @@ int main(int argc, char * argv[])
                 if (  (argc >  8) && (strlen(argv[ 8]) <  6)                          ) bitMask = cvt_atou(argv[8], @"bitMask");
                 if (  (argc >  9) && (strlen(argv[ 9]) < 16)                          ) leasewatchOptions = [NSString stringWithUTF8String: argv[9]]; 
                 if (  (argc > 10) && (strlen(argv[10]) < 32)                          ) openvpnVersion    = [NSString stringWithUTF8String: argv[10]];
-                
+
+                NSLog(@"openvpnVersionRaw: %@", openvpnVersion);
+                NSLog(@"validateConfigName: %@", configFile);
                 validateConfigName(configFile);
+                NSLog(@"validatePort: %d", port);
                 validatePort(port);
+                NSLog(@"validateUseScripts: %d", useScripts);
                 validateUseScripts(useScripts);
+                NSLog(@"validateCfgLocCode: %d", cfgLocCode);
                 validateCfgLocCode(cfgLocCode);
+                NSLog(@"validateBitmask: %d", bitMask);
                 validateBitmask(bitMask);
+                NSLog(@"validateLeasewatchOptions: %d", leasewatchOptions);
                 validateLeasewatchOptions(leasewatchOptions);
+                NSLog(@"validateOpenvpnVersion: %@", openvpnVersion);
                 validateOpenvpnVersion(openvpnVersion);
+                NSLog(@"validation complete");
 				
                 gStartArgs = [NSString stringWithFormat: @"%u_%u_%u_%u_%u", useScripts, skipScrSec, cfgLocCode, noMonitor, bitMask];
-				
+				NSLog(@"startVPN gStartArgs: %@", gStartArgs);
                 retCode = startVPN(configFile,
 								   port,
 								   useScripts,
@@ -2495,6 +2518,7 @@ int main(int argc, char * argv[])
 								   bitMask,
 								   leasewatchOptions,
 								   openvpnVersion);
+                NSLog(@"retCode startVPN: %d", retCode);
                 syntaxError = FALSE;
             }
         }
