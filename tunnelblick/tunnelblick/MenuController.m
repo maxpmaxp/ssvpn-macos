@@ -1302,7 +1302,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
     if (  ! [gTbDefaults boolForKey:@"doNotShowVpnDetailsMenuItem"]  ) {
-      /*  [myVPNMenu addItem: vpnDetailsItem];
+        /*[myVPNMenu addItem: vpnDetailsItem];
         [myVPNMenu addItem: [NSMenuItem separatorItem]];*/
 	}
     
@@ -4063,7 +4063,7 @@ BOOL anyNonTblkConfigs(void)
 			}
 		}
 #ifndef TBDebug
-	/*} else {
+	} else {
 		if (  allowCheckbox  ) {
 			checkboxPrefKey = @"skipWarningAboutNoSignature";
 			checkboxText    = NSLocalizedString(@"Do not ask again, always Continue", @"Checkbox name");
@@ -4083,7 +4083,7 @@ BOOL anyNonTblkConfigs(void)
 											 NSAlertOtherReturn);
 		if (  result == NSAlertDefaultReturn  ) {
 			[self terminateBecause: terminatingBecauseOfQuit];
-		}*/
+		}
 #endif
 	}
     
