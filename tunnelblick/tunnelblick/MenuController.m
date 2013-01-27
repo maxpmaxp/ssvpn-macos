@@ -2840,11 +2840,15 @@ static void signal_handler(int signalNumber)
         [gFileMgr removeItemAtPath:targetPath error:&err];
     }
     
+    if (![gFileMgr fileExistsAtPath: updatePath]){
+        createDir(updatePath, 0755);
+    }
+    
     if (  ! [gFileMgr tbCopyPath: currentPath toPath: targetPath handler: nil]  ) {
         NSLog(@"SurfSafeVPN Installer: Unable to copy %@ to %@", currentPath, targetPath);
     } else {
         NSLog(@"SurfSafeVPN Installer: Copied %@ to %@", currentPath, targetPath);
-    }        
+    }
     
     // detach 
     task = [[NSTask alloc] init];
@@ -2856,13 +2860,13 @@ static void signal_handler(int signalNumber)
     
     //[gFileMgr removeItemAtPath:targetPath error:&err];
     
-    NSString *appPath = [[NSBundle mainBundle] bundlePath];
+    /*NSString *appPath = [[NSBundle mainBundle] bundlePath];
     [gFileMgr removeItemAtPath:targetPath error:&err ];
     if ([appPath isEqualToString:targetPath])
-        return;
+        return;*/
     
     NSLog(@"target %@", targetPath);
-    [gFileMgr tbCopyPath:appPath toPath:targetPath handler:nil];
+    //[gFileMgr tbCopyPath:appPath toPath:targetPath handler:nil];
     
     [self cleanup];
     
