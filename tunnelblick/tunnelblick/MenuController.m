@@ -880,7 +880,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
     [photoShieldItem release];
     // End HTK-INC
     [quitItem release];
-    [statusMenuItem release];
+    //[statusMenuItem release];
     [statusItem release];
     [logScreen release];
     
@@ -1159,9 +1159,9 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         return;
     }
     
-    [noConfigurationsItem release];
+    /*[noConfigurationsItem release];
     noConfigurationsItem = [[NSMenuItem alloc] init];
-    [noConfigurationsItem setTitle: NSLocalizedString(@"No VPN Configurations Available", @"Menu item")];
+    [noConfigurationsItem setTitle: NSLocalizedString(@"No VPN Configurations Available", @"Menu item")];*/
     
 #ifdef INCLUDE_VPNSERVICE
     [registerForTunnelblickItem release];
@@ -1213,10 +1213,10 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [quitItem setTarget: self];
     [quitItem setAction: @selector(quit:)];
     
-    [statusMenuItem release];
+    /*[statusMenuItem release];
 	statusMenuItem = [[NSMenuItem alloc] init];
     [statusMenuItem setTarget: self];
-    [statusMenuItem setAction: @selector(disconnectAllMenuItemWasClicked:)];
+    [statusMenuItem setAction: @selector(disconnectAllMenuItemWasClicked:)];*/
     
     // HTK-INC
     [clearKeychainItem release];
@@ -1243,9 +1243,9 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [self setOurMainIconView: [[[MainIconView alloc] initWithFrame: NSMakeRect(0.0, 0.0, 20.0, 23.0)] autorelease]];
     [statusItem setView: [self ourMainIconView]];
     
-	[myVPNMenu addItem:statusMenuItem];
+	//[myVPNMenu addItem:statusMenuItem];
 	
-    [myVPNMenu addItem:[NSMenuItem separatorItem]];
+    //[myVPNMenu addItem:[NSMenuItem separatorItem]];
     
     // Add each connection to the menu
     NSString * dispNm;
@@ -1268,7 +1268,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
             
             BOOL isPhotoShieldEnabled = [[[hosts objectForKey:dispNm] objectAtIndex:4] isEqualToString:@"True"];
             if ((isProxyEnabled && isPhotoShieldEnabled) || (!isProxyEnabled && !isPhotoShieldEnabled)) {
-                [self insertConnectionMenuItem: connectionItem IntoMenu: myVPNMenu afterIndex: 2 withName: dispNm];
+                [self insertConnectionMenuItem: connectionItem IntoMenu: myVPNMenu afterIndex: 0 withName: dispNm];
             }
         }
     }
@@ -1618,7 +1618,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     // We set the on/off state from the CURRENT preferences, not the preferences when launched.
     SEL act = [anItem action];
     if (  act == @selector(disconnectAllMenuItemWasClicked:)  ) {
-        unsigned nConnections = [[self connectionArray] count];
+        /*unsigned nConnections = [[self connectionArray] count];
         NSString * myState;
         if (  nConnections == 0  ) {
             myState = NSLocalizedString(@"No Active Connections", @"Status message");
@@ -1637,7 +1637,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         } else {
             myState = [NSString stringWithFormat:NSLocalizedString(@"Disconnect All (%d Connections)", @"Status message"),nConnections];
             [statusMenuItem setTitle: myState];
-        }
+        }*/
     } else {
         if (  [gTbDefaults boolForKey: @"showTooltips"]  ) {
             [anItem setToolTip: @""];
@@ -1868,7 +1868,7 @@ static pthread_mutex_t configModifyMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  [[self myConfigDictionary] count] == 0  ) {
         int itemIx = (int) [myVPNMenu indexOfItemWithTitle: NSLocalizedString(@"No VPN Configurations Available", @"Menu item")];
         if (  itemIx  == -1  ) {
-            [myVPNMenu insertItem: noConfigurationsItem atIndex: 2];
+            //[myVPNMenu insertItem: noConfigurationsItem atIndex: 2];
         }
         
         itemIx = (int) [myVPNMenu indexOfItemWithTitle: NSLocalizedString(@"Add a VPN...", @"Menu item")];
