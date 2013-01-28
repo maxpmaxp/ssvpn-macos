@@ -22,12 +22,16 @@ extern NSFileManager        * gFileMgr;
 
 @synthesize delegate;
 @synthesize hosts;
+@synthesize isConfigOutOfDate;
+@synthesize isOutOfDate;
+@synthesize numOfHostLost;
 
 -(id) init{
     if (  self = [super init]  ) {
-        isOutOfDate = NO;
+        self.isOutOfDate = NO;
         hosts = [[NSMutableDictionary alloc] init];
         //[self getServerList: @""];
+        numOfHostLost = 0;
     }
     return self;
 }
@@ -160,18 +164,18 @@ extern NSFileManager        * gFileMgr;
 
             [hosts setObject: newVersion forKey:@"version"];
             if (appVersion < serverVersion){                
-                isOutOfDate = YES;
-                isConfigOutOfDate = YES;
+                self.isOutOfDate = YES;
+                self.isConfigOutOfDate = YES;
                 updateURL = [[attributeDict objectForKey:@"url"] copy];
             }
             if (appVersion != serverVersion)
             {
-                isConfigOutOfDate = YES;
+                self.isConfigOutOfDate = YES;
             }
         //}
     }   
     else if ([elementName isEqualToString:@"host"]){
-        NSString *configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
+        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"];
         //NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
         NSString *hostname, *displayname, *location, *proxy, *photoshieldEnabled;
         
@@ -193,8 +197,8 @@ extern NSFileManager        * gFileMgr;
         NSString *hostPath = [configPath stringByAppendingPathComponent:host];
         
         if (![gFileMgr fileExistsAtPath:hostPath]){
-            isConfigOutOfDate = true;
-            numOfHostLost += 1;
+            self.isConfigOutOfDate = YES;
+            numOfHostLost = numOfHostLost + 1;
         }
         
         
@@ -221,7 +225,7 @@ extern NSFileManager        * gFileMgr;
     NSError * err;
     
     // store host file
-    if (isOutOfDate || isConfigOutOfDate){
+    if (self.isOutOfDate || self.isConfigOutOfDate){
         [gFileMgr removeItemAtPath:hostsPath error:&err];
         
         [hosts writeToFile:hostsPath atomically:YES];
@@ -245,10 +249,22 @@ extern NSFileManager        * gFileMgr;
     
     //if( [delegate respondsToSelector:@selector(checkForUpdateFinished:)]){
         NSUInteger hostCount = [hosts count];
-        if (numOfHostLost == hostCount)
-            [delegate checkForUpdateFinished: isOutOfDate generateFiles:YES];
+        //hosts has object VERSION it's not a real host
+        hostCount -= 1;
+    
+        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"];
+    
+        NSUInteger configCount = [[gFileMgr contentsOfDirectoryAtPath: configPath error: nil] count];
+    
+    
+        if([gFileMgr fileExistsAtPath: [configPath stringByAppendingPathComponent:@"keys"]]){
+            configCount -= 1;
+        }
+    
+        if ((self.numOfHostLost > 0) || (configCount !=  hostCount))
+            [delegate checkForUpdateFinished: self.isOutOfDate generateFiles:YES];
         else
-            [delegate checkForUpdateFinished: isOutOfDate generateFiles:NO];
+            [delegate checkForUpdateFinished: self.isOutOfDate generateFiles:NO];
     //}
 }
 

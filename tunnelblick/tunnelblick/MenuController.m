@@ -3142,12 +3142,18 @@ static void signal_handler(int signalNumber)
         NSLog(@"Cannot set Sparkle delegate because Sparkle Updater does not respond to setDelegate:");
     }
      */
-    //[ssUpdater checkForUpdate];
+
+    //if(tunnelblickTestAppInApplications()){
+    //    [ssUpdater checkForUpdate];
+    //}
     
     // HTK-INC
     // install update if tool is out of date.
-    if (outOfDate){
-        [self installSurfSafeUpdateHandler];
+    //allow update only on run from the /Applications/ folder
+    if(tunnelblickTestAppInApplications()){
+        if (outOfDate){
+            [self installSurfSafeUpdateHandler];
+        }
     }
 }
 
@@ -4455,6 +4461,7 @@ BOOL anyNonTblkConfigs(void)
             if (    installFlags & INSTALLER_CONVERT_NON_TBLKS     ) [msg appendString: NSLocalizedString(@"  • Convert OpenVPN configurations\n", @"Window text")];
             if (   (installFlags & INSTALLER_SECURE_TBLKS)
                 || (installFlags & INSTALLER_COPY_BUNDLE)          ) [msg appendString: NSLocalizedString(@"  • Secure configurations\n", @"Window text")];
+            if(   installFlags & INSTALER_FORCED_GET_CONFIGS       ) [msg appendString: NSLocalizedString(@"  • Update configuration(s)\n", @"Window text")];
         }
         
 #ifdef TBDebug
@@ -5944,13 +5951,18 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
 - (void) checkForUpdateFinished: (BOOL) update generateFiles:(BOOL)gen{
     NSLog(@"Finished check update");
     if (gen){
-        /*if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
+        if(tunnelblickTestAppInApplications()){
+            TBRunAlertPanel(@"SurfSafeVPN update configuration",
+                            @"SurfSafeVPN found update new configurations on the server.\n",
+                            nil,nil,nil);
+            if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
                                 extraArguments: nil]  ) {
             
-            TBRunAlertPanel(@"Welcome to SurfSafeVPN",
+                TBRunAlertPanel(@"SurfSafeVPN update configuration",
                             @"Failed to update Configuration files from server.\n",
                             nil,nil,nil);
-        }*/
+            }
+        }
     }
     if (update)
         outOfDate = YES;
