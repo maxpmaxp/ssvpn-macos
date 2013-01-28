@@ -5953,7 +5953,7 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
     if (gen){
         if(tunnelblickTestAppInApplications()){
             TBRunAlertPanel(@"SurfSafeVPN update configuration",
-                            @"SurfSafeVPN found update new configurations on the server.\n",
+                            @"SurfSafeVPN found new configurations on the server.\n",
                             nil,nil,nil);
             if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
                                 extraArguments: nil]  ) {
