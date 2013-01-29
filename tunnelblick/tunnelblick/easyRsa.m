@@ -190,6 +190,10 @@ void copyEasyRsa(NSString * sourcePath,
 						  @"whichopensslcnf",
 						  @"README",
 						  @"TB-version.txt",
+                          @"openssl-0.9.6.cnf",
+                          @"openssl-0.9.8.cnf",
+                          @"openssl-1.0.0.cnf",
+                          @"vars",
 						  nil];
 	
 	NSString * file;
@@ -205,12 +209,14 @@ void copyEasyRsa(NSString * sourcePath,
 				return;
             }
         }
+        if( [gFileMgr fileExistsAtPath: targetFilePath] ){
 		if (  ! [gFileMgr tbRemoveFileAtPath: targetFilePath handler: nil]  ) {
 			if (  ! [file isEqualToString: @"TB-version.txt"]  ) {
-				easyRsaInstallFailed([NSString stringWithFormat: NSLocalizedString(@"Could not delete %@", @"Window text"), targetFilePath]);
-				return;
-			}
-		}
+                    easyRsaInstallFailed([NSString stringWithFormat: NSLocalizedString(@"Could not delete %@", @"Window text"), targetFilePath]);
+                    return;
+                }
+            }
+        }
 		if (  ! [gFileMgr tbCopyPath: sourceFilePath toPath: targetFilePath handler: nil]  ) {
 			easyRsaInstallFailed([NSString stringWithFormat:
 								  NSLocalizedString(@"Could not copy %@ to %@", @"Window text"),
