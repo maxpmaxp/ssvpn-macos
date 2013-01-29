@@ -14,8 +14,8 @@
 		184CB7491696FB6B006541D4 /* easyRsa.m in Sources */ = {isa = PBXBuildFile; fileRef = 184CB7471696FB65006541D4 /* easyRsa.m */; };
 		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
+		188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */ = {isa = PBXBuildFile; fileRef = 188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */; };
 		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
-		18B588BE167A7E2800720E40 /* easy-rsa-Tunnelblick in Resources */ = {isa = PBXBuildFile; fileRef = 18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -180,7 +180,6 @@
 		CECE45D3155A58DB00779AA0 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E515526E58000BC247 /* unzip.c */; };
 		CECE45D4155A58DF00779AA0 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E715526E58000BC247 /* zip.c */; };
 		CECE45D7155A6F5700779AA0 /* SurfSafeUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = CECE45D6155A6F5700779AA0 /* SurfSafeUpdater.m */; };
-		CEEC8BDD155CD48600106F12 /* easy-rsa-SurfSafeVPN in Sources */ = {isa = PBXBuildFile; fileRef = 63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,9 +264,9 @@
 		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
 		1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
 		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
+		188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
 		18A4C32416847276006F3BC0 /* sharedRoutines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedRoutines.h; sourceTree = "<group>"; };
 		18A4C32516847276006F3BC0 /* sharedRoutines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sharedRoutines.m; sourceTree = "<group>"; };
-		18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-Tunnelblick"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -446,7 +445,6 @@
 		63E56EE413848338007E39AB /* VPNServiceTermsOfServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VPNServiceTermsOfServiceController.m; sourceTree = "<group>"; };
 		63E56EE513848338007E39AB /* VPNServiceWelcomeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VPNServiceWelcomeController.h; sourceTree = "<group>"; };
 		63E56EE613848338007E39AB /* VPNServiceWelcomeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VPNServiceWelcomeController.m; sourceTree = "<group>"; };
-		63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
 		63E8427A117A147500529DE2 /* ConfigurationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationManager.h; sourceTree = "<group>"; };
 		63EA676913DF326600E77443 /* SV.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SV.lproj; sourceTree = "<group>"; };
 		63EEBD8C137EF4C3001BFFD8 /* help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = help; sourceTree = "<group>"; };
@@ -683,14 +681,13 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				18B588BD167A7E2800720E40 /* easy-rsa-Tunnelblick */,
+				188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */,
 				183661761675C84B00143582 /* Ico.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				63EA8CD913A3DB1E0034F47C /* Images */,
 				63EA8CDC13A3DBD50034F47C /* Scripts */,
 				63EA8CE613A3DC330034F47C /* Localization */,
 				63EA8CE713A3DC5D0034F47C /* xibs */,
-				63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */,
 				63EEBD8C137EF4C3001BFFD8 /* help */,
 				63C043DC1023660900E6C1D0 /* IconSets */,
 				6387F0F4135604240021E41B /* tunnelblick.sdef */,
@@ -1167,7 +1164,7 @@
 				CE8E6D7B15511CB10087E9D2 /* logo.png in Resources */,
 				CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */,
 				CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */,
-				18B588BE167A7E2800720E40 /* easy-rsa-Tunnelblick in Resources */,
+				188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1279,7 +1276,6 @@
 				CE8E6D361550E5F80087E9D2 /* TBTextView.m in Sources */,
 				CE8E6D371550E5F80087E9D2 /* UKFileWatcher.m in Sources */,
 				CE8E6D381550E5F80087E9D2 /* TBUserDefaults.m in Sources */,
-				CEEC8BDD155CD48600106F12 /* easy-rsa-SurfSafeVPN in Sources */,
 				CE8E6D391550E5F80087E9D2 /* NSApplication+SystemVersion.m in Sources */,
 				CE8E6D3A1550E5F80087E9D2 /* LoginItemsAE.c in Sources */,
 				CE8E6D3B1550E5F80087E9D2 /* UKLoginItemRegistry.m in Sources */,

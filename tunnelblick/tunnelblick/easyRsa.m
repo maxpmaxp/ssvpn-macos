@@ -240,7 +240,7 @@ void installOrUpdateOurEasyRsa(void) {
 		return;
 	}
 	
-    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-Tunnelblick" ofType: @""];
+    NSString * appEasyRsaPath = [[NSBundle mainBundle] pathForResource: @"easy-rsa-SurfSafeVPN" ofType: @""];
     if (  ! appEasyRsaPath  ) {
         easyRsaInstallFailed(NSLocalizedString(@"Could not find easy-rsa in SurfSafeVPN.app", @"Window text"));
         return;
