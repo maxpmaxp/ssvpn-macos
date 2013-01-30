@@ -3,10 +3,19 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		183661781675C86C00143582 /* Ico.icns in Resources */ = {isa = PBXBuildFile; fileRef = 183661761675C84B00143582 /* Ico.icns */; };
+		184CB7421696CC80006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7451696D258006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		184CB7491696FB6B006541D4 /* easyRsa.m in Sources */ = {isa = PBXBuildFile; fileRef = 184CB7471696FB65006541D4 /* easyRsa.m */; };
+		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
+		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
+		188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */ = {isa = PBXBuildFile; fileRef = 188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */; };
+		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -164,7 +173,6 @@
 		CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */ = {isa = PBXBuildFile; fileRef = CEB1B1E915526E58000BC247 /* Readme.markdown */; };
 		CEB1B1F415526E58000BC247 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1EB15526E58000BC247 /* SSZipArchive.m */; };
 		CEB1B1F815527278000BC247 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB1B1F715527278000BC247 /* libz.dylib */; };
-		CEB1B1FA1552A15E000BC247 /* version.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = CEB1B1F91552A15E000BC247 /* version.xcconfig */; };
 		CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEC3830415537C4B0036B237 /* SurfSafe-Info.plist */; };
 		CECE45CE155A58C700779AA0 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1EB15526E58000BC247 /* SSZipArchive.m */; };
 		CECE45D0155A58D000779AA0 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E115526E58000BC247 /* ioapi.c */; };
@@ -172,7 +180,6 @@
 		CECE45D3155A58DB00779AA0 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E515526E58000BC247 /* unzip.c */; };
 		CECE45D4155A58DF00779AA0 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB1B1E715526E58000BC247 /* zip.c */; };
 		CECE45D7155A6F5700779AA0 /* SurfSafeUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = CECE45D6155A6F5700779AA0 /* SurfSafeUpdater.m */; };
-		CEEC8BDD155CD48600106F12 /* easy-rsa-SurfSafeVPN in Sources */ = {isa = PBXBuildFile; fileRef = 63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -252,6 +259,14 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
+		184CB7461696FB65006541D4 /* easyRsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easyRsa.h; sourceTree = "<group>"; };
+		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
+		1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
+		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
+		188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
+		18A4C32416847276006F3BC0 /* sharedRoutines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedRoutines.h; sourceTree = "<group>"; };
+		18A4C32516847276006F3BC0 /* sharedRoutines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sharedRoutines.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -430,7 +445,6 @@
 		63E56EE413848338007E39AB /* VPNServiceTermsOfServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VPNServiceTermsOfServiceController.m; sourceTree = "<group>"; };
 		63E56EE513848338007E39AB /* VPNServiceWelcomeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VPNServiceWelcomeController.h; sourceTree = "<group>"; };
 		63E56EE613848338007E39AB /* VPNServiceWelcomeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VPNServiceWelcomeController.m; sourceTree = "<group>"; };
-		63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
 		63E8427A117A147500529DE2 /* ConfigurationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationManager.h; sourceTree = "<group>"; };
 		63EA676913DF326600E77443 /* SV.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SV.lproj; sourceTree = "<group>"; };
 		63EEBD8C137EF4C3001BFFD8 /* help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = help; sourceTree = "<group>"; };
@@ -534,6 +548,12 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				184CB7461696FB65006541D4 /* easyRsa.h */,
+				184CB7471696FB65006541D4 /* easyRsa.m */,
+				18A4C32416847276006F3BC0 /* sharedRoutines.h */,
+				18A4C32516847276006F3BC0 /* sharedRoutines.m */,
+				1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */,
+				1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */,
 				63DAFD5311CBA9F4002F9F91 /* defines.h */,
 				6185E73E0E76045D0009C2FD /* helper.h */,
 				6185E73F0E76045D0009C2FD /* helper.m */,
@@ -661,12 +681,13 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */,
+				183661761675C84B00143582 /* Ico.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				63EA8CD913A3DB1E0034F47C /* Images */,
 				63EA8CDC13A3DBD50034F47C /* Scripts */,
 				63EA8CE613A3DC330034F47C /* Localization */,
 				63EA8CE713A3DC5D0034F47C /* xibs */,
-				63E7EE74150046E70089D38B /* easy-rsa-SurfSafeVPN */,
 				63EEBD8C137EF4C3001BFFD8 /* help */,
 				63C043DC1023660900E6C1D0 /* IconSets */,
 				6387F0F4135604240021E41B /* tunnelblick.sdef */,
@@ -1069,6 +1090,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				183661781675C86C00143582 /* Ico.icns in Resources */,
 				CE8E6CD81550E5F80087E9D2 /* InfoPlist.strings in Resources */,
 				CE8E6CD91550E5F80087E9D2 /* MainMenu.xib in Resources */,
 				CE8E6CDA1550E5F80087E9D2 /* openvpn.conf in Resources */,
@@ -1141,8 +1163,8 @@
 				CE8E6D251550E5F80087E9D2 /* SurfSafeVPN.sdef in Resources */,
 				CE8E6D7B15511CB10087E9D2 /* logo.png in Resources */,
 				CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */,
-				CEB1B1FA1552A15E000BC247 /* version.xcconfig in Resources */,
 				CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */,
+				188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1173,7 +1195,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "# Touch the build folder to get it to the top of listings sorted by modification date\ntouch build\n\nPROJECT_NAME=SurfSafeVPN\nDMG_SETUP=SurfSafeSetup\n\n# Copy the tun and tap kexts\n  rm -r -f                                  \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext\"\n  cp -R \"../third_party/tap-20090913.kext/\" \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext\"\n\n  rm -r -f                                  \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext\"\n  cp -R \"../third_party/tun-20090913.kext/\" \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext\"\n\n  rm -r -f                                  \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext\"\n  cp -R \"../third_party/tap.kext/\"          \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext\"\n \n  rm -r -f                                  \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext\"\n  cp -R \"../third_party/tun.kext/\"          \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext\"\n\n# Set the build number in Info.plist for the app and for the kexts\n# Replaces all occurances of \"TBBUILDNUMBER\" in an Info.plist with the contents of TBBuildNumber.txt\n# If an \"Unsigned\" build, appends \" Unsigned\" to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# If an \"Debug\" build,    appends \" Debug\"    to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# @param String, path to Info.plist file that should be modified\nsetBuildNumber()\n{\n\ttbbn=\"$(cat \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/TBBuildNumber.txt\")\"\n\tif [ \"${CONFIGURATION}\" = \"Unsigned Release\" ]; then\n\t\tsed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Unsigned|g\" \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n\t\tsed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Debug|g\"    \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telse\n\t\tsed -e \"s|TBBUILDNUMBER|${tbbn}|g\" \"${@}\" > \"${@}.tmp\"\n\tfi\n\trm \"${@}\"\n\tmv \"${@}.tmp\" \"${@}\"\n}\nsetBuildNumber \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Info.plist\"\nsetBuildNumber \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext/Contents/Info.plist\"\nsetBuildNumber \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext/Contents/Info.plist\"\n\n# Create the openvpn directory structure:\n# ...Contents/Resources/openvpn contains a folder for each version of OpenVPN.\n# The folder for each vesion of OpenVPN is named \"openvpn-x.x.x\".\n# Each \"openvpn-x.x.x\"folder contains the openvpn binary and the openvpn-down-root.so binary\nmkdir -p \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn\"\nfor d in `ls \"../third_party/openvpn\"`\ndo\n  mkdir -p \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}\"\n  cp \"../third_party/openvpn/${d}/openvpn/openvpn\" \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn\"\n  cp \"../third_party/openvpn/${d}/openvpn/plugin/down-root/openvpn-down-root.so\" \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn-down-root.so\"\ndone\n\n# Remove extra files that are not needed\n\nrm \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/TBBuildNumber.txt\"\n\n# Remove NeedsTranslation.strings and Removed.strings from all .lproj folders\nshopt -s nullglob\nfor f in \"build/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/*.lproj\"\ndo\n  if test -f \"${f}/NeedsTranslation.strings\"\n  then\n    rm \"${f}/NeedsTranslation.strings\"\n  fi\n  if test -f \"${f}/Removed.strings\"\n  then\n    rm \"${f}/Removed.strings\"\n  fi \ndone\n\n# Sign the app and its tools except if Unsigned Release\nif [ \"${CONFIGURATION}\" != \"Unsigned Release\" ]; then\n  # Sign the binary tools and the Tunnelblick application itself\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/atsystemstart\"\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/installer\"\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/openvpnstart\"\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/process-network-changes\"\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/standardize-scutil-output\"\n  codesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH\"\nfi\n\n# Create a .dmg except if Debug\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n    \n\t# Staging folder\n\tTMPDMG=\"build/${CONFIGURATION}/${DMG_SETUP}\"\n\n\t# Folder with files for the .dmg (.DS_Store and background folder which contains background.png background image)\n\tDMG_FILES=\"dmgFiles\"\n\n\t# Remove the existing \"staging\" folder and copy the application into it\n\trm -r -f \"$TMPDMG\"\n\tmkdir -p \"$TMPDMG\"\n\tcp -p -R \"build/${CONFIGURATION}/${PROJECT_NAME}.app\" \"$TMPDMG\"\n\n\t# Copy link to documentation to the staging folder\n\tcp -p \"Online Documentation.webloc\" \"$TMPDMG\"\n\n\t# Copy the background folder and its background.png file, then make the folder invisible in the Finder\n\tcp -p -R \"$DMG_FILES/background\" \"$TMPDMG\"\n\tsetfile -a V \"$TMPDMG/background\"\n\n\t# Copy dotDS_Store to .DS_Store and make it invisible in the Finder\n\tcp -p -R \"$DMG_FILES/dotDS_Store\" \"$TMPDMG/.DS_Store\"\n\tsetfile -a V \"$TMPDMG/.DS_Store\"\n\n\t# Remove any existing .dmg and create a new one. Specify \"-noscrub\" so that .DS_Store is copied to the image\n\trm -r -f \"build/${CONFIGURATION}/${DMG_SETUP}.dmg\"\n\thdiutil create -noscrub -srcfolder \"$TMPDMG\" \"build/${CONFIGURATION}/${DMG_SETUP}.dmg\"\n\n\t# Leave the staging folder so customized .dmgs can be easily created\n\nfi";
+			shellScript = "# Touch the build folder to get it to the top of listings sorted by modification date\ntouch build\n\nPROJECT_NAME=SurfSafeVPN\nDMG_SETUP=SurfSafeSetup\n\n# Copy the tun and tap kexts\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext\"\ncp -R \"../third_party/tap-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext\"\ncp -R \"../third_party/tun-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext\"\ncp -R \"../third_party/tap.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext\"\ncp -R \"../third_party/tun.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext\"\n\n# Set the build number in Info.plist for the app and for the kexts\n# Replaces all occurances of \"TBBUILDNUMBER\" in an Info.plist with the contents of TBBuildNumber.txt\n# If an \"Unsigned\" build, appends \" Unsigned\" to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# If an \"Debug\" build,    appends \" Debug\"    to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# @param String, path to Info.plist file that should be modified\nsetBuildNumber()\n{\n\ttbbn=\"$(cat \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/TBBuildNumber.txt\")\"\n\tif [ \"${CONFIGURATION}\" = \"Unsigned Release\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Unsigned|g\" \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Debug|g\"    \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telse\n    sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" \"${@}\" > \"${@}.tmp\"\n\tfi\n\trm \"${@}\"\n\tmv \"${@}.tmp\" \"${@}\"\n}\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tun.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/tap.kext/Contents/Info.plist\"\n\n# Create the openvpn directory structure:\n# ...Contents/Resources/openvpn contains a folder for each version of OpenVPN.\n# The folder for each vesion of OpenVPN is named \"openvpn-x.x.x\".\n# Each \"openvpn-x.x.x\"folder contains the openvpn binary and the openvpn-down-root.so binary\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn\"\nfor d in `ls \"../third_party/openvpn\"`\ndo\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}\"\ncp \"../third_party/openvpn/${d}/openvpn/openvpn\" \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn\"\ncp \"../third_party/openvpn/${d}/openvpn/plugin/down-root/openvpn-down-root.so\" \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn-down-root.so\"\ndone\n\n# Remove extra files that are not needed\n\nrm \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/TBBuildNumber.txt\"\n\n# Remove NeedsTranslation.strings and Removed.strings from all .lproj folders\nshopt -s nullglob\nfor f in \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Resources/*.lproj\"\ndo\nif test -f \"${f}/NeedsTranslation.strings\"\nthen\nrm \"${f}/NeedsTranslation.strings\"\nfi\nif test -f \"${f}/Removed.strings\"\nthen\nrm \"${f}/Removed.strings\"\nfi\ndone\n\n# Sign the app and its tools except if Unsigned Release\nif [ \"${CONFIGURATION}\" != \"Unsigned Release\" ]; then\n# Sign the binary tools and the Tunnelblick application itself\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/atsystemstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/installer\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/openvpnstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/process-network-changes\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/standardize-scutil-output\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH\"\nfi\n\n# Create a .dmg except if Debug\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n\n# Staging folder\nTMPDMG=\"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}\"\n\n# Folder with files for the .dmg (.DS_Store and background folder which contains background.png background image)\nDMG_FILES=\"dmgFiles\"\n\n#try to sign app\ncodesign -f -s \"Developer ID Application: Sunpeaks Management Inc\" -v \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app\"\n\n# Remove the existing \"staging\" folder and copy the application into it\nrm -r -f \"$TMPDMG\"\nmkdir -p \"$TMPDMG\"\ncp -p -R \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app\" \"$TMPDMG\"\n\n\n\n# Copy link to documentation to the staging folder\ncp -p \"Online Documentation.webloc\" \"$TMPDMG\"\n\n# Copy the background folder and its background.png file, then make the folder invisible in the Finder\ncp -p -R \"$DMG_FILES/background\" \"$TMPDMG\"\nsetfile -a V \"$TMPDMG/background\"\n\n# Copy dotDS_Store to .DS_Store and make it invisible in the Finder\ncp -p -R \"$DMG_FILES/dotDS_Store\" \"$TMPDMG/.DS_Store\"\nsetfile -a V \"$TMPDMG/.DS_Store\"\n\n#getv version from plist file\nBUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"${BUILD_DIR}/${CONFIGURATION}/${PROJECT_NAME}.app/Contents/Info.plist\")\n\n# Remove any existing .dmg and create a new one. Specify \"-noscrub\" so that .DS_Store is copied to the image\nrm -r -f \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}.dmg\"\nhdiutil create -noscrub -srcfolder \"$TMPDMG\" \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}-${BUNDLE_VERSION}.dmg\"\n\n# Leave the staging folder so customized .dmgs can be easily created\n\nfi";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1183,8 +1205,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7451696D258006541D4 /* sharedRoutines.m in Sources */,
 				61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */,
 				63F2AD9C12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
+				1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1192,6 +1216,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */,
 				61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */,
 				63F2AD9D12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
 				CECE45CE155A58C700779AA0 /* SSZipArchive.m in Sources */,
@@ -1205,6 +1230,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7421696CC80006541D4 /* sharedRoutines.m in Sources */,
 				63179444118D7EC20057ACAF /* atsystemstart.m in Sources */,
 				63F2AD9E12AD5F1600826724 /* NSFileManager+TB.m in Sources */,
 			);
@@ -1230,6 +1256,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184CB7491696FB6B006541D4 /* easyRsa.m in Sources */,
+				1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */,
 				CE8E6D271550E5F80087E9D2 /* main.m in Sources */,
 				CE8E6D281550E5F80087E9D2 /* VPNConnection.m in Sources */,
 				CE8E6D291550E5F80087E9D2 /* NSArray+cArray.m in Sources */,
@@ -1248,7 +1276,6 @@
 				CE8E6D361550E5F80087E9D2 /* TBTextView.m in Sources */,
 				CE8E6D371550E5F80087E9D2 /* UKFileWatcher.m in Sources */,
 				CE8E6D381550E5F80087E9D2 /* TBUserDefaults.m in Sources */,
-				CEEC8BDD155CD48600106F12 /* easy-rsa-SurfSafeVPN in Sources */,
 				CE8E6D391550E5F80087E9D2 /* NSApplication+SystemVersion.m in Sources */,
 				CE8E6D3A1550E5F80087E9D2 /* LoginItemsAE.c in Sources */,
 				CE8E6D3B1550E5F80087E9D2 /* UKLoginItemRegistry.m in Sources */,
@@ -1285,6 +1312,7 @@
 				CEB1B1F215526E58000BC247 /* zip.c in Sources */,
 				CEB1B1F415526E58000BC247 /* SSZipArchive.m in Sources */,
 				CECE45D7155A6F5700779AA0 /* SurfSafeUpdater.m in Sources */,
+				18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1556,14 +1584,15 @@
 		6398C40113DB30F60005FEB0 /* Unsigned Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 			};
 			name = "Unsigned Release";
 		};
@@ -1706,14 +1735,15 @@
 		63DA33FA1502380400C3801D /* Clean Tunnelblick */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 			};
 			name = "Clean Tunnelblick";
 		};
@@ -1841,14 +1871,15 @@
 		63DA34C61502509400C3801D /* Clean Third Party */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 			};
 			name = "Clean Third Party";
 		};
@@ -1976,34 +2007,37 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		CE8E6D6A1550E5F80087E9D2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2020,7 +2054,8 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = SurfSafeVPN;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_BUILDER = 1;
 				WRAPPER_EXTENSION = app;
@@ -2031,6 +2066,7 @@
 		CE8E6D6B1550E5F80087E9D2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2044,7 +2080,8 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = SurfSafeVPN;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_BUILDER = 1;
 				WRAPPER_EXTENSION = app;
@@ -2054,6 +2091,7 @@
 		CE8E6D6C1550E5F80087E9D2 /* Unsigned Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2067,7 +2105,8 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = SurfSafeVPN;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_BUILDER = 1;
 				WRAPPER_EXTENSION = app;
@@ -2077,6 +2116,7 @@
 		CE8E6D6D1550E5F80087E9D2 /* Clean Tunnelblick */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2093,7 +2133,8 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = SurfSafeVPN;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_BUILDER = 1;
 				WRAPPER_EXTENSION = app;
@@ -2104,6 +2145,7 @@
 		CE8E6D6E1550E5F80087E9D2 /* Clean Third Party */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application: Sunpeaks Management Inc";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2120,7 +2162,8 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = SurfSafeVPN;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_BUILDER = 1;
 				WRAPPER_EXTENSION = app;

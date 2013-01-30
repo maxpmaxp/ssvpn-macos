@@ -35,6 +35,9 @@
 
 @property (nonatomic, weak) id <SurfSafeUpdaterDelegate> delegate;
 @property (nonatomic, retain) NSDictionary *hosts;
+@property (nonatomic) BOOL isOutOfDate;
+@property (nonatomic) BOOL isConfigOutOfDate;
+@property (nonatomic) NSUInteger numOfHostLost;
 
 -(id) init;
 

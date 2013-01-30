@@ -25,6 +25,7 @@
 #import <pthread.h>
 #import <signal.h>
 #import "defines.h"
+#import "sharedRoutines.h"
 #import "ConfigurationManager.h"
 #import "VPNConnection.h"
 #import "helper.h"
@@ -38,13 +39,13 @@
 #import "MainIconView.h"
 
 extern NSMutableArray       * gConfigDirs;
-extern NSString             * gDeployPath;
-extern NSString             * gSharedPath;
 extern NSString             * gPrivatePath;
+extern NSString             * gDeployPath;
 extern NSFileManager        * gFileMgr;
 extern TBUserDefaults       * gTbDefaults;
 extern unsigned               gHookupTimeout;
-extern BOOL                   gTunnelblickIsQuitting;
+extern BOOL                   gShuttingDownTunnelblick;
+extern BOOL                   gShuttingDownOrRestartingComputer;
 extern BOOL                   gComputerIsGoingToSleep;
 extern NSArray              * gRateUnits;
 extern NSArray              * gTotalUnits;
@@ -71,13 +72,9 @@ extern NSString * lastPartOfPath(NSString * thePath);
 
 -(void)             disconnectFromManagmentSocket;
 
--(void)             flushDnsCache;
-
 -(void)             forceKillWatchdogHandler;
 
 -(void)             forceKillWatchdog;
-
--(unsigned int)     getFreePort;
 
 -(BOOL)             hasLaunchDaemon;
 
@@ -126,9 +123,17 @@ extern NSString * lastPartOfPath(NSString * thePath);
 
 @synthesize proxy;
 
+-(void) initializeAuthAgent
+{
+	NSString * group = credentialsGroupFromDisplayName([self displayName]);
+	[myAuthAgent release];
+	myAuthAgent = [[AuthAgent alloc] initWithConfigName: [self displayName]
+									   credentialsGroup: group];
+}
+
 -(id) initWithConfigPath: (NSString *) inPath withDisplayName: (NSString *) inDisplayName
 {	
-    if (self = [super init]) {
+    if (  (self = [super init])  ) {
         configPath = [inPath copy];
         displayName = [inDisplayName copy];
         managementSocket = nil;
@@ -140,26 +145,37 @@ extern NSString * lastPartOfPath(NSString * thePath);
         [logDisplay setConnection: self];
         lastState = @"EXITING";
         requestedState = @"EXITING";
-		myAuthAgent = [[AuthAgent alloc] initWithConfigName:[self displayName]];
+		[self initializeAuthAgent];
+		
+		speakWhenConnected    = FALSE;
+		speakWhenDisconnected = FALSE;
         NSString * upSoundKey  = [displayName stringByAppendingString: @"-tunnelUpSoundName"];
         NSString * upSoundName = [gTbDefaults objectForKey: upSoundKey];
         if (  upSoundName  ) {
             if (  ! [upSoundName isEqualToString: @"None"]  ) {
+                if (  [upSoundName isEqualToString: @"Speak"]  ) {
+					speakWhenConnected = TRUE;
+				} else {
                 tunnelUpSound   = [NSSound soundNamed: upSoundName];
                 if (  ! tunnelUpSound  ) {
                     NSLog(@"%@ '%@' not found; no sound will be played when connecting", upSoundKey, upSoundName);
                 }
             }
         }
+        }
         NSString * downSoundKey  = [displayName stringByAppendingString: @"-tunnelDownSoundName"];
         NSString * downSoundName = [gTbDefaults objectForKey: downSoundKey];
         if (  downSoundName  ) {
             if (  ! [downSoundName isEqualToString: @"None"] ) {
+                if (  [downSoundName isEqualToString: @"Speak"]  ) {
+					speakWhenDisconnected = TRUE;
+				} else {
                 tunnelDownSound = [NSSound soundNamed: downSoundName];
                 if (  ! tunnelDownSound  ) {
                     NSLog(@"%@ '%@' not found; no sound will be played when an unexpected disconnection occurs", downSoundKey, downSoundName);
                 }
             }
+        }
         }
         portNumber = 0;
 		pid = 0;
@@ -185,7 +201,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
             NSDictionary * infoDict = [NSDictionary dictionaryWithContentsOfFile: infoPath];
             NSString * key;
             NSEnumerator * e = [infoDict keyEnumerator];
-            while (  key = [e nextObject]  ) {
+            while (  (key = [e nextObject])  ) {
                 if (  [key hasPrefix: @"TBPreference"]  ) {
                     NSString * preferenceKey = [displayName stringByAppendingString: [key substringFromIndex: [@"TBPreference" length]]];
                     if (  [gTbDefaults objectForKey: preferenceKey] == nil  ) {
@@ -229,7 +245,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     statistics.lastSet = [[NSDate date] retain];
     
     statistics.rbIx = 0;
-    int i;
+    unsigned i;
     for (  i=0; i<RB_SIZE; i++  ) {
         statistics.rb[i].lastInBytecount  = 0;
         statistics.rb[i].lastOutBytecount = 0;
@@ -247,10 +263,10 @@ extern NSString * lastPartOfPath(NSString * thePath);
     [self disconnectFromManagmentSocket];
     [connectedSinceDate release]; connectedSinceDate = [[NSDate alloc] init];
     [self clearStatisticsIncludeTotals: NO];
+    [self initializeAuthAgent];
     // Don't change logDisplay -- we want to keep it
     [lastState          release]; lastState = @"EXITING";
     [requestedState     release]; requestedState = @"EXITING";
-    [myAuthAgent        release]; myAuthAgent = [[AuthAgent alloc] initWithConfigName:[self displayName]];
     [tunOrTap           release]; tunOrTap = nil;
     portNumber       = 0;
     pid              = 0;
@@ -263,7 +279,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     serverNotClient = FALSE;
 }
 
--(void) tryToHookupToPort: (int) inPortNumber
+-(void) tryToHookupToPort: (unsigned) inPortNumber
      withOpenvpnstartArgs: (NSString *) inStartArgs
 {
     if (  portNumber != 0  ) {
@@ -297,30 +313,30 @@ extern NSString * lastPartOfPath(NSString * thePath);
 {
     NSArray * openvpnstartArgs = [openvpnstartArgString componentsSeparatedByString: @"_"];
     
-    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] intValue];
-    //  unsigned skipScrSec = [[openvpnstartArgs objectAtIndex: 1] intValue];  // Skip - no preference for this
-    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] intValue];
-    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] intValue];
-    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] intValue];
+    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] unsignedIntValue];
+    //  unsigned skipScrSec = [[openvpnstartArgs objectAtIndex: 1] unsignedIntValue];  // Skip - no preference for this
+    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] unsignedIntValue];
+    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] unsignedIntValue];
+    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] unsignedIntValue];
     
     BOOL configPathBad = FALSE;
     switch (  cfgLocCode & 0x3  ) {
             
         case CFG_LOC_PRIVATE:
         case CFG_LOC_ALTERNATE:
-            if (! [configPath hasPrefix: gPrivatePath] ) {
+            if (! [configPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]] ) {
                 configPathBad = TRUE;
             }
             break;
             
         case CFG_LOC_DEPLOY:
-            if (! [configPath hasPrefix: gDeployPath] ) {
+            if (! [configPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]] ) {
                 configPathBad = TRUE;
             }
             break;
             
         case CFG_LOC_SHARED:
-            if (! [configPath hasPrefix: gSharedPath] ) {
+            if (! [configPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]] ) {
                 configPathBad = TRUE;
             }
             break;
@@ -331,8 +347,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     }
     if (  configPathBad  ) {
         NSLog(@"cfgLocCode in log file for %@ doesn't match configuration path", [self displayName]);
-        [NSApp setAutoLaunchOnLogin: NO];
-        [NSApp terminate: self];
+        [[NSApp delegate] terminateBecause: terminatingBecauseOfError];
     }
     
     BOOL prefsChangedOK = TRUE;
@@ -340,8 +355,8 @@ extern NSString * lastPartOfPath(NSString * thePath);
     // Set preferences from the ones used when connection was made
     // They are extracted from the openvpnstart args in the log filename
     
-    BOOL prefUseScripts  = (useScripts & 0x1) == 0x1;
-    unsigned prefScriptNum = useScripts >> 2;
+    BOOL prefUseScripts  = (useScripts & OPENVPNSTART_USE_SCRIPTS_RUN_SCRIPTS) != 0;
+    unsigned prefScriptNum = (useScripts & OPENVPNSTART_USE_SCRIPTS_SCRIPT_MASK) >> OPENVPNSTART_USE_SCRIPTS_SCRIPT_SHIFT_COUNT;
     if (  prefScriptNum > 2  ) { // Disallow invalid script numbers
         prefScriptNum = 0;
         prefsChangedOK = FALSE;
@@ -350,7 +365,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     NSString * keyUseDNS = [displayName stringByAppendingString: @"useDNS"];
     NSNumber * prefUseDNS;
     if (  prefUseScripts  ) {
-        prefUseDNS = [NSNumber numberWithInt: (prefScriptNum+1)];
+        prefUseDNS = [NSNumber numberWithUnsignedInt: (prefScriptNum+1)];
     } else {
         prefUseDNS = [NSNumber numberWithInt: 0];
     }
@@ -399,8 +414,7 @@ extern NSString * lastPartOfPath(NSString * thePath);
     }
     
     if (  ! prefsChangedOK  ) {
-        [NSApp setAutoLaunchOnLogin: NO]; // Error messages have already been logged
-        [NSApp terminate: self];
+        [[NSApp delegate] terminateBecause: terminatingBecauseOfError];
     }
     
     // Keep track of the number of tun and tap kexts that openvpnstart loaded
@@ -457,7 +471,8 @@ extern NSString * lastPartOfPath(NSString * thePath);
                                     nil, nil, nil,
                                     prefKey,
                                     NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
-                                    nil);
+                                    nil,
+									NSAlertDefaultReturn);
         }
     }
 }
@@ -492,11 +507,11 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         if (   ( ! [gTbDefaults boolForKey: autoConnectKey] )
             || ( ! [gTbDefaults boolForKey: onSystemStartKey] )  ) {
             int cfgLocCode;
-            if (  [configPath hasPrefix: gPrivatePath]  ) {
+            if (  [configPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
                 cfgLocCode = CFG_LOC_PRIVATE;
-            } else if (  [configPath hasPrefix: gSharedPath]  ) {
+            } else if (  [configPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
                 cfgLocCode = CFG_LOC_SHARED;
-            } else if (  [configPath hasPrefix: gDeployPath]  ) {
+            } else if (  [configPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
                 cfgLocCode = CFG_LOC_DEPLOY;
             } else {
                 NSLog(@"Configuration is in unknown location; path is %@", configPath);
@@ -509,14 +524,16 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                 return;
             }
             
-            NSString *openvpnstartPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"openvpnstart"];
-            NSTask* task = [[[NSTask alloc] init] autorelease];
-            [task setLaunchPath: openvpnstartPath];
-            [task setArguments: [NSArray arrayWithObjects: @"deleteLogs", lastPartOfPath(configPath), [NSString stringWithFormat:@"%d", cfgLocCode], nil]];
-            [task launch];
-            [task waitUntilExit];
-            if (  [task terminationStatus] != EXIT_SUCCESS  ) {
+            NSArray * arguments = [NSArray arrayWithObjects:
+								   @"deleteLogs",
+								   lastPartOfPath(configPath),
+								   [NSString stringWithFormat:@"%d", cfgLocCode],
+								   nil];
+            status = runOpenvpnstart(arguments, nil, nil);
+            if (  status != EXIT_SUCCESS  ) {
                 NSLog(@"Error deleting log files for %@", displayName);
+            } else {
+                NSLog(@"Deleted log files for %@", displayName);
             }
             
             status = pthread_mutex_unlock( &deleteLogsMutex );
@@ -552,7 +569,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 // the .plist file used to connect when the system starts
 
 -(BOOL) checkConnectOnSystemStart: (BOOL)              startIt
-                         withAuth: (AuthorizationRef)  inAuthRef;
+                         withAuth: (AuthorizationRef)  inAuthRef
 {
     // Encode slashes and periods in the displayName so the result can act as a single component in a file name
     NSMutableString * daemonNameWithoutSlashes = encodeSlashesAndPeriods([self displayName]);
@@ -574,8 +591,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             return YES;
         }
     } else {
-        if (  ! (   [configPath hasPrefix: gDeployPath]
-                 || [configPath hasPrefix: gSharedPath]   )  ) {
+        if (  ! (   [configPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]
+                 || [configPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]   )  ) {
             NSLog(@"SurfSafeVPN will NOT connect '%@' when the computer starts because it is a private configuration", [self displayName]);
             return NO;
         }
@@ -634,7 +651,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
     BOOL okNow = FALSE; // Assume failure
-    int i;
+    unsigned i;
     for (i=0; i<5; i++) {
         if (  i != 0  ) {
             usleep( i * 500000 );
@@ -701,8 +718,6 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 // Returns YES on success, NO if user cancelled out of a dialog 
 -(BOOL) makeDictionary: (NSDictionary * *)  dict withLabel: (NSString *) daemonLabel openvpnstartArgs: (NSMutableArray * *) openvpnstartArgs
 {
-    // Don't use the "Program" key, because we want the first argument to be the path to the program,
-    // so openvpnstart can know where it is, so it can find other SurfSafeVPN compenents.
     NSString * openvpnstartPath = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
     *openvpnstartArgs = [[[self argumentsForOpenvpnstartForNow: NO] mutableCopy] autorelease];
     if (  ! (*openvpnstartArgs)  ) {
@@ -775,6 +790,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 - (void) dealloc
 {
     [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: NO];
+    [[NSApp delegate] cancelAllIPCheckThreadsForConnection: self];
     [logDisplay release];
     [managementSocket close];
     [managementSocket setDelegate: nil];
@@ -790,7 +806,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [statusScreen release];
     [tunnelUpSound release];
     [tunnelDownSound release];
-    [proxy release];
+	[ipAddressBeforeConnect release];
+	[serverIPAddress release];
     
     [super dealloc];
 }
@@ -803,7 +820,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) showStatusWindow
 {
-    if (  ! (   gTunnelblickIsQuitting
+    if (  ! (   gShuttingDownTunnelblick
              || gComputerIsGoingToSleep )  ) {
         if (  ! showingStatusWindow  ) {
             NSString * statusPref = [gTbDefaults objectForKey: @"connectionWindowDisplayCriteria"];
@@ -822,8 +839,413 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     }
 }
 
+// Returns information about the IP address and port used by the computer, and about the webserver from which the information was obtained
+//
+// If useIPAddress is FALSE, uses the URL in forced-preference IPCheckURL, or in Info.plist item IPCheckURL.
+// If useIPAddress is TRUE,  uses the URL with the host portion of the URL replaced by serverIPAddress
+//
+// Normally returns an array with three strings: client IP address, client port, server IP address
+// If could not fetch data within timeoutInterval seconds, returns an empty array
+// If an error occurred, returns nil, having output a message to the Console log
+-(NSArray *) currentIPInfoWithIPAddress: (BOOL) useIPAddress
+                        timeoutInterval: (NSTimeInterval) timeoutInterval
+{
+    NSString * logHeader = [NSString stringWithFormat:@"DEBUG: currentIPInfo(%@)", (useIPAddress ? @"Address" : @"Name")];
+
+    NSURL * url = [[NSApp delegate] getIPCheckURL];
+    if (  ! url  ) {
+        NSLog(@"%@: url == nil #1", logHeader);
+        return nil;
+    }
+	
+	NSString * hostName = [url host];
+    
+    if (  useIPAddress  ) {
+        if (  serverIPAddress  ) {
+            NSString * urlString = [url absoluteString];
+			NSMutableString * tempMutableString = [[urlString mutableCopy] autorelease];
+			NSRange rng = [tempMutableString rangeOfString: hostName];	// Just replace the first occurance of host
+            [tempMutableString replaceOccurrencesOfString: hostName withString: serverIPAddress options: 0 range: rng];
+            urlString = [NSString stringWithString: tempMutableString];
+            url = [NSURL URLWithString: urlString];
+            if (  ! url  ) {
+                NSLog(@"%@:  url == nil #2", logHeader);
+                return nil;
+            }
+        } else {
+            NSLog(@"%@: serverIPAddress has not been set", logHeader);
+            return nil;
+        }
+    }
+	
+    NSCharacterSet * charset = [NSCharacterSet characterSetWithCharactersInString: @"0123456789."];
+    ipCheckLastHostWasIPAddress = ( [[url host] rangeOfCharacterFromSet: [charset invertedSet]].length == 0 );
+    
+    // Create an NSURLRequest
+    NSDictionary * infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSString * tbBuild   = [infoPlist objectForKey: @"CFBundleVersion"];
+    NSString * tbVersion = [infoPlist objectForKey: @"CFBundleShortVersionString"];
+    
+    NSString * userAgent = [NSString stringWithFormat: @"Tunnelblick ipInfoChecker: %@: %@", tbBuild, tbVersion];
+    NSMutableURLRequest * req = [[[NSMutableURLRequest alloc] initWithURL: url] autorelease];
+    if ( ! req  ) {
+        NSLog(@"%@: req == nil", logHeader);
+        return nil;
+    }
+    [req setValue: userAgent forHTTPHeaderField: @"User-Agent"];
+	[req setValue: hostName  forHTTPHeaderField: @"Host"];
+    [req setTimeoutInterval: timeoutInterval];
+    if (  runningOnLeopardOrNewer()  ) {
+        [req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
+    } else {
+        [req setCachePolicy: NSURLRequestReloadIgnoringCacheData];
+    }
+	
+	// Make the request synchronously
+    // The request before a connection is made must be synchronous so it finishes before initiating the connection
+    // The request after a connection has been made should be asynchronous. Do that (in effect) by invoking this
+    // method from a separate thread.
+    //
+	// Implements the timeout and times the requests
+    NSURLResponse * urlResponse;
+	NSData * data = nil;
+	NSTimeInterval checkEvery = 0.01;
+	useconds_t usleepTime = (useconds_t) (checkEvery * 1.0e6);
+	BOOL firstTimeThru = TRUE;
+    uint64_t startTimeNanoseconds = nowAbsoluteNanoseconds();
+    uint64_t timeoutNanoseconds = (uint64_t)(timeoutInterval * 1.0e9);
+    uint64_t endTimeNanoseconds = startTimeNanoseconds + timeoutNanoseconds;
+	while (   (! data)
+           && (nowAbsoluteNanoseconds() < endTimeNanoseconds)  ) {
+		if (  firstTimeThru  ) {
+			firstTimeThru = FALSE;
+		} else {
+			usleep(usleepTime);
+		}
+		data = [NSURLConnection sendSynchronousRequest: req
+									 returningResponse: &urlResponse
+												 error: NULL];
+	}
+    if ( ! data  ) {
+        NSLog(@"%@: IP address info could not be fetched within %.1f seconds", logHeader, (double) timeoutInterval);
+        return [NSArray array];
+    } else {
+        uint64_t elapsedTimeNanoseconds = nowAbsoluteNanoseconds() - startTimeNanoseconds;
+        long elapsedTimeMilliseconds = (long) ((elapsedTimeNanoseconds + 500000) / 1000000);
+        NSLog(@"%@: IP address info was fetched in %ld milliseconds", logHeader, elapsedTimeMilliseconds);
+	}
+
+    if (  [data length] > 40  ) {
+        NSLog(@"%@:  Response data was too long (%ld bytes)", logHeader, (long) [data length]);
+        return nil;
+    }
+    
+    NSString * response = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
+    if ( ! response  ) {
+        NSLog(@"%@: Response as string == nil", logHeader);
+        return nil;
+    }
+    
+    charset = [NSCharacterSet characterSetWithCharactersInString: @"0123456789.,"];
+    NSRange rng = [response rangeOfCharacterFromSet: [charset invertedSet]];
+    if (  rng.length != 0  ) {
+        NSLog(@"%@: Response had invalid characters. response = %@", logHeader, response);
+		return nil;
+    }
+    
+    NSArray * items = [response componentsSeparatedByString: @","];
+    if (  [items count] != 3  ) {
+        NSLog(@"%@: Response does not have three items separated by commas. response = %@", logHeader, response);
+		return nil;
+    }
+    
+    NSLog(@"%@: [%@, %@, %@]", logHeader, [items objectAtIndex: 0], [items objectAtIndex: 1], [items objectAtIndex: 2] );
+    return items;
+}
+
+- (void) ipInfoTimeoutBeforeConnectingDialog: (NSTimeInterval) timeoutToUse
+{
+    NSString * msg = [NSString stringWithFormat:
+                      NSLocalizedString(@"After %.1f seconds, gave up trying to fetch IP address information.\n\n"
+                                        @"Tunnelblick will not check that this computer's apparent IP address changes when %@ is connected.\n\n",
+                                        @"Window text"), (double) timeoutToUse, [self displayName]];
+
+    TBRunAlertPanelExtended(NSLocalizedString(@"Warning", @"Window text"),
+                            msg,
+                            nil, nil, nil,
+                            @"skipWarningThatIPAddressDidNotChangeAfterConnection",
+                            NSLocalizedString(@"Do not check for IP address changes", @"Checkbox name"),
+                            nil,
+							NSAlertDefaultReturn);
+}
+
+- (void) ipInfoErrorDialog
+{
+    TBRunAlertPanelExtended(NSLocalizedString(@"Warning", @"Window text"),
+                            @"A problem occured while checking this computer's apparent public IP address.\n\nSee the Console log for details.\n\n",
+                            nil, nil, nil,
+                            @"skipWarningThatIPAddressDidNotChangeAfterConnection",
+                            NSLocalizedString(@"Do not check for IP address changes", @"Checkbox name"),
+                            nil,
+							NSAlertDefaultReturn);
+}
+
+- (void) ipInfoInternetNotReachableDialog
+{
+    NSString * msg = [NSString stringWithFormat:
+                      NSLocalizedString(@"After connecting to %@, the Internet does not appear to be reachable.\n\n"
+                                        @"This may mean that your VPN is not configured correctly.\n\n", @"Window text"), [self displayName]];
+    
+    TBRunAlertPanelExtended(NSLocalizedString(@"Warning", @"Window text"),
+                            msg,
+                            nil, nil, nil,
+                            @"skipWarningThatInternetIsNotReachable",
+                            NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
+                            nil,
+							NSAlertDefaultReturn);
+}
+
+- (void) ipInfoNoDNSDialog
+{
+    NSString * msg = [NSString stringWithFormat:
+                      NSLocalizedString(@"After connecting to %@, DNS does not appear to be working.\n\n"
+                                        @"This may mean that your VPN is not configured correctly.\n\n", @"Window text"), [self displayName]];
+    
+    TBRunAlertPanelExtended(NSLocalizedString(@"Warning", @"Window text"),
+                            msg,
+                            nil, nil, nil,
+                            @"skipWarningThatDNSIsNotWorking",
+                            NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
+                            nil,
+							NSAlertDefaultReturn);
+}
+
+- (void) ipInfoNoChangeDialogBefore: (NSString *) beforeConnect
+{
+    NSString * msg = [NSString stringWithFormat:
+                      NSLocalizedString(@"This computer's apparent public IP address was not different after connecting to %@. It is still %@.\n\n"
+                                        @"This may mean that your VPN is not configured correctly.\n\n", @"Window text"), [self displayName], beforeConnect];
+    TBRunAlertPanelExtended(NSLocalizedString(@"Warning", @"Window text"),
+                            msg,
+                            nil, nil, nil,
+                            @"skipWarningThatIPAddressDidNotChangeAfterConnection",
+                            NSLocalizedString(@"Do not check for IP address changes", @"Checkbox name"),
+                            nil,
+							NSAlertDefaultReturn);
+}
+
+- (void) checkIPAddressBeforeConnected
+{
+    if (   [gTbDefaults boolForKey: @"skipWarningThatIPAddressDidNotChangeAfterConnection"]
+        || [gTbDefaults boolForKey: @"notOKToCheckThatIPAddressDidNotChangeAfterConnection"]  ) {
+        return;
+    }
+    
+    // Try to get ipAddressBeforeConnect and serverIPAddress
+	[ipAddressBeforeConnect release];
+	ipAddressBeforeConnect = nil;
+	[serverIPAddress release];
+	serverIPAddress = nil;
+    
+	NSTimeInterval timeoutToUse = 5.0;
+    id obj = [gTbDefaults objectForKey: @"timeoutForIPAddressCheckBeforeConnection"];
+    if (   obj
+        && [obj respondsToSelector: @selector(doubleValue)]  ) {
+        timeoutToUse = (NSTimeInterval) [obj doubleValue];
+    }
+	
+    NSArray * ipInfo = [self currentIPInfoWithIPAddress: NO timeoutInterval: timeoutToUse];
+    
+	if (  ipInfo  ) {
+		if (  [ipInfo count] > 2  ) {
+			ipAddressBeforeConnect = [[ipInfo objectAtIndex: 0] copy];
+			serverIPAddress        = [[ipInfo objectAtIndex: 2] copy];
+		} else {
+            NSLog(@"After %.1f seconds, gave up trying to fetch IP address information before connecting", timeoutToUse);
+			[self ipInfoTimeoutBeforeConnectingDialog: timeoutToUse];
+		}
+	} else {
+        NSLog(@"An error occured fetching IP address information before connecting");
+        [self ipInfoErrorDialog];
+    }
+}
+
+-(void) checkIPAddressAfterConnected
+{
+    if (   [gTbDefaults boolForKey: @"skipWarningThatIPAddressDidNotChangeAfterConnection"]
+        || [gTbDefaults boolForKey: @"notOKToCheckThatIPAddressDidNotChangeAfterConnection"]
+        || ( ! ipAddressBeforeConnect)
+        || ( ! serverIPAddress)  ) {
+        return;
+    }
+    
+    NSString * threadID = [NSString stringWithFormat: @"%lu-%llu", (long) self, (long long) nowAbsoluteNanoseconds()];
+    [[NSApp delegate] addActiveIPCheckThread: threadID];
+    [NSThread detachNewThreadSelector:@selector(checkIPAddressAfterConnectedThread:) toTarget: self withObject: threadID];
+    return;
+}
+
+-(BOOL) checkForChangedIPAddress: (NSString *) beforeConnect andIPAddress: (NSString *) afterConnect
+{
+	if (  [beforeConnect isEqualToString: afterConnect]  ) {
+		[self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: This computer's apparent public IP address (%@) was unchanged after the connection was made", beforeConnect]];
+		[self ipInfoNoChangeDialogBefore: beforeConnect];
+		return FALSE;
+	} else {
+		[self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: This computer's apparent public IP address changed from %@ before connection to %@ after connection", beforeConnect, afterConnect]];
+		return TRUE;
+	}
+}	
+
+-(void) checkIPAddressErrorResultLogMessage: (NSString *) msg
+{
+    [self addToLog: msg];
+    [self ipInfoErrorDialog];
+}
+
+-(void) checkIPAddressGoodResult: (NSDictionary *) dict
+{
+    [self checkForChangedIPAddress: [dict objectForKey: @"before"]
+                      andIPAddress: [dict objectForKey: @"after"]];
+}
+
+-(void) checkIPAddressBadResultLogMessage: (NSString *) msg
+{
+    [self addToLog: msg];      
+    [self ipInfoInternetNotReachableDialog];
+}
+
+-(void) checkIPAddressNoDNSLogMessage: (NSString *) msg
+{
+    [self addToLog: msg];      
+    [self ipInfoNoDNSDialog];
+}
+
+//******************************************************************************************************************
+// This method runs in a separate thread detached by checkIPAddressAfterConnected
+-(void) checkIPAddressAfterConnectedThread: (NSString *) threadID
+{
+    NSAutoreleasePool * threadPool = [NSAutoreleasePool new];
+
+    NSTimeInterval delay = 5.0;   // Delay for network settling before we start trying to get the IP info 
+    id obj = [gTbDefaults objectForKey: @"delayBeforeIPAddressCheckAfterConnection"];
+    if (   obj
+        && [obj respondsToSelector: @selector(doubleValue)]  ) {
+        delay = (NSTimeInterval) [obj doubleValue];
+    }
+    useconds_t delayMicroseconds = (unsigned)(delay * 1.0e6);
+    if (  delayMicroseconds != 0  ) {
+        NSLog(@"DEBUG: checkIPAddressAfterConnectedThread: Delaying %f seconds before checking connection", delay);
+        usleep(delayMicroseconds);
+    }
+    
+    NSTimeInterval timeoutToUse = 30.0;   // Long timeout value here; we are asynchronous so it doesn't matter  
+    obj = [gTbDefaults objectForKey: @"timeoutForIPAddressCheckAfterConnection"];
+    if (   obj
+        && [obj respondsToSelector: @selector(doubleValue)]  ) {
+        timeoutToUse = (NSTimeInterval) [obj doubleValue];
+    }
+    
+    NSArray * ipInfo = [self currentIPInfoWithIPAddress: NO timeoutInterval: timeoutToUse];
+    if (   [[NSApp delegate] isOnCancellingListIPCheckThread: threadID]
+        || ( ! [lastState isEqualToString: @"CONNECTED" ] )  ) {
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    if (  ! ipInfo  ) {
+        NSLog(@"DEBUG: An error occured fetching IP address information after connecting");
+        NSLog(@"An error occured fetching IP address information after connecting");
+        [self performSelectorOnMainThread: @selector(checkIPAddressErrorResultLogMessage:)
+                               withObject: @"*SurfSafeVPN: An error occured fetching IP address information after connecting"
+                            waitUntilDone: NO];
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    if (  [ipInfo count] > 0  ) {
+        NSLog(@"DEBUG: checkIPAddressAfterConnectedThread: fetched IP address %@", [ipInfo objectAtIndex:0]);
+        [self performSelectorOnMainThread: @selector(checkIPAddressGoodResult:)
+                               withObject: [NSDictionary dictionaryWithObjectsAndKeys: ipAddressBeforeConnect, @"before", [ipInfo objectAtIndex:0], @"after", nil]
+                            waitUntilDone: NO];
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    // Timed out. If the attempt was by IP address, the Internet isn't reachable
+    if (  ipCheckLastHostWasIPAddress  ) {
+        // URL was already numeric, so it isn't a DNS problem
+        NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's IP address");
+        [self performSelectorOnMainThread: @selector(checkIPAddressBadResultLogMessage:)
+                               withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
+		                    waitUntilDone: NO];
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    // Timed out by name, try by IP address
+    NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's name; retrying by IP address");
+
+    [self performSelectorOnMainThread: @selector(addToLog:)
+                           withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's name after connecting.", (double) timeoutToUse]
+                        waitUntilDone: NO];
+
+    ipInfo = [self currentIPInfoWithIPAddress: YES timeoutInterval: timeoutToUse];
+    if (   [[NSApp delegate] isOnCancellingListIPCheckThread: threadID]
+        || ( ! [lastState isEqualToString: @"CONNECTED" ] )  ) {
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    if (  ! ipInfo  ) {
+        NSLog(@"DEBUG: An error occured fetching IP address information after connecting");
+        NSLog(@"An error occured fetching IP address information after connecting");
+        [self performSelectorOnMainThread: @selector(checkIPAddressErrorResultLogMessage:)
+                               withObject: @"*SurfSafeVPN: An error occured fetching IP address information using the ipInfo host's IP address after connecting"
+                            waitUntilDone: NO];
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    if (  [ipInfo count] == 0  ) {
+        NSLog(@"DEBUG: Timeout getting IP address using the ipInfo host's IP address");
+        [self performSelectorOnMainThread: @selector(checkIPAddressBadResultLogMessage:)
+                               withObject: [NSString stringWithFormat: @"*SurfSafeVPN: After %.1f seconds, gave up trying to fetch IP address information using the ipInfo host's IP address after connecting.", timeoutToUse]
+		                    waitUntilDone: NO];
+        [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+        [threadPool drain];
+        return;
+    }
+    
+    // Got IP address, even though DNS isn't working
+    NSLog(@"DEBUG: checkIPAddressAfterConnectedThread: fetched IP address %@ using the ipInfo host's IP address", [ipInfo objectAtIndex:0]);
+    [self performSelectorOnMainThread: @selector(checkIPAddressNoDNSLogMessage:)
+                           withObject: [NSString stringWithFormat: @"*SurfSafeVPN: fetched IP address information using the ipInfo host's IP address after connecting."]
+                        waitUntilDone: NO];
+    [[NSApp delegate] haveFinishedIPCheckThread: threadID];
+    [threadPool drain];
+}
+
 - (void) connect: (id) sender userKnows: (BOOL) userKnows
 {
+	(void) sender;
+	
+    /*if (   ( ! [[self configPath] hasPrefix: @"/Library/"] )
+        && ( ! [[[self configPath] pathExtension] isEqualToString: @"tblk"] )  ) {
+        TBRunAlertPanel(NSLocalizedString(@"Unavailable", @"Window title"),
+                        NSLocalizedString(@"You may not connect this configuration.\n\n"
+                                          @"If you convert it to a 'Tunnelblick VPN Connection' (.tblk), you"
+                                          @" will be able to connect.", @"Window text"),
+                        nil, nil, nil);
+        return;
+    }
+    */
     NSString * oldRequestedState = requestedState;
     if (  userKnows  ) {
         requestedState = @"CONNECTED";
@@ -838,7 +1260,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         }
         VPNConnection * connection;
         NSEnumerator* e = [[[NSApp delegate] myVPNConnectionDictionary] objectEnumerator];
-        while (connection = [e nextObject]) {
+        while (  (connection = [e nextObject])  ) {
             if (  ! [[connection state] isEqualToString:@"EXITING"]  ) {
                 numConnections++;
                 if (  [connection usedModifyNameserver]  ) {
@@ -855,7 +1277,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                                                  nil,
                                                  @"skipWarningAboutSimultaneousConnections",
                                                  NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
-                                                 nil);
+                                                 nil,
+												 NSAlertDefaultReturn);
             if (  button == NSAlertAlternateReturn  ) {
                 if (  userKnows  ) {
                     requestedState = oldRequestedState;
@@ -864,6 +1287,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             }
         }
     }
+    
+    [self checkIPAddressBeforeConnected];
     
     logFilesMayExist = TRUE;
     authFailed = FALSE;
@@ -916,16 +1341,6 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     
     [gTbDefaults setBool: NO forKey: [displayName stringByAppendingString: @"-lastConnectionSucceeded"]];
     
-	NSTask* task = [[[NSTask alloc] init] autorelease];
-    
-	path = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
-	[task setLaunchPath: path]; 
-		
-    NSPipe * errPipe = [[NSPipe alloc] init];
-    [task setStandardError: errPipe];
-    NSPipe * stdPipe = [[NSPipe alloc] init];
-    [task setStandardOutput: stdPipe];
-    
     [self addToLog: [[NSApp delegate] openVPNLogHeader]];
 
     NSString * logText = [NSString stringWithFormat:@"*SurfSafeVPN: Attempting connection with %@%@; Set nameserver = %@%@",
@@ -943,16 +1358,16 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [self addToLog: logText];
 
     NSMutableArray * escapedArguments = [NSMutableArray arrayWithCapacity:[arguments count]];
-    int i;
+    unsigned i;
     for (i=0; i<[arguments count]; i++) {
         [escapedArguments addObject: [[[arguments objectAtIndex: i] componentsSeparatedByString: @" "] componentsJoinedByString: @"\\ "]];
     }
     
-    [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: %@ %@",
-                     [[path componentsSeparatedByString: @" "] componentsJoinedByString: @"\\ "],
+    [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: openvpnstart %@",
                      [escapedArguments componentsJoinedByString: @" "]]];
     
-    unsigned bitMask = [[arguments objectAtIndex: 7] intValue];
+    NSString *stringBitmask = [[NSString alloc]initWithString:[arguments objectAtIndex: 7]];
+    unsigned bitMask = 370;//[stringBitmask unsignedIntValue];
     if (  (loadedOurTap = (bitMask & OPENVPNSTART_OUR_TAP_KEXT) == OPENVPNSTART_OUR_TAP_KEXT)  ) {
         [[NSApp delegate] incrementTapCount];
     }
@@ -961,46 +1376,54 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         [[NSApp delegate] incrementTunCount];
     }
     
-	[task setArguments:arguments];
-	[task setCurrentDirectoryPath: firstPartOfPath(configPath)];
-	[task launch];
     [self setConnectedSinceDate: [NSDate date]];
     [self clearStatisticsIncludeTotals: NO];
-	[task waitUntilExit];
     
-    // Standard output has command line that openvpnstart used to start OpenVPN; copy it to the log
-    NSFileHandle * file = [stdPipe fileHandleForReading];
-    NSData * data = [file readDataToEndOfFile];
-    [file closeFile];
-    [stdPipe release];
-    NSString * openvpnstartOutput = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
-    openvpnstartOutput = [openvpnstartOutput stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (  [openvpnstartOutput length] != 0  ) {
-        [self addToLog: [NSString stringWithFormat:@"*SurfSafeVPN: openvpnstart output:\n\n%@\n", openvpnstartOutput]];
-    }
+    NSString * errOut;
 
-    int status = [task terminationStatus];
+    BOOL isDeployedConfiguration = [[arguments objectAtIndex: 5] isEqualToString:@"2"];
+
+    OSStatus status = runOpenvpnstart(arguments, nil, &errOut);
+	
+    NSString * openvpnstartOutput;
     if (  status != 0  ) {
-        if (  status == 240  ) {
+        if (  status == OPENVPNSTART_RETURN_SYNTAX_ERROR  ) {
             openvpnstartOutput = @"Internal SurfSafeVPN error: openvpnstart syntax error";
         } else {
-            file = [errPipe fileHandleForReading];
-            data = [file readDataToEndOfFile];
-            [file closeFile];
-            openvpnstartOutput = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
-            openvpnstartOutput = [openvpnstartOutput stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            openvpnstartOutput = [@"\n" stringByAppendingString: openvpnstartOutput];
-            NSMutableString * tempMutableString = [[openvpnstartOutput mutableCopy] autorelease];
-            [tempMutableString replaceOccurrencesOfString: @"\n" withString: @"\n     " options: 0 range: NSMakeRange(0, [tempMutableString length])];
-            openvpnstartOutput = [NSString stringWithString: tempMutableString];
+            openvpnstartOutput = stringForLog(errOut, @"*SurfSafeVPN: openvpnstart log:\n");
         }
         
         [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN:\n\n"
-                         "Could not start OpenVPN (openvpnstart returned with status #%d)\n\n"
+                         "Could not start OpenVPN (openvpnstart returned with status #%ld)\n\n"
                          "Contents of the openvpnstart log:\n"
                          "%@",
-                         status, openvpnstartOutput]];
-        [errPipe release];
+                         (long)status, openvpnstartOutput]];
+		
+		if (  status == OPENVPNSTART_RETURN_CONFIG_NOT_SECURED_ERROR) {
+			
+            if (  userKnows  ) {
+                requestedState = oldRequestedState;
+            }
+            
+            // Secure the configuration
+            unsigned installerFlags;
+            if (  isDeployedConfiguration  ) {
+                installerFlags = INSTALLER_SECURE_APP;
+            } else {
+                installerFlags = INSTALLER_SECURE_TBLKS;
+            }
+
+            if (  ! [[NSApp delegate] runInstaller: installerFlags
+                                    extraArguments: nil]  ) {
+                // the user cancelled or an error occurred
+				// if an error occurred, runInstaller has already put up an error dialog and put a message in the console log
+				return;
+            }
+            
+            [self connect: sender userKnows: userKnows];
+            return;
+        }
+        
         if (  userKnows  ) {
             TBRunAlertPanel(NSLocalizedString(@"Warning!", @"Window title"),
                             [NSString stringWithFormat:
@@ -1010,41 +1433,94 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             requestedState = oldRequestedState;
         }
     } else {
-        file = [errPipe fileHandleForReading];
-        data = [file readDataToEndOfFile];
-        [file closeFile];
-        openvpnstartOutput = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
+        openvpnstartOutput = stringForLog(errOut, @"*SurfSafeVPN: openvpnstart log:\n");
         if (  openvpnstartOutput  ) {
-            openvpnstartOutput = [openvpnstartOutput stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             if (  [openvpnstartOutput length] != 0  ) {
-                [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: openvpnstart message: %@", openvpnstartOutput]];
+                [self addToLog: openvpnstartOutput];
             }
         }
-//        [[[NSApp delegate] logScreen] hookedUpOrStartedConnection: self];
-        [errPipe release];
         [self setState: @"SLEEP"];
         [self showStatusWindow];
         [self connectToManagementSocket];
     }
 }
 
+-(BOOL) shadowIsIdenticalMakeItSo: (BOOL) makeItSo
+{
+    NSString * cfgPath = [self configPath];
+	NSString * name = lastPartOfPath(cfgPath);
+	if (  ! [[name pathExtension] isEqualToString: @"tblk"]) {
+		NSLog(@"Internal Tunnelblick error: '%@' is not a .tblk", name);
+		return NO;
+	}
+	
+	NSArray * arguments = [NSArray arrayWithObjects:@"compareTblkShadowCopy", [self displayName], nil];
+	OSStatus status =  runOpenvpnstart(arguments, nil, nil);
+	
+	switch (  status  ) {
+			
+		case OPENVPNSTART_COMPARE_CONFIG_SAME:
+			return YES;
+			break;
+			
+		case OPENVPNSTART_COMPARE_CONFIG_DIFFERENT:
+			if (  ! makeItSo  ) {
+				return NO;
+			}
+			
+			// Alt config is different or doesn't exist. We must create it (and maybe the folders that contain it)
+			; // empty statement needed to avoid bogus compiler error
+			AuthorizationRef authRef = [NSApplication getAuthorizationRef:
+										NSLocalizedString(@"Tunnelblick needs to create or update a secure (shadow) copy of the configuration file.", @"Window text")];
+			if ( authRef == nil ) {
+				NSLog(@"Authorization to create/update a secure (shadow) copy of the configuration file cancelled by user.");
+				AuthorizationFree(authRef, kAuthorizationFlagDefaults);
+				return NO;
+			}
+			
+			NSString * altCfgPath = [[L_AS_T_USERS stringByAppendingPathComponent: NSUserName()]
+									 stringByAppendingPathComponent: lastPartOfPath(cfgPath)];
+			
+			if ( [[ConfigurationManager defaultManager] copyConfigPath: cfgPath
+																toPath: altCfgPath
+													   usingAuthRefPtr: &authRef
+															warnDialog: YES
+														   moveNotCopy: NO] ) {    // Copy the config to the alt config
+				AuthorizationFree(authRef, kAuthorizationFlagDefaults);
+				NSLog(@"Created or updated secure (shadow) copy of configuration file %@", cfgPath);
+				break;
+			}
+			
+			AuthorizationFree(authRef, kAuthorizationFlagDefaults); // Couldn't make alt file
+			NSLog(@"Unable to create or update secure (shadow) copy of configuration file %@", cfgPath);
+			return NO;
+			break;
+			
+		default:
+			NSLog(@"Internal Tunnelblick error: unknown status %ld from compareTblkShadowCopy(%@)", (long) status, [self displayName]);
+			return NO;
+	}
+	
+	return NO;	// Should never get here, but...
+}
+
 -(NSArray *) argumentsForOpenvpnstartForNow: (BOOL) forNow
 {
     NSString *cfgPath = [self configPath];
-    NSString *altPath = [NSString stringWithFormat:@"/Library/Application Support/SurfSafeVPN/Users/%@/%@",
-                         NSUserName(), lastPartOfPath(configPath)];
     
-    if ( ! (cfgPath = [[ConfigurationManager defaultManager] getConfigurationToUse: cfgPath orAlt: altPath]) ) {
+    if (   [cfgPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+        if (  ! [self shadowIsIdenticalMakeItSo: YES]  ) {
         return nil;
     }
+    }
     
-    BOOL useShadowCopy = [cfgPath isEqualToString: altPath];
-    BOOL useDeploy     = [cfgPath hasPrefix: gDeployPath];
-    BOOL useShared     = [cfgPath hasPrefix: gSharedPath];
+    BOOL useShadowCopy = [cfgPath hasPrefix: [gPrivatePath  stringByAppendingString: @"/"]];
+    BOOL useDeploy     = [cfgPath hasPrefix: [gDeployPath   stringByAppendingString: @"/"]];
+    BOOL useShared     = [cfgPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]];
     
     NSString *portString;
     if (  forNow  ) {
-        [self setPort:[self getFreePort]];
+        [self setPort: getFreePort()];
         portString = [NSString stringWithFormat:@"%d", portNumber];
     } else {
         portString = @"0";
@@ -1062,6 +1538,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
     NSString *useDNSArg = @"0";
+    unsigned useDNSNum = 0;
     unsigned useDNSStat = (unsigned) [self useDNSStatus];
 	if(  useDNSStat == 0) {
         if (  forNow  ) {
@@ -1070,7 +1547,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 	} else {
         NSString * useDownRootPluginKey = [[self displayName] stringByAppendingString: @"-useDownRootPlugin"];
         BOOL useDownRoot = [gTbDefaults boolForKey: useDownRootPluginKey];
-        unsigned useDNSNum = (  (useDNSStat-1) << 2) + (useDownRoot ? 2 : 0) + 1;   // (script #) + downroot-flag + set-nameserver-flag
+        useDNSNum = (  (useDNSStat-1) << 2) + (useDownRoot ? 2 : 0) + 1;   // (script #) + downroot-flag + set-nameserver-flag
         useDNSArg = [NSString stringWithFormat: @"%u", useDNSNum];
         if (  forNow  ) {
             usedModifyNameserver = TRUE;
@@ -1113,10 +1590,15 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         altCfgLoc = @"3";
     }
     
+    NSString * noMonitor = @"1";
     NSString * noMonitorKey = [[self displayName] stringByAppendingString: @"-notMonitoringConnection"];
-    NSString * noMonitor = @"0";
-    if (  [useDNSArg isEqualToString: @"0"] || [gTbDefaults boolForKey: noMonitorKey]  ) {
-        noMonitor = @"1";
+    if (  ! [gTbDefaults boolForKey: noMonitorKey]  ) { // Monitor only if monitoring enabled
+        unsigned onlyDNSFlags = useDNSNum & 0xFD;       //
+        if (   (onlyDNSFlags == 0x01)                   //                 and "Set nameserver"
+            || (onlyDNSFlags == 0x05)                   //                 or "Set nameserver (3.1)"
+            ) {
+            noMonitor = @"0";
+        }
     }
 
     unsigned int bitMask = 0;
@@ -1146,6 +1628,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     
     [self setBit: OPENVPNSTART_RESTORE_ON_WINS_RESET  inMask: &bitMask ifConnectionPreference: @"-doNotRestoreOnWinsReset"   inverted: YES];
     [self setBit: OPENVPNSTART_RESTORE_ON_DNS_RESET   inMask: &bitMask ifConnectionPreference: @"-doNotRestoreOnDnsReset"    inverted: YES];
+    [self setBit: OPENVPNSTART_PREPEND_DOMAIN_NAME    inMask: &bitMask ifConnectionPreference: @"-prependDomainNameToSearchDomains" inverted: NO];
+    [self setBit: OPENVPNSTART_FLUSH_DNS_CACHE        inMask: &bitMask ifConnectionPreference: @"-doNotFlushCache"                  inverted: YES];
     
     NSString * bitMaskString = [NSString stringWithFormat: @"%d", bitMask];
     
@@ -1167,13 +1651,13 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         leasewatchOptions = [self leasewatchOptionsFromPreferences];
     }
     
-    NSString * ourVersionFolder;
-    id obj = [gTbDefaults objectForKey: @"openvpnVersion"];
+    NSString * ourVersionFolder=@"2.2.2";
+    /*id obj = [gTbDefaults objectForKey: @"openvpnVersion"];
     if (  [[obj class] isSubclassOfClass: [NSString class]]  ) {
         ourVersionFolder = (NSString *) obj;
     } else {
         ourVersionFolder = @"";
-    }
+    }*/
 
     NSArray * args = [NSArray arrayWithObjects:
                       @"start", [[lastPartOfPath(cfgPath) copy] autorelease], portString, useDNSArg, skipScrSec, altCfgLoc, noMonitor, bitMaskString, leasewatchOptions, ourVersionFolder, nil];
@@ -1210,34 +1694,38 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(NSString * ) leasewatchOptionsFromPreferences
 {
-    NSArray * chars = [NSArray arrayWithObjects: @"d", @"a", @"s", @"n", @"g", @"w", @"D", @"A", @"S", @"N", @"G", @"W", nil];
+    NSArray * chars = [NSArray arrayWithObjects: @"a", @"d", @"s", @"g", @"n", @"w", @"A", @"D", @"S", @"G", @"N", @"W", nil];
     NSArray * preferenceKeys = [NSArray arrayWithObjects:
-                                @"-changeDomainAction",
                                 @"-changeDNSServersAction",
+                                @"-changeDomainAction",
                                 @"-changeSearchDomainAction",
-                                @"-changeNetBIOSNameAction",
                                 @"-changeWINSServersAction",
+                                @"-changeNetBIOSNameAction",
                                 @"-changeWorkgroupAction",
-                                @"-changeOtherDomainAction",
                                 @"-changeOtherDNSServersAction",
+                                @"-changeOtherDomainAction",
                                 @"-changeOtherSearchDomainAction",
-                                @"-changeOtherNetBIOSNameAction",
                                 @"-changeOtherWINSServersAction",
+                                @"-changeOtherNetBIOSNameAction",
                                 @"-changeOtherWorkgroupAction",
                                 nil];
     
     // Get the preference values. Use -1 for any preference that isn't present
     NSMutableArray * preferenceValues = [NSMutableArray arrayWithCapacity: 12];
-    int i;
+    unsigned i;
     for (  i=0; i<[preferenceKeys count]; i++  ) {
         NSString * key = [[self displayName] stringByAppendingString: [preferenceKeys objectAtIndex: i]];
         NSString * value = [gTbDefaults objectForKey: key];
         int intValue;
         if (  value  ) {
-            if (  [value respondsToSelector: @selector(intValue)]  ) {
-                intValue = [value intValue];
+			if (  [value isEqualToString:@"ignore"]  ) {
+				intValue = 0;
+			} else if (  [value isEqualToString:@"restore"]  ) {
+				intValue = 1;
+			} else if (  [value isEqualToString:@"restart"]  ) {
+				intValue = 2;
             } else {
-                NSLog(@"Preference '%@' is not a number; it will be ignored", key);
+                NSLog(@"Preference '%@' is not 'ignore', 'restore', or 'restart'; it will be ignored", key);
                 intValue = -1;
             }
         } else {
@@ -1247,11 +1735,12 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
         // If no prefererence, changes to pre-VPN will be undone and other changes will cause a restart
         if (  intValue == -1  ) {
             if (  i < 6  ) {
-                intValue = 1;
+                intValue = 1;			// pre-VPN default is restore
+            } else if (  i == 8  ) {
+				intValue = 0;			// Default for other SearchDomains is ignore
             } else {
-                intValue = 2;
+                intValue = 2;			// Defai;t fpr others is restart
             }
-
         }
 
         [preferenceValues addObject: [NSNumber numberWithInt: intValue]];
@@ -1360,7 +1849,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
 
 - (void) connectToManagementSocket
 {
-    [self setManagementSocket: [NetSocket netsocketConnectedToHost: @"127.0.0.1" port: portNumber]];   
+    [self setManagementSocket: [NetSocket netsocketConnectedToHost: @"127.0.0.1" port: (unsigned short)portNumber]];
 }
 
 -(void) disconnectFromManagmentSocket
@@ -1378,6 +1867,8 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
 // Waits for up to 5 seconds for the disconnection to occur if "wait" is TRUE
 - (void) disconnectAndWait: (NSNumber *) wait userKnows:(BOOL)userKnows
 {
+    [[NSApp delegate] cancelAllIPCheckThreadsForConnection: self];
+    
     if (  [self isDisconnected]  ) {
         return;
     }
@@ -1399,7 +1890,7 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
     BOOL disconnectionComplete = FALSE;
 
     pid_t thePid = pid; // Avoid pid changing between this if statement and the invokation of waitUntilNoProcessWithID (pid can change outside of main thread)
-    if (  thePid > 0  ) {
+    if (  ALLOW_OPENVPNSTART_KILL && (thePid > 0)  ) {
         [self killProcess];
         if (  [wait boolValue]  ) {
             // Wait up to five seconds for the OpenVPN process to disappear
@@ -1407,12 +1898,12 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
         }
     } else {
         if([managementSocket isConnected]) {
-            NSLog(@"No process ID; disconnecting via management interface");
+            NSLog(@"Disconnecting via management interface");
             [managementSocket writeString: @"signal SIGTERM\r\n" encoding: NSASCIIStringEncoding];
             
             if (  [wait boolValue]  ) {
                 // Wait up to five seconds for the management socket to disappear
-                int i;
+                unsigned i;
                 for (i=0; i<5; i++) {
                     if (  managementSocket == nil  ) {
                         break;
@@ -1422,6 +1913,11 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
             }
 
             disconnectionComplete = (managementSocket == nil) || ( ! [managementSocket isConnected]);
+			if (   ( ! disconnectionComplete )
+				&& (thePid > 0)   ) {
+				// Wait up to five seconds for the OpenVPN process to disappear
+				disconnectionComplete = [NSApp waitUntilNoProcessWithID: thePid];
+			}
         }
     }
     
@@ -1430,19 +1926,15 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
     } else {
 
         if (  [wait boolValue]  ) {
-            forceKillInterval = 10;   // Seconds between disconnect attempts
-            id terminationSeconds;
-            if (  (terminationSeconds = [gTbDefaults objectForKey: @"openvpnTerminationInterval"])  ) {
-                if (   [terminationSeconds respondsToSelector: @selector(intValue)]  ) {
-                    forceKillInterval = [terminationSeconds intValue];
-                }
-            }
-            forceKillTimeout = 180;   // Seconds before considering it disconnected anyway
-            if (  (terminationSeconds = [gTbDefaults objectForKey: @"openvpnTerminationTimeout"])  ) {
-                if (   [terminationSeconds respondsToSelector: @selector(intValue)]  ) {
-                    forceKillTimeout = [terminationSeconds intValue];
-                }
-            }
+            forceKillInterval = [gTbDefaults unsignedIntForKey: @"openvpnTerminationInterval"
+                                                       default: 10
+                                                           min: 0
+                                                           max: UINT_MAX];
+            
+            forceKillTimeout = [gTbDefaults unsignedIntForKey: @"openvpnTerminationTimeout"
+                                                      default: 10
+                                                          min: 0
+                                                          max: UINT_MAX];
             
             if (  forceKillInterval  != 0) {
                 if ( forceKillTimeout != 0  ) {
@@ -1461,17 +1953,11 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
 // Tries to kill the OpenVPN process associated with this connection, if any
 -(void)killProcess 
 {
-	NSString* path = [[NSBundle mainBundle] pathForResource: @"openvpnstart" 
-													 ofType: nil];
-	NSTask* task = [[[NSTask alloc] init] autorelease];
-	[task setLaunchPath: path]; 
+	if (  ALLOW_OPENVPNSTART_KILL  ) {
 	NSString *pidString = [NSString stringWithFormat:@"%d", pid];
-    
 	NSArray *arguments = [NSArray arrayWithObjects:@"kill", pidString, nil];
-	[task setArguments:arguments];
-	[task setCurrentDirectoryPath: firstPartOfPath(configPath)];
-	[task launch];
-	[task waitUntilExit];
+		runOpenvpnstart(arguments, nil, nil);
+	}
 }
 
 -(void) tellUserAboutDisconnectWait
@@ -1488,6 +1974,10 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) forceKillWatchdogHandler
 {
+    if (  gShuttingDownOrRestartingComputer  ) {
+        return;
+    }
+    
     [self performSelectorOnMainThread: @selector(forceKillWatchdog) withObject: nil waitUntilDone: NO];
 }
 
@@ -1495,7 +1985,7 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     if (  ! [self isDisconnected]  ) {
         
-        if (  pid > 0  ) {
+        if (  ALLOW_OPENVPNSTART_KILL && (pid > 0)  ) {
             [self killProcess];
         } else {
             if([managementSocket isConnected]) {
@@ -1530,6 +2020,8 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 // Call on main thread only
 -(void) hasDisconnected
 {
+    [[NSApp delegate] cancelAllIPCheckThreadsForConnection: self];
+
     [self clearStatisticsRatesDisplay];
     
     pthread_mutex_lock( &lastStateMutex );
@@ -1564,43 +2056,6 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     [self runScriptNamed: @"post-disconnect" openvpnstartCommand: @"postDisconnect"];
     
     [[NSApp delegate] updateNavigationLabels];
-    
-    [self flushDnsCache];
-
-}
-    
--(void) flushDnsCache
-{
-    NSString * key = [displayName stringByAppendingString:@"-doNotFlushCache"];
-    if (  ! [gTbDefaults boolForKey: key]  ) {
-        BOOL didNotTry = TRUE;
-        NSArray * pathArray = [NSArray arrayWithObjects: @"/usr/bin/dscacheutil", @"/usr/sbin/lookupd", nil];
-        NSString * path;
-        NSEnumerator * arrEnum = [pathArray objectEnumerator];
-        while (  path = [arrEnum nextObject]  ) {
-            if (  [gFileMgr fileExistsAtPath: path]  ) {
-                didNotTry = FALSE;
-                NSArray * arguments = [NSArray arrayWithObject: @"-flushcache"];
-                NSTask * task = [[NSTask alloc] init];
-                [task setLaunchPath: path];
-                [task setArguments: arguments];
-                [task launch];
-                [task waitUntilExit];
-                int status = [task terminationStatus];
-                [task release];
-                if (  status != 0) {
-                    [self addToLog: [NSString stringWithFormat: @"*SurfSafeVPN: Failed to flush the DNS cache; the command was: '%@ -flushcache'", path]];
-                } else {
-                    [self addToLog: @"*SurfSafeVPN: Flushed the DNS cache"];
-                    break;
-                }
-            }
-        }
-        
-        if (  didNotTry  ) {
-            [self addToLog: @"* SurfSafeVPN: DNS cache not flushed; did not find needed executable"];
-        }
-    }
 }
 
 - (void) netsocketConnected: (NetSocket*) socket
@@ -1656,6 +2111,45 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     }
 }
 
+-(void) authFailedFromServer: (NSString*)parameterString withLine:(NSString*)line
+{
+    authFailed = TRUE;
+    userWantsState = userWantsUndecided;
+    credentialsAskedFor = FALSE;
+    
+    id buttonWithDifferentCredentials = nil;
+    if (  [myAuthAgent authMode]  ) {               // Handle "auto-login" --  we were never asked for credentials, so authMode was never set
+        if ([myAuthAgent keychainHasCredentials]) { //                         so credentials in Keychain (if any) were never used, so we needn't delete them to rery
+            buttonWithDifferentCredentials = NSLocalizedString(@"Try again with different credentials", @"Button");
+        }
+    }
+    int alertVal = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@", [self displayName], NSLocalizedString(@"Authentication failed", @"Window title")],
+                                   NSLocalizedString(@"The credentials (passphrase or username/password) were not accepted by the remote VPN server.", @"Window text"),
+                                   NSLocalizedString(@"Try again", @"Button"),  // Default
+                                   buttonWithDifferentCredentials,              // Alternate
+                                   NSLocalizedString(@"Cancel", @"Button"));    // Other
+    if (alertVal == NSAlertDefaultReturn) {
+        userWantsState = userWantsRetry;                // User wants to retry
+        
+    } else if (alertVal == NSAlertAlternateReturn) {
+        [myAuthAgent deleteCredentialsFromKeychain];    // User wants to retry after deleting credentials
+        [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES]; //in other case same behaviour as in simple retry
+        userWantsState = userWantsRetry;
+    } else {
+        userWantsState = userWantsAbandon;              // User wants to cancel or an error happened, so disconnect
+        [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
+        [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      // (User requested it by cancelling)
+    }
+    
+    [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
+                                     target: self
+                                   selector: @selector(afterFailureHandler:)
+                                   userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
+                                              parameterString, @"parameterString",
+                                              line, @"line", nil]
+                                    repeats: NO];
+}
+
 -(void) processState: (NSString *) newState dated: (NSString *) dateTime
 {
     if ([newState isEqualToString: @"EXITING"]) {
@@ -1665,7 +2159,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         if ([newState isEqualToString: @"CONNECTED"]) {
             NSDate *date; 
             if (  dateTime) {
-                date = [NSCalendarDate dateWithTimeIntervalSince1970: [dateTime intValue]];
+                date = [NSCalendarDate dateWithTimeIntervalSince1970: (float) [dateTime intValue]];
             } else {
                 date = [[[NSDate alloc] init] autorelease];
             }
@@ -1681,7 +2175,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             
         } else if ([newState isEqualToString: @"CONNECTED"]) {
             [[NSApp delegate] addConnection:self];
-            [self flushDnsCache];
+            [self checkIPAddressAfterConnected];
             [gTbDefaults setBool: YES forKey: [displayName stringByAppendingString: @"-lastConnectionSucceeded"]];
         }
     }
@@ -1698,7 +2192,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             BOOL stillTrying = FALSE;
             NSEnumerator * e = [[[NSApp delegate] myVPNConnectionDictionary] objectEnumerator];
             VPNConnection * connection;
-            while (  connection = [e nextObject]  ) {
+            while (  (connection = [e nextObject])  ) {
                 if (  [connection tryingToHookup]  ) {
                     stillTrying = TRUE;
                     break;
@@ -1719,9 +2213,9 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         [self setStateFromLine:line];
 		return;
 	}
-
+    
     // "Real time" output from OpenVPN.
-     NSRange separatorRange = [line rangeOfString: @":"];
+    NSRange separatorRange = [line rangeOfString: @":"];
     if (separatorRange.length) {
         NSRange commandRange = NSMakeRange(1, separatorRange.location-1);
         NSString* command = [line substringWithRange: commandRange];
@@ -1732,46 +2226,24 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             NSArray* parameters = [parameterString componentsSeparatedByString: @","];
             NSString* state = [parameters objectAtIndex: 1];
             [self processState: state dated: nil];
+            if ([state isEqualToString:@"AUTH"]) {
+                //count auth calls
+                stateAuthRecievedTimes++;
+                //set 3 tryies to connect 
+                if(stateAuthRecievedTimes > 3){
+                    stateAuthRecievedTimes = 0;
+                    //start the same routine as on Auth Failed
+                    [self authFailedFromServer:parameterString withLine:line];
+                }
+            }
             
         } else if ([command isEqualToString: @"PASSWORD"]) {
             if (   [line rangeOfString: @"Failed"].length
                 || [line rangeOfString: @"failed"].length  ) {
                 
-                authFailed = TRUE;
-                userWantsState = userWantsUndecided;
-                credentialsAskedFor = FALSE;
-                
-                id buttonWithDifferentCredentials = nil;
-                if (  [myAuthAgent authMode]  ) {               // Handle "auto-login" --  we were never asked for credentials, so authMode was never set
-                    if ([myAuthAgent keychainHasCredentials]) { //                         so credentials in Keychain (if any) were never used, so we needn't delete them to rery
-                        buttonWithDifferentCredentials = NSLocalizedString(@"Try again with different credentials", @"Button");
-                    }
-                }
-                int alertVal = TBRunAlertPanel([NSString stringWithFormat:@"%@: %@", [self displayName], NSLocalizedString(@"Authentication failed", @"Window title")],
-                                               NSLocalizedString(@"The credentials (passphrase or username/password) were not accepted by the remote VPN server.", @"Window text"),
-                                               NSLocalizedString(@"Try again", @"Button"),  // Default
-                                               buttonWithDifferentCredentials,              // Alternate
-                                               NSLocalizedString(@"Cancel", @"Button"));    // Other
-                if (alertVal == NSAlertDefaultReturn) {
-                    userWantsState = userWantsRetry;                // User wants to retry
-                    
-                } else if (alertVal == NSAlertAlternateReturn) {
-                    [myAuthAgent deleteCredentialsFromKeychain];    // User wants to retry after deleting credentials
-                    userWantsState = userWantsRetry;
-                } else {
-                    userWantsState = userWantsAbandon;              // User wants to cancel or an error happened, so disconnect
-                    [self addToLog: @"*SurfSafeVPN: Disconnecting; user cancelled authorization or there was an error obtaining authorization"];
-                    [self disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      // (User requested it by cancelling)
-                }
-                
-                [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
-                                                 target: self
-                                               selector: @selector(afterFailureHandler:)
-                                               userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
-                                                          parameterString, @"parameterString",
-                                                          line, @"line", nil]
-                                                repeats: NO];
-            } else {
+                [self authFailedFromServer:parameterString withLine:line];
+            }
+            else {
                 // Password request from server.
                 if (  authFailed  ) {
                     if (  userWantsState == userWantsUndecided  ) {
@@ -1820,6 +2292,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) afterFailureHandler: (NSTimer *) timer
 {
+    if (  gShuttingDownOrRestartingComputer  ) {
+        return;
+    }
+    
 	[self performSelectorOnMainThread: @selector(afterFailure:) withObject: [timer userInfo] waitUntilDone: NO];
 }
 
@@ -1851,6 +2327,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) credentialsHaveBeenAskedForHandler: (NSTimer *) timer
 {
+    if (  gShuttingDownOrRestartingComputer  ) {
+        return;
+    }
+    
     [self performSelectorOnMainThread: @selector(credentialsHaveBeenAskedFor) withObject: [timer userInfo] waitUntilDone: NO];
 }
 
@@ -1959,9 +2439,9 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     NSEnumerator * configEnum = [[[NSApp delegate] myConfigDictionary] objectEnumerator];
     while (   ( path = [configEnum nextObject] )
            && ( (havePrivate + haveShared + haveDeployed) < 2) ) {
-        if (  [path hasPrefix: gPrivatePath]  ) {
+        if (  [path hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
             havePrivate = 1;
-        } else if (  [path hasPrefix: gSharedPath]  ) {
+        } else if (  [path hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
             haveShared = 1;
         } else {
             haveDeployed =1;
@@ -1970,9 +2450,9 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     
     if (  (havePrivate + haveShared + haveDeployed) > 1  ) {
         path = [self configPath];
-        if (  [path hasPrefix: gDeployPath]) {
+        if (  [path hasPrefix: [gDeployPath stringByAppendingString: @"/"]]) {
             locationMessage =  NSLocalizedString(@" (Deployed)", @"Window title");
-        } else if (  [path hasPrefix: gSharedPath]) {
+        } else if (  [path hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]) {
             locationMessage =  NSLocalizedString(@" (Shared)", @"Window title");
         } else {
             locationMessage =  NSLocalizedString(@" (Private)", @"Window title");
@@ -1996,6 +2476,8 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 - (void) netsocket: (NetSocket*) socket dataAvailable: (unsigned) inAmount
 {
+    (void) inAmount;
+    
     NSParameterAssert(socket == managementSocket);
     NSString* line;
     
@@ -2010,11 +2492,12 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                     NSRange commaRange = [line rangeOfString: @","];
                     if (  commaRange.location != NSNotFound  ) {
                         if (  commaRange.location < [line length]  ) {
+							NSRange inCountRange;
                             @try {
                                 
                                 NSDate * currentTime = [NSDate date];
                                 unsigned long bcpl = [bcClientPrefix length];
-                                NSRange inCountRange = NSMakeRange(bcpl, commaRange.location - bcpl);
+                                inCountRange = NSMakeRange(bcpl, commaRange.location - bcpl);
                                 
                                 TBByteCount inCount  = (TBByteCount) [[line substringWithRange: inCountRange]            doubleValue];
                                 TBByteCount outCount = (TBByteCount) [[line substringFromIndex: commaRange.location + 1] doubleValue];
@@ -2029,9 +2512,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                                 
                                 if (  statistics.totalInBytecount > inCount  ) {
                                     statistics.totalInByteCountBeforeThisConnection += statistics.totalInBytecount;
+                                    statistics.totalInBytecount = 0;
                                 }
-                                if (  statistics.totalOutBytecount > inCount  ) {
+                                if (  statistics.totalOutBytecount > outCount  ) {
                                     statistics.totalOutByteCountBeforeThisConnection += statistics.totalOutBytecount;
+                                    statistics.totalOutBytecount = 0;
                                 }
                                 
                                 TBByteCount lastInBytecount    = inCount  - statistics.totalInBytecount;
@@ -2093,6 +2578,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     if (inSocket==managementSocket) {
         [self setManagementSocket: nil];
+        [[NSApp delegate] cancelAllIPCheckThreadsForConnection: self];
         [self performSelectorOnMainThread: @selector(hasDisconnected) withObject: nil waitUntilDone: NO];
     }
 }
@@ -2110,14 +2596,16 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_unlock( &bytecountMutex );    
 }
 
--(void) setNumber: (NSString * *) rate andUnits: (NSString * *) units from: (TBByteCount) value unitsArray: (NSArray *) unitsArray {
-    
+-(void) setNumber: (NSString * *) rate andUnits: (NSString * *) units from: (TBByteCount) value unitsArray: (NSArray *) unitsArray
+{
     // Decide units
-    int i = 0;
-    TBByteCount n = value;
-    while (  n > 999  ) {
+    unsigned i = 0;
+	double valueD = (double) value;
+    double n = valueD;
+    while (  n > 999.0  ) {
         i++;
-        n = (  value + (  1ull << 10*(i-1)  )  ) >> 10*i;
+        double divisor = pow(10.0, (   (double) (i*3)   )  );
+        n = valueD / divisor;
     }
     
     if (  i >= [unitsArray count]  ) {
@@ -2131,16 +2619,22 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  i == 0  ) {
         *rate = [NSString stringWithFormat: @"%llu", value];
     } else {
-        double displayDouble = (double) value / (double) ( 1ull << (10*i) );
-        TBByteCount displayInteger = (TBByteCount) displayDouble;
-        if (  displayDouble < 10.0  ) {
-            int displayFraction = (int) ((displayDouble - displayInteger) * 100);
-            *rate = [NSString stringWithFormat: @"%llu.%02d", displayInteger, displayFraction];
-        } else if (  displayDouble < 100.0  ) {
-            int displayFraction = (int) ((displayDouble - displayInteger) * 10);
-            *rate = [NSString stringWithFormat: @"%llu.%01d", displayInteger,  displayFraction];
-        } else if (  displayDouble < 1000.0 ) {
-            *rate = [NSString stringWithFormat: @"%llu", displayInteger];
+		unsigned n100 = (unsigned) round(n * 100.0) ;
+		unsigned displayInteger = n100/100u;
+		unsigned displayFraction = n100 - (displayInteger * 100u);
+        if (  n100 < 1000u  ) {
+            *rate = [NSString stringWithFormat: @"%u.%02u", displayInteger, displayFraction];
+			
+        } else if (  n100 < 10000u  ) {
+            *rate = [NSString stringWithFormat: @"%u.%01u", displayInteger,  (displayFraction + 5u) / 10u];
+			
+        } else if (  n100 < 100000 ) {
+			if (   (displayFraction > 49u)
+				&& (displayInteger < 999u)  ) {
+				displayInteger++;
+			}
+            *rate = [NSString stringWithFormat: @"%u", displayInteger];
+			
         } else {
             *units = @"***";
             *rate  = @"***";
@@ -2230,8 +2724,8 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         NSString * outRate      = nil;
         NSString * outRateUnits = nil;
         
-        [self setNumber: &inRate  andUnits: &inRateUnits  from: ((double) tInBytes  / tTimeInt) unitsArray: gRateUnits];
-        [self setNumber: &outRate andUnits: &outRateUnits from: ((double) tOutBytes / tTimeInt) unitsArray: gRateUnits];
+        [self setNumber: &inRate  andUnits: &inRateUnits  from: ((TBByteCount) ((double) tInBytes  / tTimeInt)) unitsArray: gRateUnits];
+        [self setNumber: &outRate andUnits: &outRateUnits from: ((TBByteCount) ((double) tOutBytes / tTimeInt)) unitsArray: gRateUnits];
         
         [[statusScreen inRateTFC]       setTitle: inRate];
         [[statusScreen inRateUnitsTFC]  setTitle: inRateUnits];
@@ -2314,9 +2808,15 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 - (void) setState: (NSString*) newState
 	// Be sure to call this in main thread only
 {
+    if (  [newState isEqualToString: @"EXITING"]  ) {
+        [[NSApp delegate] cancelAllIPCheckThreadsForConnection: self];
+    }
+    
+    if (  newState != lastState  ) {
     [newState retain];
     [lastState release];
     lastState = newState;
+    }
 
     // The 'pre-connect.sh' and 'post-tun-tap-load.sh' scripts are run by openvpnstart
     // The 'connected.sh' and 'reconnecting.sh' scripts are run here
@@ -2324,14 +2824,26 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     if (   [newState isEqualToString: @"EXITING"]
         && [requestedState isEqualToString: @"CONNECTED"]
         && ( ! [[NSApp delegate] terminatingAtUserRequest] )  ) {
+        if (  speakWhenDisconnected  ) {
+            [self speakActivity: @"disconnected"];
+        } else {
         [tunnelDownSound play];
+        }
     } else if (  [newState isEqualToString: @"CONNECTED"]  ) {
+        if (  speakWhenConnected  ) {
+            [self speakActivity: @"connected"];
+        } else {
         [tunnelUpSound play];
+        }
         // Run the connected script, if any
         [self runScriptNamed: @"connected" openvpnstartCommand: @"connected"];
         [gTbDefaults setObject: displayName forKey: @"lastConnectedDisplayName"];
     } else if (  [newState isEqualToString: @"RECONNECTING"]  ) {
+        if (  speakWhenDisconnected  ) {
+            [self speakActivity: @"disconnected"];
+        } else {
         [tunnelDownSound play];
+        }
         // Run the reconnecting script, if any
         [self runScriptNamed: @"reconnecting" openvpnstartCommand: @"reconnecting"];
     }
@@ -2360,6 +2872,29 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     [delegate performSelector: @selector(connectionStateDidChange:) withObject: self];    
 }
 
+-(void) speakActivity: (NSString *) activityName
+{
+    NSString * speech;
+    
+    if (  [activityName isEqualToString: @"connected"]  ) {
+        speech = [NSString stringWithFormat:
+                  NSLocalizedString(@"Connected to %@", @"Speak string"),
+                  [self displayName]];
+    } else if (  [activityName isEqualToString: @"disconnected"]  ) {
+        speech = [NSString stringWithFormat:
+                  NSLocalizedString(@"Disconnected from %@", @"Speak string"),
+                  [self displayName]];
+    } else {
+		NSLog(@"speakActivity: No activity '%@'", activityName);
+		return;
+	}
+    
+    if (  [speech length] != 0  ) {
+        NSSpeechSynthesizer * speechSynth = [[[NSSpeechSynthesizer alloc] initWithVoice: nil] autorelease];
+        [speechSynth startSpeakingString: speech];
+    }
+}
+
 -(void) runScriptNamed: (NSString *) scriptName openvpnstartCommand: (NSString *) command
 {
     if (  [[configPath pathExtension] isEqualToString: @"tblk"]  ) {
@@ -2369,7 +2904,6 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                                   stringByAppendingPathComponent: scriptName]
                                  stringByAppendingPathExtension: @"sh"];
         if (  [gFileMgr fileExistsAtPath: scriptPath]  ) {
-            NSString * path = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
             NSArray * startArguments = [self argumentsForOpenvpnstartForNow: YES];
             if (   startArguments
                 && ( ! [[startArguments objectAtIndex: 5] isEqualToString: @"1"] )  ) {
@@ -2379,18 +2913,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                                        [startArguments objectAtIndex: 5],    // cfgLocCode
                                        nil];
                 
-                NSTask * task = [[NSTask alloc] init];
-                [task setLaunchPath: path];
-                [task setArguments: arguments];
-
                 NSString * msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' executing…", scriptName];
                 [self addToLog: msg];
-                [task launch];
-                [task waitUntilExit];
-                int status = [task terminationStatus];
-                msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' returned with status %d", scriptName, status];
+                OSStatus status = runOpenvpnstart(arguments, nil, nil);
+                msg = [NSString stringWithFormat: @"*SurfSafeVPN: '%@.sh' returned with status %ld", scriptName, (long)status];
                 [self addToLog: msg];
-                [task release];
                 if (   (status != 0)
                     && ( ! [scriptName isEqualToString: @"post-disconnect"] )  ) {
                     [self addToLog: @"*SurfSafeVPN: Disconnecting; script failed"];
@@ -2403,12 +2930,12 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) fadeAway
 {
-    if (  ! (   gTunnelblickIsQuitting
+    if (  ! (   gShuttingDownTunnelblick
              || gComputerIsGoingToSleep )  ) {
         BOOL okToFade = TRUE;   // Assume OK to fade, but don't fade if any connection is being attempted or any auth failed
         VPNConnection * connection;
         NSEnumerator * connectionEnum = [[[NSApp delegate] connectionArray] objectEnumerator];
-        while (  connection = [connectionEnum nextObject]  ) {
+        while (  (connection = [connectionEnum nextObject])  ) {
             if (   ( ! [connection isConnected]    )            // Don't fade if any connection is being  attempted
                 && ( ! [connection isDisconnected] )  ) {
                 okToFade = FALSE;
@@ -2419,7 +2946,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
                 break;
             }
         }
-        if (  [[NSApp delegate] mouseIsInsideAnyView]  ) {
+        if (  [[NSApp delegate] mouseIsInsideAnyView] ) {
+            okToFade = FALSE;
+        }
+        if ([[[NSApp delegate] getLastState] isEqualToString:(@"ANIMATED")]){
             okToFade = FALSE;
         }
         
@@ -2457,10 +2987,10 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 	return resultPort;
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)anItem 
+- (BOOL)validateMenuItem:(NSMenuItem *)anItem
 {
     SEL action = [anItem action];
-	
+
     if (action == @selector(toggle:)) 
     {
         VPNConnection *connection = [anItem target];
@@ -2475,6 +3005,13 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         else if ([connection isDisconnected]) 
         {
             state = NSOffState;
+            if (![[[NSApp delegate] getLastState] isEqualToString:(@"EXITING" )]){
+                [anItem setHidden:YES];
+                logFilesMayExist = NO;
+            }
+            else{
+                [anItem setHidden:NO];
+            }
         }
         
         [anItem setState:state];
@@ -2531,7 +3068,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     BOOL custom = FALSE;
     NSString * resourcePath          = [[NSBundle mainBundle] resourcePath];
     
-    if (  [configPath hasPrefix: gDeployPath]  ) {
+    if (  [configPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
         NSString * deployPath                  = [resourcePath stringByAppendingPathComponent: @"Deploy"];
         NSString * configFile                  = [configPath lastPathComponent];
         NSString * deployScriptPath            = [deployPath stringByAppendingPathComponent:[configFile stringByDeletingPathExtension]];
@@ -2602,12 +3139,21 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
     return logFilesMayExist;
 }
 
+-(void) setSpeakWhenConnected: (BOOL) newValue
+{
+	speakWhenConnected = newValue;
+}
+
+-(void) setSpeakWhenDisconnected: (BOOL) newValue
+{
+	speakWhenDisconnected = newValue;
+}
+
 TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelUpSound,   setTunnelUpSound)
 
 TBSYNTHESIZE_OBJECT_SET(NSSound *, tunnelDownSound, setTunnelDownSound)
 
 TBSYNTHESIZE_OBJECT(retain, NSDate *, bytecountsUpdated, setBytecountsUpdated)
-
 
 //*********************************************************************************************************
 //
@@ -2648,6 +3194,7 @@ TBSYNTHESIZE_OBJECT(retain, NSDate *, bytecountsUpdated, setBytecountsUpdated)
     [self readStatisticsTo: &stats];
     return [NSString stringWithFormat: @"%llu", (unsigned long long) (stats.totalInBytecount + stats.totalInByteCountBeforeThisConnection)];
 }
+    
 - (NSString *) bytesOut
 {
     struct Statistics stats;
@@ -2655,10 +3202,5 @@ TBSYNTHESIZE_OBJECT(retain, NSDate *, bytecountsUpdated, setBytecountsUpdated)
     return [NSString stringWithFormat: @"%llu", (unsigned long long) (stats.totalOutBytecount + stats.totalOutByteCountBeforeThisConnection)];
 }
 
-
-- (void) setProxy:(Proxy *)aProxy{
-    [proxy release];
-    proxy = [aProxy retain];
-}
 
 @end

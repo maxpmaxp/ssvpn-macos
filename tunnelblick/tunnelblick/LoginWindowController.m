@@ -62,10 +62,15 @@
     
     [saveInKeychainCheckbox setState: NSOnState];
     
-    NSURL *url = [NSURL URLWithString:@"https://surfsafevpn.com/photoshield.html"];
-    NSMutableAttributedString *string = [[NSMutableAttributedString alloc] init];
+    /*NSURL *url = [NSURL URLWithString:@"https://surfsafevpn.com/wp-content/themes/NewSurfSafeVPN/photoshield.php"];*/
+    NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:@"Photoshield"];
+    NSRange range = NSMakeRange(0, [string length]);
+
+    [string addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSSingleUnderlineStyle] range:range];
+    [string addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
     
-    [string appendAttributedString:[NSAttributedString hyperlinkFromString:@"PhotoShield" withURL:url]];
+   /* [string appendAttributedString:[NSAttributedString hyperlinkFromString:@"PhotoShield" withURL:url]];*/
+    
 
     [photoShieldTextField setAttributedStringValue:string];
     [photoShieldStatusTF setStringValue:IsEnabledProxy()?@"ON":@"OFF"];
@@ -217,7 +222,7 @@
 
 
 -(IBAction) photoShieldClicked:     (id)  sender{
-    NSURL *url = [[NSURL alloc] initWithString:@"https://surfsafevpn.com/photoshield.html"];
+    NSURL *url = [[NSURL alloc] initWithString:@"https://surfsafevpn.com/wp-content/themes/NewSurfSafeVPN/photoshield.php"];
     [[NSWorkspace sharedWorkspace] openURL:url]; 
 }
 

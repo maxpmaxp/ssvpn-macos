@@ -20,15 +20,14 @@
  */
 
 
-#import <unistd.h>
 #import "ConfigurationUpdater.h"
 #import "defines.h"
 #import "MenuController.h"
 #import "NSFileManager+TB.h"
 #import "helper.h"
-#import "SSZipArchive.h"
 
 extern NSFileManager        * gFileMgr;
+extern BOOL                   gShuttingDownWorkspace;
 
 @implementation ConfigurationUpdater
 
@@ -70,7 +69,7 @@ extern NSFileManager        * gFileMgr;
                         if (   [gFileMgr tbCopyPath: CONFIGURATION_UPDATES_BUNDLE_PATH toPath: tempBundlePath handler: nil]  ) {
                             NSBundle * tempBundle = [NSBundle bundleWithPath: tempBundlePath];
                             if (  tempBundle  ) {
-                                if (  self = [super init]  ) {
+                                if (  (self = [super init])  ) {
                                     cfgBundlePath = [tempBundlePath retain];
                                     cfgBundle = [tempBundle retain];
                                     cfgUpdater = [[SUUpdater updaterForBundle: cfgBundle] retain];
@@ -113,14 +112,12 @@ extern NSFileManager        * gFileMgr;
     return nil;
 }
 
-
 -(void) dealloc
 {
     [cfgBundlePath release];
     [cfgUpdater release];
     [cfgBundle release];
     [cfgFeedURL release];
-    [hosts release];
     [super dealloc];
 }
 
@@ -158,6 +155,10 @@ extern NSFileManager        * gFileMgr;
 
 -(void) startFromTimerHandler: (NSTimer *) timer
 {
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
+    
     [self startWithUI: [[timer userInfo] boolValue]];
 }
      
@@ -167,6 +168,8 @@ extern NSFileManager        * gFileMgr;
 // Use this to override the default behavior for Sparkle prompting the user about automatic update checks.
 - (BOOL)updaterShouldPromptForPermissionToCheckForUpdates:(SUUpdater *)bundle
 {
+	(void) bundle;
+	
     NSLog(@"cfgUpdater: updaterShouldPromptForPermissionToCheckForUpdates");
     return NO;
 }
@@ -174,12 +177,21 @@ extern NSFileManager        * gFileMgr;
 // Returns the path which is used to relaunch the client after the update is installed. By default, the path of the host bundle.
 - (NSString *)pathToRelaunchForUpdater:(SUUpdater *)updater
 {
+	(void) updater;
+	
     return [[NSBundle mainBundle] bundlePath];
 }
 
 
 - (void)updater:(SUUpdater *)updater willInstallUpdate:(SUAppcastItem *)update
 {
+	(void) updater;
+    (void) update;
+	
+    if (  gShuttingDownWorkspace  ) {
+        return;
+    }
+    
     [[NSApp delegate] saveConnectionsToRestoreOnRelaunch];
     [[NSApp delegate] installConfigurationsUpdateInBundleAtPathHandler: cfgBundlePath];
 }
@@ -217,4 +229,5 @@ extern NSFileManager        * gFileMgr;
     NSLog(@"cfgUpdater: updaterWillRelaunchApplication");
 }
 // */
+
 @end
