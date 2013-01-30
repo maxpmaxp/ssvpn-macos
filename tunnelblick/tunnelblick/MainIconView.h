@@ -23,18 +23,14 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface MainIconView : NSView {
-    
-    IBOutlet NSImageView * imageView;                   // Contains the icon image
-    
-    NSImage              * iconImage;
+@interface MainIconView : NSImageView {
 
     NSTrackingRectTag      mainIconTrackingRectTag;     // Used to track mouseEntered and mouseExited events for statistics display
+	NSTimeInterval		   mainIconLastClickTime;		// Timestamp of last click (used to detect double-click)
+	BOOL				   mainIconTrackingRectTagIsValid;
 }
 
--(void) setImage:       (NSImage *) newImage;
-
+-(void) setOrRemoveTrackingRect;
 -(void) changedDoNotShowNotificationWindowOnMouseover;
-
 
 @end

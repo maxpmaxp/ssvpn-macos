@@ -3,7 +3,10 @@
 
 CC=gcc
 MACOSX_DEPLOYMENT_TARGET=10.6
-SDKROOT=/Developer/SDKs/MacOSX10.6.sdk
+OSX_VERSION=10.8
+#looking for xcode sdk in a new folder for sdks (xcode.app/...)
+SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VERSION).sdk
+#SDKROOT=/Developer/SDKs/MacOSX10.6.sdk
 
 CFLAGS=-isysroot $(SDKROOT) -Os -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
@@ -11,19 +14,20 @@ TOPDIR = $(PWD)
 BUILD_DIR = build
 THIRD_PARTY_PROJS = OPENSSL
 
-OPENSSL_SRC_DIR = openssl-1.0.0e
+OPENSSL_SRC_DIR = openssl-1.0.1c
 OPENSSL_BUILD_DIR = $(TOPDIR)/$(BUILD_DIR)/$(OPENSSL_SRC_DIR)
 OPENSSL_DEST_DIR = $(TOPDIR)/$(BUILD_DIR)/staging/$(OPENSSL_SRC_DIR)
 OPENSSL_TARGET_FILES = $(foreach f, libcrypto.a libssl.a, $(OPENSSL_DEST_DIR)/lib/$(f))
 
 PROJ_BUILD_DIRS = $(foreach proj, $(THIRD_PARTY_PROJS), $($(proj)_BUILD_DIR))
 
-# Both lzo and openvpn should be built universally
+# Both lzo and openvpn should be built universally (now only for i386; ppc buildconf was removed)
 
 LZO_DIR=lzo-2.05
 PKCS11_DIR=pkcs11-helper-1.09
+PKCS11_TUNNELBLICK_STAGING_DIR=$(TOPDIR)/$(PKCS11_DIR)/staging
 TUNTAP_PRE_LION_DIR=tuntap-20090913
-TUNTAP_LION_DIR=tuntap-20110914
+TUNTAP_LION_DIR=tuntap-20111101
 
 
 all: tuntap openvpn
@@ -161,16 +165,16 @@ tuntap-patch:
 
 tuntap: tuntap-patch
 	$(MAKE) -C tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/; \
-	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tap.kext tap-pre-lion.kext; \
-	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tun.kext tun-pre-lion.kext; \
+	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tap.kext tap-20090913.kext; \
+	mv tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/tun.kext tun-20090913.kext; \
 	$(MAKE) -C tuntap/$(TUNTAP_LION_DIR)/tuntap/; \
 	mv tuntap/$(TUNTAP_LION_DIR)/tuntap/tap.kext tap.kext; \
 	mv tuntap/$(TUNTAP_LION_DIR)/tuntap/tun.kext tun.kext
 
 tuntap-clean:
 	$(MAKE) -C tuntap/$(TUNTAP_PRE_LION_DIR)/tuntap/ clean; \
-	rm -f -R tap-pre-lion.kext; \
-	rm -f -R tun-pre-lion.kext; \
+	rm -f -R tap-20090913.kext; \
+	rm -f -R tun-20090913.kext; \
 	$(MAKE) -C tuntap/$(TUNTAP_LION_DIR)/tuntap/ clean; \
 	rm -f -R tap.kext; \
 	rm -f -R tun.kext

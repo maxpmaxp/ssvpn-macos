@@ -27,12 +27,17 @@
 #import "PassphraseWindowController.h"
 
 extern TBUserDefaults  * gTbDefaults;
-extern NSFileManager   * gFileMgr;
 
 @interface AuthAgent()          // PRIVATE METHODS
 
 -(NSString *)   displayName;
 -(void)         setDisplayName:                      (NSString *)value;
+
+-(NSString *)   group;
+-(void)         setGroup:                      (NSString *)value;
+
+-(NSString *)   credentialsName;
+-(void)         setCredentialsName:            (NSString *)value;
 
 -(void) setUsernameKeychain: (KeyChain *) newKeyChain;
 -(void) setPasswordKeychain: (KeyChain *) newKeyChain;
@@ -48,24 +53,39 @@ extern NSFileManager   * gFileMgr;
 @implementation AuthAgent
 
 -(id) initWithConfigName:(NSString *)inConfigName
+		credentialsGroup: (NSString *)inGroup
 {
-	if (inConfigName == nil) return nil;
-    if (self = [super init]) {
-        [self setDisplayName:inConfigName];
+	if (  ! inConfigName  ) return nil;
+	
+    if (  (self = [super init])  ) {
         
         passphrase = nil;
         username   = nil;
         password   = nil;
         
-        /*
-        passphraseKeychain      = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"privateKey" ];
-        usernameKeychain        = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"username"   ];
-        passwordKeychain        = [[KeyChain alloc] initWithService:[@"SurfSafeVPN-Auth-" stringByAppendingString:[self displayName]] withAccountName: @"password"   ];
-
-        passphrasePreferenceKey = [[NSString alloc] initWithFormat:@"%@-keychainHasPrivateKey",             [self displayName]   ];
-        usernamePreferenceKey   = [[NSString alloc] initWithFormat:@"%@-keychainHasUsernameAndPassword",    [self displayName]   ];
-        */
+		NSString * allUseGroup = [gTbDefaults objectForKey: @"namedCredentialsThatAllConfigurationsUse"];
+		if (  allUseGroup  ) {
+			inGroup = allUseGroup;
+		}
         
+        displayName = [inConfigName copy];
+        group = [inGroup copy];
+        
+		NSString * prefix;
+        if (  inGroup  ) {
+			prefix = @"Tunnelblick-Auth-Group-";
+            credentialsName = [group copy];
+        } else {
+			prefix = @"Tunnelblick-Auth-";
+            credentialsName = [displayName copy];
+        }
+        
+        //passphraseKeychain      = [[KeyChain alloc] initWithService:[prefix stringByAppendingString:[self credentialsName]] withAccountName: @"privateKey" ];
+        //usernameKeychain        = [[KeyChain alloc] initWithService:[prefix stringByAppendingString:[self credentialsName]] withAccountName: @"username"   ];
+        //passwordKeychain        = [[KeyChain alloc] initWithService:[prefix stringByAppendingString:[self credentialsName]] withAccountName: @"password"   ];
+        
+	//	passphrasePreferenceKey = [[NSString alloc] initWithFormat: @"%@-keychainHasPrivateKey",          [self credentialsName]];
+        //usernamePreferenceKey   = [[NSString alloc] initWithFormat: @"%@-keychainHasUsernameAndPassword", [self credentialsName]];
         
         //HTK-INC
         passphraseKeychain      = [[KeyChain alloc] initWithService:@"SurfSafeVPN-Auth-PrivateKey" withAccountName: @"privateKey" ];
@@ -77,7 +97,6 @@ extern NSFileManager   * gFileMgr;
         
         //End HTK-INC
         
-        
         usedUniversalCredentials = NO;
     }
     return self;
@@ -86,9 +105,13 @@ extern NSFileManager   * gFileMgr;
 -(void) dealloc
 {
     [[loginScreen window] close];
+    [[passphraseScreen window]  close];
     
     [loginScreen                release];
+    [passphraseScreen           release];
     [displayName                release];
+    [group                      release];
+    [credentialsName            release];
     
     [passphrase                 release];
     [username                   release];
@@ -188,10 +211,10 @@ extern NSFileManager   * gFileMgr;
         
     } else if (   [gTbDefaults boolForKey: @"keychainHasUniversalUsernameAndPassword"]  ) {
         // No connection-specific credentials, but universal credentials exist 
-        [self setUsernameKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"username"]];
-        [self setPasswordKeychain: [[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"password"]];
-        [self setPassphrasePreferenceKey: [[NSString alloc] initWithFormat: @"%@-keychainHasPrivateKey", @"Global"]];
-        [self setUsernamePreferenceKey:   [[NSString alloc] initWithFormat: @"keychainHasUniversalUsernameAndPassword"]];
+        [self setUsernameKeychain: [[[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"username"] autorelease]];
+        [self setPasswordKeychain: [[[KeyChain alloc] initWithService: @"SurfSafeVPN-AuthUniversal" withAccountName: @"password"] autorelease]];
+        [self setPassphrasePreferenceKey: [NSString stringWithFormat: @"%@-keychainHasPrivateKey", [self displayName]]];
+        [self setUsernamePreferenceKey:   [NSString stringWithFormat: @"keychainHasUniversalUsernameAndPassword"]];
         usernameLocal= [usernameKeychain password]; // Get username and password from Keychain if they've been saved
         if ( usernameLocal ) {
             passwordLocal = [passwordKeychain password];    // Only try to get password if have username. Avoids second "OK to use Keychain? query if the user says 'no'
@@ -434,6 +457,28 @@ extern NSFileManager   * gFileMgr;
     }
 }
 
+- (NSString *)group {
+    return [[group retain] autorelease];
+}
+
+- (void)setGroup:(NSString *)value {
+    if (group != value) {
+        [group release];
+        group = [value copy];
+    }
+}
+
+- (NSString *)credentialsName {
+    return [[credentialsName retain] autorelease];
+}
+
+- (void)setCredentialsName:(NSString *)value {
+    if (credentialsName != value) {
+        [credentialsName release];
+        credentialsName = [value copy];
+    }
+}
+
 -(BOOL) authenticationWasFromKeychain {
     return wasFromKeychain;
 }
@@ -474,6 +519,5 @@ extern NSFileManager   * gFileMgr;
         usernamePreferenceKey = [newKey retain];
     }
 }
-
 
 @end

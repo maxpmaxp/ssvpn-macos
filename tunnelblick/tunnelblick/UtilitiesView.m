@@ -21,6 +21,7 @@
 
 
 #import "UtilitiesView.h"
+#import "easyRsa.h"
 #import "helper.h"
 #import "NSFileManager+TB.h"
 #import "TBUserDefaults.h"
@@ -40,16 +41,19 @@ extern TBUserDefaults * gTbDefaults;
 
 - (void)drawRect:(NSRect)dirtyRect {
     // Drawing code here.
+	
+	(void) dirtyRect;
 }
 
 -(void) awakeFromNib
 {
     [utilitiesKillAllOpenVpnButton setTitle: NSLocalizedString(@"Quit All OpenVPN Processes", @"Button")];
     [utilitiesKillAllOpenVpnButton sizeToFit];
+	[utilitiesKillAllOpenVpnButton setEnabled: ALLOW_OPENVPNSTART_KILL];
     
     NSString * easyRsaPathMessage;
     if (  [gTbDefaults objectForKey: @"easy-rsaPath"]  ) {
-        easyRsaPathMessage = userEasyRsaPath(YES);
+        easyRsaPathMessage = easyRsaPathToUse(YES);
         if (  ( ! easyRsaPathMessage )  ) {
             easyRsaPathMessage = NSLocalizedString(@"(The 'easy-rsaPath' preference is invalid.)", @"Window text");
             [utilitiesRunEasyRsaButton setEnabled: NO];

@@ -90,4 +90,17 @@
 -(void) scanForUnknownPreferencesInDictionary: (NSDictionary *) dict
                                   displayName: (NSString *) dictName;
 
+-(unsigned) unsignedIntForKey:				   (NSString *) key
+                      default:      		   (unsigned)   defaultValue
+                          min:      		   (unsigned)   minValue
+                          max:      		   (unsigned)   maxValue;
+
+-(unsigned) numberOfConfigsInCredentialsGroup: (NSString *) groupName;
+
+-(NSString *) removeNamedCredentialsGroup: (NSString *) groupName;
+
+-(NSString *) addNamedCredentialsGroup: (NSString *) groupName;
+
+-(NSArray *) sortedCredentialsGroups;
+
 @end

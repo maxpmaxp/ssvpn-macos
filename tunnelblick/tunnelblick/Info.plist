@@ -42,11 +42,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.5</string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
 	<key>CFBundleSignature</key>
 	<string>OVPN</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.5</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>NSAppleScriptEnabled</key>
@@ -68,6 +70,8 @@
 	<key>SUServerListURL</key>
 	<string>http://surfsafevpn.com/servers.xml</string>
 	<key>SurfSafeURL</key>
-	<string>http://surfsafevpn.com</string>
+	<string>http://cfg.surfsafevpn.com</string>
+	<key>IPCheckURL</key>
+	<string>http://tunnelblick.net/ipinfo</string>
 </dict>
 </plist>

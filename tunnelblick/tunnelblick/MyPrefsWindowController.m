@@ -36,12 +36,12 @@
 #import "SettingsSheetWindowController.h"
 #import "Sparkle/SUUpdater.h"
 #import "MainIconView.h"
+#import "easyRsa.h"
 
 extern NSFileManager  * gFileMgr;
 extern TBUserDefaults * gTbDefaults;
-extern NSString       * gDeployPath;
-extern NSString       * gSharedPath;
 extern NSString       * gPrivatePath;
+extern NSString       * gDeployPath;
 extern unsigned         gMaximumLogSize;
 extern NSArray        * gProgramPreferences;
 extern NSArray        * gConfigurationPreferences;
@@ -59,20 +59,20 @@ extern NSArray        * gConfigurationPreferences;
                              to: (BOOL)       newValue
                        inverted: (BOOL)       inverted;
 
--(int) firstDifferentComponent: (NSArray *) a
+-(unsigned) firstDifferentComponent: (NSArray *) a
                            and: (NSArray *) b;
 
 -(NSString *) indent: (NSString *) s
-                  by: (int)        n;
+                  by: (unsigned)   n;
 
 -(void) initializeSoundPopUpButtons;
 
 -(void) setCurrentViewName: (NSString *) newName;
 
--(void) setSelectedWhenToConnectIndex: (NSInteger) newValue;
+-(void) setSelectedWhenToConnectIndex: (NSUInteger) newValue;
 
--(void) setSoundIndex: (NSInteger *) index
-                   to: (NSInteger)   newValue
+-(void) setSoundIndex: (NSUInteger *) index
+                   to: (NSUInteger)   newValue
            preference: (NSString *)  preference;
 
 -(void) setupCheckbox: (NSButton *) checkbox
@@ -99,8 +99,6 @@ extern NSArray        * gConfigurationPreferences;
 
 -(void) updateLastCheckedDate;
 
--(void) validateDetailsWindowControls;
-
 -(void) validateWhenToConnect: (VPNConnection *) connection;
 
 @end
@@ -125,7 +123,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 -(void) setupViews
 {
     
-    currentFrame = NSMakeRect(0, 0, 760, 390);
+    currentFrame = NSMakeRect(0.0, 0.0, 760.0, 390.0);
     
     currentViewName = @"Configurations";
     
@@ -177,6 +175,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(void) windowWillClose:(NSNotification *)notification
 {
+	(void) notification;
+	
     if (  [currentViewName isEqualToString: @"Info"]  ) {
         [infoPrefsView oldViewWillDisappear: infoPrefsView identifier: @"Info"];
     }
@@ -273,7 +273,9 @@ static BOOL firstTimeShowingWindow = TRUE;
         [[self window] makeFirstResponder: [utilitiesPrefsView utilitiesHelpButton]];
     } else if (   view == infoPrefsView  ) {
         [[self window] makeFirstResponder: [infoPrefsView infoHelpButton]];
-        NSString * version = [NSString stringWithFormat: @"%@  -  %@", tunnelblickVersion([NSBundle mainBundle]), openVPNVersion()];
+        NSString * deployedString = (gDeployPath && [gFileMgr fileExistsAtPath: gDeployPath]
+                                     ? NSLocalizedString(@" (Deployed)", @"Window title") : @"");
+        NSString * version = [NSString stringWithFormat: @"%@%@  -  %@", surfsafevpnVersion([NSBundle mainBundle]), deployedString, openVPNVersion()];
         [[infoPrefsView infoVersionTFC] setTitle: version];
     } else {
         NSLog(@"newViewDidAppear:identifier: invoked with unknown view");
@@ -282,6 +284,9 @@ static BOOL firstTimeShowingWindow = TRUE;
 
     -(BOOL) tabView: (NSTabView *) inTabView shouldSelectTabViewItem: (NSTabViewItem *) tabViewItem
 {
+	(void) inTabView;
+	(void) tabViewItem;
+		
     if (  [self selectedConnection]  ) {
         return YES;
     }
@@ -370,8 +375,8 @@ static BOOL firstTimeShowingWindow = TRUE;
     id obj = [gTbDefaults objectForKey: key];
     if (  obj != nil  ) {
         if (  [obj respondsToSelector: @selector(intValue)]  ) {
-            ix = (NSInteger) [obj intValue];
-            if (  ix >= [[[configurationsPrefsView setNameserverArrayController] content] count]  ) {
+            ix = [obj intValue];
+            if (  (unsigned)ix >= [[[configurationsPrefsView setNameserverArrayController] content] count]  ) {
                 NSLog(@"%@ preference ignored: value %ld too large", key, (long) ix);
                 ix = 0;
             }
@@ -384,12 +389,17 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
     
     [[configurationsPrefsView setNameserverPopUpButton] selectItemAtIndex: ix];
-    [self setSelectedSetNameserverIndex: ix];
+    [self setSelectedSetNameserverIndex: (unsigned)ix];
     [[configurationsPrefsView setNameserverPopUpButton] setEnabled: [gTbDefaults canChangeValueForKey: key]];
+    [settingsSheetWindowController setupPrependDomainNameCheckbox];
+	[settingsSheetWindowController setupFlushDNSCheckbox];
+    [settingsSheetWindowController setupReconnectOnWakeFromSleepCheckbox];
 }
 
 -(void) setupNetworkMonitoring: (VPNConnection *) connection
 {
+ 	(void) connection;
+	
     if (  [self forceDisableOfNetworkMonitoring]  ) {
         [[configurationsPrefsView monitorNetworkForChangesCheckbox] setState: NSOffState];
         [[configurationsPrefsView monitorNetworkForChangesCheckbox] setEnabled: NO];
@@ -403,6 +413,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(void) setupShowOnTunnelblickMenu: (VPNConnection *) connection
 {
+	(void) connection;
+	
     [self setupCheckbox: [configurationsPrefsView showOnTunnelBlickMenuCheckbox]
                     key: @"-doNotShowOnTunnelblickMenu"
                inverted: YES];
@@ -411,6 +423,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(void) setupSoundPopUpButtons: (VPNConnection *) connection
 {
+	(void) connection;
+	
     [self setupSoundButton: [configurationsPrefsView soundOnConnectButton]
            arrayController: [configurationsPrefsView soundOnConnectArrayController]
                 preference: @"-tunnelUpSoundName"];
@@ -446,12 +460,12 @@ static BOOL firstTimeShowingWindow = TRUE;
     while ((connection = [[[NSApp delegate] myVPNConnectionDictionary] objectForKey: [configEnum nextObject]])) {
         NSString * dispNm = [connection displayName];
         NSArray * currentConfig = [dispNm componentsSeparatedByString: @"/"];
-        int firstDiff = [self firstDifferentComponent: currentConfig and: currentFolders];
+        unsigned firstDiff = [self firstDifferentComponent: currentConfig and: currentFolders];
         
         // Track any necessary "outdenting"
         if (  firstDiff < [currentFolders count]  ) {
             // Remove components from the end of currentFolders until we have a match
-            int i;
+            unsigned i;
             for (  i=0; i < ([currentFolders count]-firstDiff); i++  ) {
                 [currentFolders removeLastObject];
             }
@@ -460,7 +474,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         // currentFolders and currentConfig now match, up to but not including the firstDiff-th entry
         
         // Add a "folder" line for each folder in currentConfig starting with the first-Diff-th entry (if any)
-        int i;
+        unsigned i;
         for (  i=firstDiff; i < [currentConfig count]-1; i++  ) {
             [leftNavDisplayNames addObject: @""];
             NSString * folderName = [currentConfig objectAtIndex: i];
@@ -471,7 +485,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         
         // Add a "configuration" line
         [leftNavDisplayNames addObject: [connection displayName]];
-        [leftNavList         addObject: [self indent: [currentConfig lastObject] by: [currentConfig count]-1]];
+        [leftNavList         addObject: [self indent: [currentConfig lastObject] by: [currentConfig count]-1u]];
         
         if (  displayNameToSelect  ) {
             if (  [displayNameToSelect isEqualToString: [connection displayName]]  ) {
@@ -496,7 +510,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         }
         if (  leftNavIndexToSelect != NSNotFound  ) {
             selectedLeftNavListIndex = NSNotFound;  // Force a change
-            [self setSelectedLeftNavListIndex: leftNavIndexToSelect];
+            [self setSelectedLeftNavListIndex: (unsigned)leftNavIndexToSelect];
             [[configurationsPrefsView leftNavTableView] scrollRowToVisible: leftNavIndexToSelect];
         }
     }
@@ -592,7 +606,11 @@ static BOOL firstTimeShowingWindow = TRUE;
                                        NSLocalizedString(@"No sound", @"Button"), @"name", 
                                        @"None", @"value", nil]];
     
-    int i;
+    [soundsDictionaryArray addObject: [NSDictionary dictionaryWithObjectsAndKeys:
+                                       NSLocalizedString(@"Speak", @"Button"), @"name",
+                                       @"Speak", @"value", nil]];
+    
+    unsigned i;
     for (  i=0; i<[soundsSorted count]; i++  ) {
         [soundsDictionaryArray addObject: [NSDictionary dictionaryWithObjectsAndKeys: 
                                            [soundsSorted objectAtIndex: i], @"name", 
@@ -604,7 +622,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
-//  Set a sound popup button from preferences
+//  Set up a sound popup button from preferences
 -(void) setupSoundButton: (NSButton *)          button
          arrayController: (NSArrayController *) ac
               preference: (NSString *)          preference
@@ -613,11 +631,11 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * key = [[[self selectedConnection] displayName] stringByAppendingString: preference];
     NSString * soundName = [gTbDefaults objectForKey: key];
     if (   soundName
-        && [soundName isNotEqualTo: @"None"]  ) {
+		&& ( ! [soundName isEqualToString: @"None"] )  ) {
         NSArray * listContent = [ac content];
         NSDictionary * dict;
-        int i;
-        for (  i=1; i<[listContent count]; i++  ) {  // Look for the sound in the array, skipping the first entry, which is "None"
+        unsigned i;
+        for (  i=0; i<[listContent count]; i++  ) {  // Look for the sound in the array
             dict = [listContent objectAtIndex: i];
             if (  [[dict objectForKey: @"name"] isEqualToString: soundName]  ) {
                 ix = i;
@@ -661,25 +679,16 @@ static BOOL firstTimeShowingWindow = TRUE;
         
         // Left split view
         
-        [[configurationsPrefsView addConfigurationButton]               setEnabled: ! [gTbDefaults boolForKey: @"disableAddConfigurationButton"                          ]];
-        [[configurationsPrefsView removeConfigurationButton]            setEnabled: ! [gTbDefaults boolForKey: @"disableRemoveConfigurationButton"                       ]];
         [[configurationsPrefsView workOnConfigurationPopUpButton]       setEnabled: ! [gTbDefaults boolForKey: @"disableWorkOnConfigurationButton"                       ]];
-        
-        [[configurationsPrefsView workOnConfigurationPopUpButton] setAutoenablesItems: NO];
-        
-        [[configurationsPrefsView renameConfigurationMenuItem]          setEnabled: ! [gTbDefaults boolForKey: @"disableRenameConfigurationMenuItem"                     ]];
-        [[configurationsPrefsView duplicateConfigurationMenuItem]       setEnabled: ! [gTbDefaults boolForKey: @"disableDuplicateConfigurationMenuItem"                  ]];
+		[[configurationsPrefsView workOnConfigurationPopUpButton] setAutoenablesItems: YES];
         
         NSString * configurationPath = [connection configPath];
-        if (  [configurationPath hasPrefix: gSharedPath]  ) {
+        if (  [configurationPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
             [[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Private..."  , @"Menu Item")];
-            [[configurationsPrefsView makePrivateOrSharedMenuItem] setEnabled:  ! [gTbDefaults boolForKey: @"disableMakeConfigurationPrivateOrSharedMenuItem"            ]];
-        } else if (  [configurationPath hasPrefix: gPrivatePath]  ) {
+        } else if (  [configurationPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
             [[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Shared..."  , @"Menu Item")];
-            [[configurationsPrefsView makePrivateOrSharedMenuItem] setEnabled:  ! [gTbDefaults boolForKey: @"disableMakeConfigurationPrivateOrSharedMenuItem"            ]];
         } else {
             [[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Shared..."  , @"Menu Item")];
-            [[configurationsPrefsView makePrivateOrSharedMenuItem] setEnabled: NO];
         }
         
         if (  [[ConfigurationManager defaultManager] userCanEditConfiguration: [connection configPath]]  ) {
@@ -687,10 +696,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         } else {
             [[configurationsPrefsView editOpenVPNConfigurationFileMenuItem] setTitle: NSLocalizedString(@"Examine OpenVPN Configuration File...", @"Menu Item")];
         }
-        [[configurationsPrefsView editOpenVPNConfigurationFileMenuItem] setEnabled: ! [gTbDefaults boolForKey: @"disableExamineOpenVpnConfigurationFileMenuItem"         ]];
         
-        [[configurationsPrefsView showOpenvpnLogMenuItem]               setEnabled: ! [gTbDefaults boolForKey: @"disableShowOpenVpnLogInFinderMenuItem"                  ]];
-        [[configurationsPrefsView removeCredentialsMenuItem]            setEnabled: ! [gTbDefaults boolForKey: @"disableDeleteConfigurationCredentialsInKeychainMenuItem"]];
         
         // right split view
         
@@ -723,6 +729,58 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
 }
 
+- (BOOL)validateMenuItem:(NSMenuItem *) anItem
+{
+	VPNConnection * connection = [self selectedConnection];
+	
+	if (  [anItem action] == @selector(addConfigurationButtonWasClicked:)  ) {
+		return ! [gTbDefaults boolForKey: @"disableAddConfigurationButton"];
+		
+	} else if (  [anItem action] == @selector(removeConfigurationButtonWasClicked:)  ) {
+		return [gTbDefaults boolForKey: @"disableRemoveConfigurationButton"];
+		
+	} else if (  [anItem action] == @selector(renameConfigurationMenuItemWasClicked:)  ) {
+		return ! [gTbDefaults boolForKey: @"disableRenameConfigurationMenuItem"];
+		
+	} else if (  [anItem action] == @selector(duplicateConfigurationMenuItemWasClicked:)  ) {
+		return ! [gTbDefaults boolForKey: @"disableDuplicateConfigurationMenuItem"];
+		
+	} else if (  [anItem action] == @selector(revertToShadowMenuItemWasClicked:)  ) {
+		return (   ( ! [gTbDefaults boolForKey: @"disableRevertToShadowMenuItem"] )
+				&& (   [[connection configPath] hasPrefix: [gPrivatePath stringByAppendingString: @"/"]])
+				&& ( ! [connection shadowIsIdenticalMakeItSo: NO] )
+				);
+		
+	} else if (  [anItem action] == @selector(makePrivateOrSharedMenuItemWasClicked:)  ) {
+		NSString * configurationPath = [connection configPath];
+		if (  [configurationPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
+			[[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Private..."  , @"Menu Item")];
+			return ! [gTbDefaults boolForKey: @"disableMakeConfigurationPrivateOrSharedMenuItem"];
+		} else if (  [configurationPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+			[[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Shared..."  , @"Menu Item")];
+			return ! [gTbDefaults boolForKey: @"disableMakeConfigurationPrivateOrSharedMenuItem"];
+		} else {
+			[[configurationsPrefsView makePrivateOrSharedMenuItem] setTitle: NSLocalizedString(@"Make Configuration Shared..."  , @"Menu Item")];
+			return NO;
+		}
+		
+	} else if (  [anItem action] == @selector(editOpenVPNConfigurationFileMenuItemWasClicked:)  ) {
+		return (   ( ! [gTbDefaults boolForKey: @"disableExamineOpenVpnConfigurationFileMenuItem"] )
+				&& [[connection configPath] hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]
+				);
+		
+	} else if (  [anItem action] == @selector(showOpenvpnLogMenuItemWasClicked:)  ) {
+		return (   ( ! [gTbDefaults boolForKey: @"disableShowOpenVpnLogInFinderMenuItem"] )
+				&& [[connection configPath] hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]
+				);
+		
+	} else if (  [anItem action] == @selector(removeCredentialsMenuItemWasClicked:)  ) {
+		return  ! [gTbDefaults boolForKey: @"disableDeleteConfigurationCredentialsInKeychainMenuItem"];
+	}
+	
+	NSLog(@"MyPrefsWindowController:validateMenuItem: Unknown menuItem %@", [anItem description]);
+	return NO;
+}
 
 
 // Overrides superclass method
@@ -730,7 +788,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 //      configname (Shared/Private/Deployed): Status (hh:mm:ss) - Tunnelblick
 // Otherwise, window title is:
 //      tabname - Tunnelblick
-- (NSString *)windowTitle:(NSString *)currentItemLabel;
+- (NSString *)windowTitle:(NSString *)currentItemLabel
 {
     NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
     NSString *appName = [[NSFileManager defaultManager] displayNameAtPath: bundlePath];
@@ -738,7 +796,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         appName = [appName substringToIndex: [appName length] - 4];
     }
     
-    NSString * windowLabel = [NSString stringWithFormat: @"%@ - SurfSafe", localizeNonLiteral(currentViewName, @"Window title")];
+    NSString * windowLabel = [NSString stringWithFormat: @"%@ - SurfSafeVPN", localizeNonLiteral(currentViewName, @"Window title")];
 
     if (  [currentViewName isEqualToString: @"Configurations"]  ) {
         VPNConnection * connection = [self selectedConnection];
@@ -797,10 +855,10 @@ static BOOL firstTimeShowingWindow = TRUE;
                                    && ( ! [gTbDefaults boolForKey: disableDisconnectButtonKey] )  )];
 }
 
--(int) firstDifferentComponent: (NSArray *) a and: (NSArray *) b
+-(unsigned) firstDifferentComponent: (NSArray *) a and: (NSArray *) b
 {
-    int retVal = 0;
-    int i;
+    unsigned retVal = 0;
+    unsigned i;
     for (i=0;
          (i < [a count]) 
          && (i < [b count])
@@ -813,7 +871,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
--(NSString *) indent: (NSString *) s by: (int) n
+-(NSString *) indent: (NSString *) s by: (unsigned) n
 {
     NSString * retVal = [NSString stringWithFormat:@"%*s%@", 3*n, "", s];
     return retVal;
@@ -823,7 +881,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 -(BOOL) forceDisableOfNetworkMonitoring
 {
     NSArray * content = [[configurationsPrefsView setNameserverArrayController] content];
-    NSInteger ix = [self selectedSetNameserverIndex];
+    NSUInteger ix = [self selectedSetNameserverIndex];
     if (   ([content count] < 4)
         || (ix > 2)
         || (ix == 0)  ) {
@@ -836,8 +894,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 -(int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     if (  aTableView == [configurationsPrefsView leftNavTableView]  ) {
-        int n = [leftNavList count];
-        return n;
+        unsigned n = [leftNavList count];
+        return (int)n;
     }
     
     return 0;
@@ -845,8 +903,10 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(id) tableView:(NSTableView *) aTableView objectValueForTableColumn:(NSTableColumn *) aTableColumn row:(int) rowIndex
 {
+    (void) aTableColumn;
+    
     if (  aTableView == [configurationsPrefsView leftNavTableView]  ) {
-        NSString * s = [leftNavList objectAtIndex: rowIndex];
+        NSString * s = [leftNavList objectAtIndex: (unsigned)rowIndex];
         return s;
     }
     
@@ -856,7 +916,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 - (VPNConnection*) selectedConnection
 // Returns the connection associated with the currently selected connection or nil on error.
 {
-    if (  selectedLeftNavListIndex >= 0  ) {
+    if (  selectedLeftNavListIndex != UINT_MAX  ) {
         if (  selectedLeftNavListIndex < [leftNavDisplayNames count]  ) {
             NSString * dispNm = [leftNavDisplayNames objectAtIndex: selectedLeftNavListIndex];
             if (  dispNm != nil) {
@@ -894,10 +954,12 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) disconnectButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
-        [connection addToLog: @"*Tunnelblick: Disconnecting; 'disconnect' button pressed"];
-        [connection disconnectAndWait: [NSNumber numberWithBool: YES] userKnows: YES];      
+        [connection addToLog: @"*SurfSafeVPN: Disconnecting; 'disconnect' button pressed"];
+        [connection disconnectAndWait: [NSNumber numberWithBool: NO] userKnows: YES];      
     } else {
         NSLog(@"disconnectButtonWasClicked but no configuration selected");
     }
@@ -906,6 +968,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) configurationsHelpButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     OSStatus err;
     if ((err = MyGotoHelpPage(CFSTR("vpn-details.html"), NULL))  ) {
         NSLog(@"Error %ld from MyGotoHelpPage()", (long) err);
@@ -917,12 +981,16 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) addConfigurationButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     [[ConfigurationManager defaultManager] addConfigurationGuide];
 }
 
 
 -(IBAction) removeConfigurationButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     
     if (  ! connection  ) {
@@ -930,13 +998,12 @@ static BOOL firstTimeShowingWindow = TRUE;
         return;
     }
     
-    
     NSString * displayName = [connection displayName];
     NSString * autoConnectKey = [displayName stringByAppendingString: @"autoConnect"];
     NSString * onSystemStartKey = [displayName stringByAppendingString: @"-onSystemStart"];
     if (   [gTbDefaults boolForKey: autoConnectKey]
         && [gTbDefaults boolForKey: onSystemStartKey]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not delete a configuration which is set to start when the computer starts.", @"Window text"),
                         nil, nil, nil);
         return;
@@ -951,13 +1018,24 @@ static BOOL firstTimeShowingWindow = TRUE;
     
     NSString * configurationPath = [connection configPath];
     
-    if (  [configurationPath hasPrefix: gDeployPath]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+    if (  [configurationPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not delete a Deployed configuration.", @"Window text"),
                         nil, nil, nil);
         return;
     }
     
+	NSString * group = credentialsGroupFromDisplayName(displayName);
+
+	BOOL removeCredentials = TRUE;
+	NSString * credentialsNote = @"";
+	if (  group  ) {
+		if (  1 != [gTbDefaults numberOfConfigsInCredentialsGroup: group]  ) {
+			credentialsNote = NSLocalizedString(@"\n\nNote: The configuration's group credentials will not be deleted because other configurations use them.", @"Window text");
+			removeCredentials = FALSE;
+		}
+	}
+	
     NSString * notDeletingOtherFilesMsg;
     NSString * ext = [configurationPath pathExtension];
     if (  [ext isEqualToString: @"tblk"]  ) {
@@ -970,8 +1048,9 @@ static BOOL firstTimeShowingWindow = TRUE;
     if (  authorization == nil  ) {
         // Get an AuthorizationRef and use executeAuthorized to run the installer to delete the file
         NSString * msg = [NSString stringWithFormat: 
-                          NSLocalizedString(@" Configurations may be deleted only by a computer administrator.\n\n Deletion is immediate and permanent. All settings for '%@' will also be deleted permanently.%@", @"Window text"),
+                          NSLocalizedString(@" Configurations may be deleted only by a computer administrator.\n\n Deletion is immediate and permanent. All settings for '%@' will also be deleted permanently.%@%@", @"Window text"),
                           displayName,
+						  credentialsNote,
                           notDeletingOtherFilesMsg];
         authorization = [NSApplication getAuthorizationRef: msg];
         if (  authorization == nil) {
@@ -981,7 +1060,8 @@ static BOOL firstTimeShowingWindow = TRUE;
     } else {
         int button = TBRunAlertPanel(NSLocalizedString(@"Please Confirm", @"Window title"),
                                      [NSString stringWithFormat:
-                                      NSLocalizedString(@"Deleting a configuration is permanent and cannot be undone.\n\nAll settings for the configuration will also be deleted permanently.\n\n%@\n\nAre you sure you wish to delete configuration '%@'?", @"Window text"),
+                                      NSLocalizedString(@"Deleting a configuration is permanent and cannot be undone.\n\nAll settings for the configuration will also be deleted permanently.\n\n%@%@\n\nAre you sure you wish to delete configuration '%@'?", @"Window text"),
+                                      credentialsNote,
                                       notDeletingOtherFilesMsg,
                                       displayName],
                                      NSLocalizedString(@"Cancel", @"Button"),    // Default button
@@ -997,10 +1077,12 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
     
     if (  [[ConfigurationManager defaultManager] deleteConfigPath: configurationPath
-                                                     usingAuthRef: authorization
+                                                  usingAuthRefPtr: &authorization
                                                        warnDialog: YES]  ) {
         //Remove credentials
-        AuthAgent * myAuthAgent = [[[AuthAgent alloc] initWithConfigName: displayName] autorelease];
+		if (  removeCredentials  ) {
+			AuthAgent * myAuthAgent = [[[AuthAgent alloc] initWithConfigName: group credentialsGroup: group] autorelease];
+			
         [myAuthAgent setAuthMode: @"privateKey"];
         if (  [myAuthAgent keychainHasCredentials]  ) {
             [myAuthAgent deleteCredentialsFromKeychain];
@@ -1009,6 +1091,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         if (  [myAuthAgent keychainHasCredentials]  ) {
             [myAuthAgent deleteCredentialsFromKeychain];
         }
+		}
         
         [gTbDefaults removePreferencesFor: displayName];
     }
@@ -1022,6 +1105,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) renameConfigurationMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  ! connection  ) {
         NSLog(@"renameConfigurationMenuItemWasClicked but no configuration has been selected");
@@ -1033,7 +1118,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * onSystemStartKey = [sourceDisplayName stringByAppendingString: @"-onSystemStart"];
     if (   [gTbDefaults boolForKey: autoConnectKey]
         && [gTbDefaults boolForKey: onSystemStartKey]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not rename a configuration which is set to start when the computer starts.", @"Window text"),
                         nil, nil, nil);
         return;
@@ -1047,8 +1132,8 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
     
     NSString * sourcePath = [connection configPath];
-    if (  [sourcePath hasPrefix: gDeployPath]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+    if (  [sourcePath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not rename a Deployed configuration.", @"Window text"),
                         nil, nil, nil);
         return;
@@ -1088,7 +1173,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     
     if (  [[ConfigurationManager defaultManager] copyConfigPath: sourcePath
                                                          toPath: targetPath
-                                                   usingAuthRef: authorization
+                                                usingAuthRefPtr: &authorization
                                                      warnDialog: YES
                                                     moveNotCopy: YES]  ) {
         
@@ -1117,6 +1202,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) duplicateConfigurationMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  ! connection  ) {
         NSLog(@"duplicateConfigurationMenuItemWasClicked but no configuration has been selected");
@@ -1128,15 +1215,15 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * onSystemStartKey = [displayName stringByAppendingString: @"-onSystemStart"];
     if (   [gTbDefaults boolForKey: autoConnectKey]
         && [gTbDefaults boolForKey: onSystemStartKey]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not duplicate a configuration which is set to start when the computer starts.", @"Window text"),
                         nil, nil, nil);
         return;
     }
     
     NSString * source = [connection configPath];
-    if (  [source hasPrefix: gDeployPath]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+    if (  [source hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You may not duplicate a Deployed configuration.", @"Window text"),
                         nil, nil, nil);
         return;
@@ -1182,7 +1269,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     
     if (  [[ConfigurationManager defaultManager] copyConfigPath: source
                                                          toPath: target
-                                                   usingAuthRef: authorization
+                                                usingAuthRefPtr: &authorization
                                                      warnDialog: YES
                                                     moveNotCopy: NO]  ) {
         
@@ -1205,6 +1292,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) makePrivateOrSharedMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  ! connection  ) {
         NSLog(@"makePrivateOrSharedMenuItemWasClicked but no configuration has been selected");
@@ -1216,7 +1305,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * onSystemStartKey = [displayName stringByAppendingString: @"-onSystemStart"];
     if (   [gTbDefaults boolForKey: autoConnectKey]
         && [gTbDefaults boolForKey: onSystemStartKey]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You cannot make a configuration private if it is set to start when the computer starts.", @"Window text"),
                         nil, nil, nil);
         return;
@@ -1224,14 +1313,14 @@ static BOOL firstTimeShowingWindow = TRUE;
     
     NSString * path = [connection configPath];
     if (  ! [[path pathExtension] isEqualToString: @"tblk"]  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         NSLocalizedString(@"You cannot make a configuration shared if it is not a SurfSafeVPN VPN Configuration (.tblk).", @"Window text"),
                         nil, nil, nil);
         return;
     }
     
     if (  ! [connection isDisconnected]  ) {
-        NSString * msg = (  [path hasPrefix: gSharedPath]
+        NSString * msg = (  [path hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]
                           ? NSLocalizedString(@"You cannot make a configuration private unless it is disconnected.", @"Window text")
                           : NSLocalizedString(@"You cannot make a configuration shared unless it is disconnected.", @"Window text")
                           );
@@ -1245,8 +1334,77 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
+-(IBAction) revertToShadowMenuItemWasClicked: (id) sender
+{
+	(void) sender;
+	
+    VPNConnection * connection = [self selectedConnection];
+    if (  ! connection  ) {
+        NSLog(@"revertToShadowMenuItemWasClicked but no configuration has been selected");
+        return;
+    }
+    
+	NSString * source = [connection configPath];
+
+    if (  ! [source hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+        TBRunAlertPanel(NSLocalizedString(@"Tunnelblick", @"Window title"),
+                        NSLocalizedString(@"You may only revert a private configuration.", @"Window text"),
+                        nil, nil, nil);
+        return;
+    }
+	
+	if ( [connection shadowIsIdenticalMakeItSo: NO]  ) {
+		TBRunAlertPanel(NSLocalizedString(@"Tunnelblick", @"Window title"),
+						[NSString stringWithFormat:
+						 NSLocalizedString(@"%@is already identical to its last secured (shadow) copy.\n\n", @"Window text"),
+						 [connection displayName]],
+						nil, nil, nil);
+        return;
+	}
+    
+	int result = TBRunAlertPanel(NSLocalizedString(@"Tunnelblick", @"Window title"),
+								 [NSString stringWithFormat:
+								  NSLocalizedString(@"Do you wish to revert the '%@' configuration to its last secured (shadow) copy?\n\n", @"Window text"),
+								  [connection displayName]],
+								 NSLocalizedString(@"Revert", @"Button"),
+								 NSLocalizedString(@"Cancel", @"Button"), nil);
+	
+	if (  result != NSAlertDefaultReturn  ) {
+		return;
+	}
+    
+	NSString * fileName = lastPartOfPath(source);
+	NSArray * arguments = [NSArray arrayWithObjects: @"revertToShadow", fileName, nil];
+	result = runOpenvpnstart(arguments, nil, nil);
+	switch (  result  ) {
+			
+		case OPENVPNSTART_REVERT_CONFIG_OK:
+			TBRunAlertPanel(NSLocalizedString(@"Tunnelblick", @"Window title"),
+							[NSString stringWithFormat:
+							 NSLocalizedString(@"%@ has been reverted to its last secured (shadow) copy.\n\n", @"Window text"),
+							 [connection displayName]],
+							nil, nil, nil);
+			break;
+			
+		case OPENVPNSTART_REVERT_CONFIG_MISSING:
+			TBRunAlertPanel(NSLocalizedString(@"Configuration Installation Error", @"Window title"),
+							NSLocalizedString(@"The private configuration has never been secured, so you cannot revert to the secured (shadow) copy.", @"Window text"),
+							nil, nil, nil);
+			break;
+			
+		default:
+			TBRunAlertPanel(NSLocalizedString(@"Configuration Installation Error", @"Window title"),
+							NSLocalizedString(@"An error occurred while trying to revert to the secured (shadow) copy. See the Console Log for details.\n\n", @"Window text"),
+							nil, nil, nil);
+			break;
+	}
+}
+
+
 -(IBAction) editOpenVPNConfigurationFileMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (connection  ) {
         [[ConfigurationManager defaultManager] editConfigurationAtPath: [connection configPath] forConnection: connection];
@@ -1259,6 +1417,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) showOpenvpnLogMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
         NSString * path = [connection openvpnLogPath];
@@ -1279,10 +1439,14 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) removeCredentialsMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
         NSString * name = [connection displayName];
-        AuthAgent * myAuthAgent = [[[AuthAgent alloc] initWithConfigName: name] autorelease];
+		
+		NSString * group = credentialsGroupFromDisplayName(name);
+		AuthAgent * myAuthAgent = [[[AuthAgent alloc] initWithConfigName: name credentialsGroup: group] autorelease];
         
         BOOL hasCredentials = FALSE;
         [myAuthAgent setAuthMode: @"privateKey"];
@@ -1295,8 +1459,17 @@ static BOOL firstTimeShowingWindow = TRUE;
         }
         
         if (  hasCredentials  ) {
+			NSString * msg;
+			if (  group  ) {
+				msg =[NSString stringWithFormat: NSLocalizedString(@"Are you sure you wish to delete the credentials (private"
+																   @" key or username and password) stored in the Keychain for '%@'"
+                                                                   @" credentials?", @"Window text"), group];
+			} else {
+				msg =[NSString stringWithFormat: NSLocalizedString(@"Are you sure you wish to delete the credentials (private key or username and password) for '%@' that are stored in the Keychain?", @"Window text"), name];
+			}
+			
             int button = TBRunAlertPanel(NSLocalizedString(@"Please Confirm", @"Window title"),
-                                         [NSString stringWithFormat: NSLocalizedString(@"Are you sure you wish to delete the credentials (private key or username and password) for '%@' that are stored in the Keychain?", @"Window text"), name],
+                                         msg,
                                          NSLocalizedString(@"Cancel", @"Button"),             // Default button
                                          NSLocalizedString(@"Delete Credentials", @"Button"), // Alternate button
                                          nil);
@@ -1329,6 +1502,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) logToClipboardButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     if (  [self selectedConnection]  ) {
         NSTextStorage * store = [[configurationsPrefsView logView] textStorage];
         NSPasteboard * pb = [NSPasteboard generalPasteboard];
@@ -1344,6 +1519,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) whenToConnectManuallyMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     if (  [self selectedConnection]  ) {
         [self setSelectedWhenToConnectIndex: 0];
     } else {
@@ -1354,6 +1531,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) whenToConnectTunnelBlickLaunchMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     if (  [self selectedConnection]  ) {
         [self setSelectedWhenToConnectIndex: 1];
     } else {
@@ -1364,23 +1543,25 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) whenToConnectOnComputerStartMenuItemWasClicked: (id) sender
 {
+	(void) sender;
+	
     if (  [self selectedConnection]  ) {
         NSString * configurationPath = [[self selectedConnection] configPath];
-        if (  [configurationPath hasPrefix: gPrivatePath]  ) {
-            NSInteger ix = selectedWhenToConnectIndex;
+        if (  [configurationPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+            NSUInteger ix = selectedWhenToConnectIndex;
             selectedWhenToConnectIndex = 2;
-            [[configurationsPrefsView whenToConnectPopUpButton] selectItemAtIndex: ix];
+            [[configurationsPrefsView whenToConnectPopUpButton] selectItemAtIndex: (int)ix];
             [self setSelectedWhenToConnectIndex: ix];
-            TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                             NSLocalizedString(@"Private configurations cannot connect when the computer starts.\n\n"
                                               "First make the configuration shared, then change this setting.", @"Window text"),
                             nil, nil, nil);
         } else if (  ! [[configurationPath pathExtension] isEqualToString: @"tblk"]  ) {
-            NSInteger ix = selectedWhenToConnectIndex;
+            NSUInteger ix = selectedWhenToConnectIndex;
             selectedWhenToConnectIndex = 2;
-            [[configurationsPrefsView whenToConnectPopUpButton] selectItemAtIndex: ix];
+            [[configurationsPrefsView whenToConnectPopUpButton] selectItemAtIndex: (int)ix];
             [self setSelectedWhenToConnectIndex: ix];
-            TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                             NSLocalizedString(@"Only a SurfSafeVPN Configuration (.tblk) can start when the computer starts.", @"Window text"),
                             nil, nil, nil);
         } else {
@@ -1392,7 +1573,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 // Checkbox was changed by another window
--(void) monitorNetworkForChangesCheckboxChangedForConnection: (VPNConnection *) theConnection;
+-(void) monitorNetworkForChangesCheckboxChangedForConnection: (VPNConnection *) theConnection
 {
     VPNConnection * connection = [self selectedConnection];
     if (   connection
@@ -1421,6 +1602,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) showOnTunnelBlickMenuCheckboxWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
         NSString * key = [[connection displayName] stringByAppendingString: @"-doNotShowOnTunnelblickMenu"];
@@ -1437,13 +1620,13 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
--(NSInteger) selectedSoundOnConnectIndex
+-(NSUInteger) selectedSoundOnConnectIndex
 {
     return selectedSoundOnConnectIndex;
 }
 
 
--(void) setSelectedSoundOnConnectIndex: (NSInteger) newValue
+-(void) setSelectedSoundOnConnectIndex: (NSUInteger) newValue
 {
     [self setSoundIndex: &selectedSoundOnConnectIndex
                      to: newValue
@@ -1451,13 +1634,13 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
--(NSInteger) selectedSoundOnDisconnectIndex
+-(NSUInteger) selectedSoundOnDisconnectIndex
 {
     return selectedSoundOnDisconnectIndex;
 }
 
 
--(void) setSelectedSoundOnDisconnectIndex: (NSInteger) newValue
+-(void) setSelectedSoundOnDisconnectIndex: (NSUInteger) newValue
 {
     [self setSoundIndex: &selectedSoundOnDisconnectIndex
                      to: newValue
@@ -1466,6 +1649,8 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 -(IBAction) advancedButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
         if (  settingsSheetWindowController == nil  ) {
@@ -1508,7 +1693,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     NSString * configurationPath = [connection configPath];
     NSString * displayName = [connection displayName];
     
-    BOOL enableWhenComputerStarts = ! [configurationPath hasPrefix: gPrivatePath];
+    BOOL enableWhenComputerStarts = ! [configurationPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]];
     
     NSString * autoConnectKey = [displayName stringByAppendingString: @"autoConnect"];
     BOOL autoConnect   = [gTbDefaults boolForKey: autoConnectKey];
@@ -1517,7 +1702,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     
     BOOL launchdPlistWillConnectOnSystemStart = [connection launchdPlistWillConnectOnSystemStart];
     
-    NSInteger ix = NSNotFound;
+    NSUInteger ix = NSNotFound;
     
     //Keep track of what we've done for an alert to the user
     BOOL fixedPreferences       = FALSE;
@@ -1676,9 +1861,9 @@ static BOOL firstTimeShowingWindow = TRUE;
     [[configurationsPrefsView whenToConnectPopUpButton] setEnabled: enable];
 }
 
--(void) setSelectedWhenToConnectIndex: (NSInteger) newValue
+-(void) setSelectedWhenToConnectIndex: (NSUInteger) newValue
 {
-    NSInteger oldValue = selectedWhenToConnectIndex;
+    NSUInteger oldValue = selectedWhenToConnectIndex;
     if (  newValue != oldValue  ) {
         NSString * configurationName = [[self selectedConnection] displayName];
         NSString * autoConnectKey   = [configurationName stringByAppendingString: @"autoConnect"];
@@ -1703,7 +1888,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         selectedWhenToConnectIndex = newValue;
         [self validateWhenToConnect: [self selectedConnection]];
         
-        int ix = 0;
+        NSUInteger ix = 0;
         if (  [gTbDefaults boolForKey: autoConnectKey]  ) {
             if (  [gTbDefaults boolForKey: onSystemStartKey]  ) {
                 ix = 2;
@@ -1722,12 +1907,12 @@ static BOOL firstTimeShowingWindow = TRUE;
 }
 
 
--(void) setSelectedSetNameserverIndex: (NSInteger) newValue
+-(void) setSelectedSetNameserverIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedSetNameserverIndex  ) {
         if (  selectedSetNameserverIndex != NSNotFound  ) {
             NSString * actualKey = [[[self selectedConnection] displayName] stringByAppendingString: @"useDNS"];
-            [gTbDefaults setObject: [NSNumber numberWithInt: newValue] forKey: actualKey];
+            [gTbDefaults setObject: [NSNumber numberWithUnsignedInt: newValue] forKey: actualKey];
         }
         selectedSetNameserverIndex = newValue;
         
@@ -1743,27 +1928,31 @@ static BOOL firstTimeShowingWindow = TRUE;
                        inverted: YES];
         }
         [settingsSheetWindowController monitorNetworkForChangesCheckboxChangedForConnection: [self selectedConnection]];
-        
+        [settingsSheetWindowController setupPrependDomainNameCheckbox];
+		[settingsSheetWindowController setupFlushDNSCheckbox];
+        [settingsSheetWindowController setupReconnectOnWakeFromSleepCheckbox];
     }
 }
 
 -(void) tableViewSelectionDidChange:(NSNotification *)notification
 {
+	(void) notification;
+	
     [self performSelectorOnMainThread: @selector(selectedLeftNavListIndexChanged) withObject: nil waitUntilDone: NO];
 }
 
 -(void) selectedLeftNavListIndexChanged
 {
     int n = [[configurationsPrefsView leftNavTableView] selectedRow];
-    [self setSelectedLeftNavListIndex: n];
+    [self setSelectedLeftNavListIndex: (unsigned)n];
 }
 
--(void) setSelectedLeftNavListIndex: (int) newValue
+-(void) setSelectedLeftNavListIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedLeftNavListIndex  ) {
         
         // Don't allow selection of a "folder" row, only of a "configuration" row
-        while (  [[leftNavDisplayNames objectAtIndex: newValue] length] == 0) {
+        while (  [[leftNavDisplayNames objectAtIndex: (unsigned) newValue] length] == 0) {
             ++newValue;
         }
         
@@ -1773,7 +1962,7 @@ static BOOL firstTimeShowingWindow = TRUE;
         }
         
         selectedLeftNavListIndex = newValue;
-        [[configurationsPrefsView leftNavTableView] selectRowIndexes: [NSIndexSet indexSetWithIndex: newValue] byExtendingSelection: NO];
+        [[configurationsPrefsView leftNavTableView] selectRowIndexes: [NSIndexSet indexSetWithIndex: (unsigned) newValue] byExtendingSelection: NO];
         
         VPNConnection* newConnection = [self selectedConnection];
         NSString * dispNm = [newConnection displayName];
@@ -1800,9 +1989,9 @@ static BOOL firstTimeShowingWindow = TRUE;
     }
 }
 
-TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedWhenToConnectIndex)
-TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedSetNameserverIndex)
-TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
+TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedWhenToConnectIndex)
+TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedSetNameserverIndex)
+TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedLeftNavListIndex)
 
 
 //***************************************************************************************************************
@@ -1811,16 +2000,16 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 {
     // Select values for the configurations checkboxes
     
-    [self setValueForCheckbox: [generalPrefsView useShadowCopiesCheckbox]
-                preferenceKey: @"useShadowConfigurationFiles"
-                     inverted: NO
-                   defaultsTo: FALSE];
-    
     [self setValueForCheckbox: [generalPrefsView monitorConfigurationFolderCheckbox]
                 preferenceKey: @"doNotMonitorConfigurationFolder"
                      inverted: YES
                    defaultsTo: FALSE];
     
+    [self setValueForCheckbox: [generalPrefsView checkIPAddressAfterConnectCheckbox]
+                preferenceKey: @"notOKToCheckThatIPAddressDidNotChangeAfterConnection"
+                     inverted: YES
+                   defaultsTo: TRUE];
+	
     // Select value for the update automatically checkbox and set the last update date/time
     [self setValueForCheckbox: [generalPrefsView updatesCheckAutomaticallyCheckbox]
                 preferenceKey: @"updateCheckAutomatically"
@@ -1848,7 +2037,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     NSString * lastValue = @"";
     NSArrayController * ac = [generalPrefsView openvpnVersionArrayController];
     NSArray * list = [ac content];
-    int i;
+    unsigned i;
     for (  i=0; i<[list count]; i++  ) {
         NSDictionary * dict = [list objectAtIndex: i];
         lastValue = [dict objectForKey: @"value"];
@@ -1874,7 +2063,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     [[generalPrefsView openvpnVersionButton] setEnabled: [gTbDefaults canChangeValueForKey: @"openvpnVersion"]];
     
     if (  warnAboutVersion  ) {
-        TBRunAlertPanel(NSLocalizedString(@"SurfSafe", @"Window title"),
+        TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN", @"Window title"),
                         [NSString stringWithFormat: NSLocalizedString(@"OpenVPN version %@ is not available. Using the default, version %@", @"Window text"),
                          prefVersion, lastValue],
                         nil, nil, nil);
@@ -1883,34 +2072,26 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     
     // Select the keyboard shortcut
     
-    unsigned kbsIx = 1; // F1 is the default
-    NSNumber * ixNumber = [gTbDefaults objectForKey: @"keyboardShortcutIndex"];
     unsigned kbsCount = [[[generalPrefsView keyboardShortcutArrayController] content] count];
-    if (   ixNumber  ) {
-        unsigned ix = [ixNumber unsignedIntValue];
-        if (  ix < kbsCount  ) {
-            kbsIx = ix;
-        }
-    }
-    if (  kbsIx < kbsCount  ) {
+    unsigned kbsIx = [gTbDefaults unsignedIntForKey: @"keyboardShortcutIndex"
+                                            default: 1 /* F1  key */
+                                                min: 0 /* (none) */
+                                                max: kbsCount];
+    
         [self setSelectedKeyboardShortcutIndex: kbsIx];
-    }
     
     [[generalPrefsView keyboardShortcutButton] setEnabled: [gTbDefaults canChangeValueForKey: @"keyboardShortcutIndex"]];
     
     // Select the log size
     
-    unsigned prefSize = 102400;
-    id logSizePref = [gTbDefaults objectForKey: @"maxLogDisplaySize"];
-    if (  logSizePref  ) {
-        if (  [logSizePref respondsToSelector:@selector(intValue)]  ) {
-            prefSize = [logSizePref intValue];
-        } else {
-            NSLog(@"'maxLogDisplaySize' preference is invalid.");
-        }
-    }
+    unsigned prefSize = [gTbDefaults unsignedIntForKey: @"maxLogDisplaySize"
+                                               default: DEFAULT_LOG_SIZE_BYTES
+                                                   min: MIN_LOG_SIZE_BYTES
+                                                   max: MAX_LOG_SIZE_BYTES];
     
-    int logSizeIx = -1;
+
+    
+    NSUInteger logSizeIx = UINT_MAX;
     ac = [generalPrefsView maximumLogSizeArrayController];
     list = [ac content];
     for (  i=0; i<[list count]; i++  ) {
@@ -1918,7 +2099,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         NSString * listValue = [dict objectForKey: @"value"];
         unsigned listValueSize;
         if (  [listValue respondsToSelector:@selector(intValue)]  ) {
-            listValueSize = [listValue intValue];
+            listValueSize = [listValue unsignedIntValue];
         } else {
             NSLog(@"'value' entry in %@ is invalid.", dict);
             listValueSize = UINT_MAX;
@@ -1936,8 +2117,8 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         }
     }
     
-    if (  logSizeIx == -1  ) {
-        NSLog(@"'maxLogDisplaySize' preference value of '%@' is not available", logSizePref);
+    if (  logSizeIx == UINT_MAX  ) {
+        NSLog(@"'maxLogDisplaySize' preference value of %ud is not available", prefSize);
         logSizeIx = 2;  // Second one should be '102400'
     }
     
@@ -1964,16 +2145,6 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }
 
 
--(IBAction) useShadowCopiesCheckboxWasClicked: (id) sender
-{
-	if (  [sender state]  ) {
-		[gTbDefaults setBool: TRUE  forKey:@"useShadowConfigurationFiles"];
-	} else {
-		[gTbDefaults setBool: FALSE forKey:@"useShadowConfigurationFiles"];
-	}
-}
-
-
 -(IBAction) monitorConfigurationFolderCheckboxWasClicked: (id) sender
 {
 	if (  [sender state]  ) {
@@ -1986,8 +2157,20 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }
 
 
+-(IBAction) checkIPAddressAfterConnectCheckboxWasClicked: (id) sender
+{
+	if (  [sender state]  ) {
+		[gTbDefaults setBool: FALSE forKey:@"notOKToCheckThatIPAddressDidNotChangeAfterConnection"];
+	} else {
+		[gTbDefaults setBool: TRUE  forKey:@"notOKToCheckThatIPAddressDidNotChangeAfterConnection"];
+	}
+}
+
+
 -(IBAction) updatesCheckAutomaticallyCheckboxWasClicked: (id) sender
 {
+ 	(void) sender;
+	
     SUUpdater * updater = [[NSApp delegate] updater];
     if (  [updater respondsToSelector: @selector(setAutomaticallyChecksForUpdates:)]  ) {
         [[NSApp delegate] setupSparklePreferences]; // Sparkle may have changed it's preferences so we update ours
@@ -2008,6 +2191,8 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 
 -(IBAction) updatesCheckNowButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     [[NSApp delegate] checkForUpdates: self];
     [self updateLastCheckedDate];
 }
@@ -2015,9 +2200,11 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 
 -(IBAction) resetDisabledWarningsButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     NSString * key;
     NSEnumerator * arrayEnum = [gProgramPreferences objectEnumerator];
-    while (   key = [arrayEnum nextObject]  ) {
+    while (   (key = [arrayEnum nextObject])  ) {
         if (  [key hasPrefix: @"skipWarning"]  ) {
             if (  [gTbDefaults objectForKey: key]  ) {
                 if (  [gTbDefaults canChangeValueForKey: key]  ) {
@@ -2028,7 +2215,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     }
     
     arrayEnum = [gConfigurationPreferences objectEnumerator];
-    while (   key = [arrayEnum nextObject]  ) {
+    while (  (key = [arrayEnum nextObject])  ) {
         if (  [key hasPrefix: @"-skipWarning"]  ) {
             [gTbDefaults removeAllObjectsWithSuffix: key];
         }
@@ -2038,6 +2225,8 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 
 -(IBAction) generalHelpButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     OSStatus err;
     if ((err = MyGotoHelpPage(CFSTR("preferences-general.html"), NULL))  ) {
         NSLog(@"Error %ld from MyGotoHelpPage()", (long) err);
@@ -2045,22 +2234,22 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }
 
 
--(NSInteger) selectedKeyboardShortcutIndex
+-(NSUInteger) selectedKeyboardShortcutIndex
 {
     return selectedKeyboardShortcutIndex;
 }
 
 
--(NSInteger) selectedOpenvpnVersionIndex
+-(NSUInteger) selectedOpenvpnVersionIndex
 {
     return selectedOpenvpnVersionIndex;
 }
 
 
--(void) setSelectedOpenvpnVersionIndex: (NSInteger) newValue
+-(void) setSelectedOpenvpnVersionIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedOpenvpnVersionIndex  ) {
-        NSInteger oldValue = selectedOpenvpnVersionIndex;
+        NSUInteger oldValue = selectedOpenvpnVersionIndex;
         NSArrayController * ac = [generalPrefsView openvpnVersionArrayController];
         NSArray * list = [ac content];
         if (  newValue < [list count]  ) {
@@ -2083,7 +2272,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     }
 }    
 
--(void) setSelectedKeyboardShortcutIndex: (NSInteger) newValue
+-(void) setSelectedKeyboardShortcutIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedKeyboardShortcutIndex  ) {
         NSArrayController * ac = [generalPrefsView keyboardShortcutArrayController];
@@ -2105,13 +2294,13 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }    
 
 
--(NSInteger) selectedMaximumLogSizeIndex
+-(NSUInteger) selectedMaximumLogSizeIndex
 {
     return selectedMaximumLogSizeIndex;
 }
 
 
--(void) setSelectedMaximumLogSizeIndex: (NSInteger) newValue
+-(void) setSelectedMaximumLogSizeIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedMaximumLogSizeIndex  ) {
         NSArrayController * ac = [generalPrefsView maximumLogSizeArrayController];
@@ -2128,7 +2317,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
             [gTbDefaults setObject: newPref forKey: @"maxLogDisplaySize"];
             
             // Set the value we use
-            gMaximumLogSize = [newPref intValue];
+            gMaximumLogSize = (unsigned)[newPref intValue];
         }
     }
 }
@@ -2147,6 +2336,18 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     }
 }    
     
+-(void) setupDisplayStatisticsWindowWhenDisconnectedCheckbox {
+    if (  [[gTbDefaults objectForKey: @"connectionWindowDisplayCriteria"] isEqualToString: @"neverShow"] ) {
+        [[appearancePrefsView appearanceDisplayStatisticsWindowsWhenDisconnectedCheckbox] setState: NSOffState];
+        [[appearancePrefsView appearanceDisplayStatisticsWindowsWhenDisconnectedCheckbox] setEnabled: NO];
+    } else {
+        [self setValueForCheckbox: [appearancePrefsView appearanceDisplayStatisticsWindowsWhenDisconnectedCheckbox]
+                    preferenceKey: @"doNotShowDisconnectedNotificationWindows"
+                         inverted: YES
+                       defaultsTo: FALSE];
+    }
+}    
+
 -(void) setupAppearanceView
 {
     // Select value for icon set popup
@@ -2160,9 +2361,9 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     
     // Search popup list for the specified filename and the default
     NSArray * icsContent = [[appearancePrefsView appearanceIconSetArrayController] content];
-    int i;
-    int iconSetIx = -1;
-    int defaultIconSetIx = -1;
+    unsigned i;
+    unsigned iconSetIx = UINT_MAX;
+    unsigned defaultIconSetIx = UINT_MAX;
     for (  i=0; i< [icsContent count]; i++  ) {
         NSDictionary * dict = [icsContent objectAtIndex: i];
         NSString * fileName = [dict objectForKey: @"value"];
@@ -2174,11 +2375,11 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         }
     }
 
-    if (  iconSetIx == -1) {
+    if (  iconSetIx == UINT_MAX) {
         iconSetIx = defaultIconSetIx;
     }
     
-    if (  iconSetIx == -1  ) {
+    if (  iconSetIx == UINT_MAX  ) {
         if (  [icsContent count] > 0) {
             if (  [iconSetToUse isEqualToString: defaultIconSetName]) {
                 NSLog(@"Could not find '%@' icon set or default icon set; using first set found", iconSetToUse);
@@ -2192,7 +2393,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         }
     }
     
-    if (  iconSetIx == -1  ) {
+    if (  iconSetIx == UINT_MAX  ) {
          [NSDictionary dictionaryWithObjectsAndKeys: NSLocalizedString(@"(None available)", @"Button"), @"name", @"", @"value", nil];
         [self setSelectedAppearanceIconSetIndex: 0];
     } else {
@@ -2232,7 +2433,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         displayCriteria = @"showWhenConnecting";
     }
     
-    int displayCriteriaIx = -1;
+    NSUInteger displayCriteriaIx = UINT_MAX;
     NSArrayController * ac = [appearancePrefsView appearanceConnectionWindowDisplayCriteriaArrayController];
     NSArray * list = [ac content];
     for (  i=0; i<[list count]; i++  ) {
@@ -2243,7 +2444,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
             break;
         }
     }
-    if (  displayCriteriaIx == -1  ) {
+    if (  displayCriteriaIx == UINT_MAX  ) {
         NSLog(@"'connectionWindowDisplayCriteria' preference value of '%@' is not available", displayCriteria);
         displayCriteriaIx = 0;  // First one should be 'showWhenConnecting'
     }
@@ -2313,8 +2514,20 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     [[[NSApp delegate] ourMainIconView] changedDoNotShowNotificationWindowOnMouseover];
 }
 
+-(IBAction) appearanceDisplayStatisticsWindowWhenDisconnectedCheckboxWasClicked: (id) sender
+{
+	if (  [sender state]  ) {
+		[gTbDefaults setBool: FALSE forKey:@"doNotShowDisconnectedNotificationWindows"];
+	} else {
+		[gTbDefaults setBool: TRUE  forKey:@"doNotShowDisconnectedNotificationWindows"];
+	}
+    [[[NSApp delegate] ourMainIconView] changedDoNotShowNotificationWindowOnMouseover];
+}
+
 -(IBAction) appearanceHelpButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     OSStatus err;
     if ((err = MyGotoHelpPage(CFSTR("preferences-appearance.html"), NULL))  ) {
         NSLog(@"Error %ld from MyGotoHelpPage()", (long) err);
@@ -2322,12 +2535,12 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }
 
 
--(NSInteger) selectedAppearanceIconSetIndex
+-(NSUInteger) selectedAppearanceIconSetIndex
 {
     return selectedAppearanceIconSetIndex;
 }
 
--(void) setSelectedAppearanceIconSetIndex: (NSInteger) newValue
+-(void) setSelectedAppearanceIconSetIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedAppearanceIconSetIndex  ) {
         NSArrayController * ac = [appearancePrefsView appearanceIconSetArrayController];
@@ -2355,13 +2568,13 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 }
 
 
--(NSInteger) selectedAppearanceConnectionWindowDisplayCriteriaIndex
+-(NSUInteger) selectedAppearanceConnectionWindowDisplayCriteriaIndex
 {
     return selectedAppearanceConnectionWindowDisplayCriteriaIndex;
 }
 
 
--(void) setSelectedAppearanceConnectionWindowDisplayCriteriaIndex: (NSInteger) newValue
+-(void) setSelectedAppearanceConnectionWindowDisplayCriteriaIndex: (NSUInteger) newValue
 {
     if (  newValue != selectedAppearanceConnectionWindowDisplayCriteriaIndex  ) {
         NSArrayController * ac = [appearancePrefsView appearanceConnectionWindowDisplayCriteriaArrayController];
@@ -2378,12 +2591,15 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
             [gTbDefaults setObject: preferenceValue forKey: @"connectionWindowDisplayCriteria"];
             
             [self setupDisplayStatisticsWindowCheckbox];
+            [self setupDisplayStatisticsWindowWhenDisconnectedCheckbox];
         }
     }
 }
 
 -(IBAction) infoHelpButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     OSStatus err;
     if ((err = MyGotoHelpPage(CFSTR("info.html"), NULL))  ) {
         NSLog(@"Error %ld from MyGotoHelpPage()", (long) err);
@@ -2405,69 +2621,33 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 
 -(IBAction) utilitiesRunEasyRsaButtonWasClicked: (id) sender
 {
-    NSString * userPath = userEasyRsaPath(YES);
+	(void) sender;
+	
+    NSString * userPath = easyRsaPathToUse(YES);
     if (  ! userPath  ) {
         NSLog(@"utilitiesRunEasyRsaButtonWasClicked: no easy-rsa folder!");
         [[utilitiesPrefsView utilitiesRunEasyRsaButton] setEnabled: NO];
         return;
     }
     
-    // Run an AppleScript to open Terminal.app and cd to the easy-rsa folder
-    
-    NSArray * applescriptProgram = [NSArray arrayWithObjects:
-                                    [NSString stringWithFormat: @"set cmd to \"cd \\\"%@\\\"\"", userPath],
-                                    @"tell application \"System Events\" to set terminalIsRunning to exists application process \"Terminal\"",
-                                    @"tell application \"Terminal\"",
-                                    @"     activate",
-                                    @"     if terminalIsRunning is true then",
-                                    @"        do script with command cmd",
-                                    @"     else",
-                                    @"        do script with command cmd in window 1",
-                                    @"     end if",
-                                    @"end tell",
-                                    nil];
-    
-    NSMutableArray * arguments = [[[NSMutableArray alloc] initWithCapacity:6] autorelease];
-    NSEnumerator * e = [applescriptProgram objectEnumerator];
-    NSString * line;
-    while ( (line = [e nextObject])  ) {
-        [arguments addObject: @"-e"];
-        [arguments addObject: line];
-    }
-    
-    NSTask* task = [[[NSTask alloc] init] autorelease];
-    [task setLaunchPath: @"/usr/bin/osascript"];
-    [task setArguments: arguments];
-    [task setCurrentDirectoryPath: @"/tmp"];
-    [task launch];
+    openTerminalWithEasyRsaFolder(userPath);
 }
 
 -(IBAction) utilitiesKillAllOpenVpnButtonWasClicked: (id) sender
 {
-    NSString *openvpnstartPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"openvpnstart"];
+	(void) sender;
 
-    NSTask* task = [[[NSTask alloc] init] autorelease];
-    [task setLaunchPath: openvpnstartPath];
-    [task setArguments: [NSArray arrayWithObjects: @"killall", nil]];
-    [task setCurrentDirectoryPath: @"/tmp"];
-    NSPipe * errPipe = [[[NSPipe alloc] init] autorelease];
-    [task setStandardError: errPipe];
-    NSPipe * stdPipe = [[[NSPipe alloc] init] autorelease];
-    [task setStandardOutput: stdPipe];
-    [task launch];
-    [task waitUntilExit];
+	if (  ! ALLOW_OPENVPNSTART_KILL  ) {
+		return;
+	}
     
-    NSFileHandle * file = [errPipe fileHandleForReading];
-    NSData * data = [file readDataToEndOfFile];
-    [file closeFile];
-    NSString * stdErrOut = [[[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease]
-                 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSArray  * arguments = [NSArray arrayWithObject: @"killall"];
+    NSString * stdOut;
+    NSString * stdErrOut;
+    runOpenvpnstart(arguments, &stdOut, &stdErrOut);
     
+    stdErrOut = [stdErrOut stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (  [stdErrOut length] == 0  ) {
-        file = [stdPipe fileHandleForReading];
-        data = [file readDataToEndOfFile];
-        [file closeFile];
-        NSString * stdOut = [[[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding] autorelease];
         int numberKilled = [stdOut intValue];
         NSString * message;
         if (  numberKilled == 0  ) {
@@ -2490,6 +2670,8 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
 
 -(IBAction) utilitiesHelpButtonWasClicked: (id) sender
 {
+	(void) sender;
+	
     OSStatus err;
     if ((err = MyGotoHelpPage(CFSTR("preferences-utilities.html"), NULL))  ) {
         NSLog(@"Error %ld from MyGotoHelpPage()", (long) err);
@@ -2524,20 +2706,32 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
     [checkbox setEnabled: [gTbDefaults canChangeValueForKey: preferenceKey]];
 }
 
--(void) setSoundIndex: (NSInteger *) index
-                   to: (NSInteger)   newValue
+-(void) setSoundIndex: (NSUInteger *) index
+                   to: (NSUInteger)   newValue
            preference: (NSString *)  preference
 {
     NSArray * contents = [[configurationsPrefsView soundOnConnectArrayController] content];
-    NSInteger size = [contents count];
+    NSUInteger size = [contents count];
     if (  newValue < size  ) {
         VPNConnection * connection = [self selectedConnection];
         NSString * key = [[[self selectedConnection] displayName] stringByAppendingString: preference];
         NSString * newName;
         NSSound  * newSound;
+		BOOL       speakIt = FALSE;
         if (  newValue == 0) {
             newName = @"None";
             newSound = nil;
+		} else if (  newValue == 1) {
+			newName = @"Speak";
+			newSound = nil;
+			if (  ! doNotPlaySounds  ) {
+				if (  [preference hasSuffix: @"tunnelUpSoundName"]  ) {
+					[connection speakActivity: @"connected"];
+				} else {
+					[connection speakActivity: @"disconnected"];
+				}
+			}			
+			speakIt = TRUE;
         } else {
             newName = [[contents objectAtIndex: newValue] objectForKey: @"name"];
             newSound = [NSSound soundNamed: newName];
@@ -2554,13 +2748,15 @@ TBSYNTHESIZE_NONOBJECT_GET(NSInteger, selectedLeftNavListIndex)
         
         if (  [preference hasSuffix: @"tunnelUpSoundName"]  ) {
             [connection setTunnelUpSound: newSound];
+			[connection setSpeakWhenConnected: speakIt];
         } else {
             [connection setTunnelDownSound: newSound];
+			[connection setSpeakWhenDisconnected: speakIt];
         }
 
         *index = newValue;
         
-    } else {
+    } else if (  size != 0  ) {
         NSLog(@"setSelectedSoundIndex: %ld but there are only %ld sounds", (long) newValue, (long) size);
     }
 }

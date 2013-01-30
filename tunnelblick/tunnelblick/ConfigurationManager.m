@@ -29,17 +29,17 @@
 #import "NSApplication+LoginItem.h"
 #import "TBUserDefaults.h"
 #import "NSFileManager+TB.h"
+#import "ConfigurationConverter.h"
 
 extern NSMutableArray       * gConfigDirs;
-extern NSString             * gDeployPath;
-extern NSString             * gSharedPath;
 extern NSString             * gPrivatePath;
+extern NSString             * gDeployPath;
 extern NSFileManager        * gFileMgr;
 extern TBUserDefaults       * gTbDefaults;
+extern AuthorizationRef       gAuthorization;
 
 extern NSString * firstPartOfPath(NSString * thePath);
 extern NSString * lastPartOfPath(NSString * thePath);
-extern BOOL       folderContentsNeedToBeSecuredAtPath(NSString * theDirPath);
 
 enum state_t {                      // These are the "states" of the guideState state machine
     entryNoConfigurations,
@@ -48,10 +48,8 @@ enum state_t {                      // These are the "states" of the guideState 
     stateHasNoConfigurations,
     stateMakeSampleConfiguration,
     stateMakeEmptyConfiguration,
-    stateOpenPrivateFolder,
     stateHasConfigurations,
     stateShowTbInstructions,
-    stateShowOpenVpnInstructions
 };
 
 @interface ConfigurationManager() // PRIVATE METHODS
@@ -61,13 +59,6 @@ enum state_t {                      // These are the "states" of the guideState 
                             toDict:         (NSMutableDictionary * )    dict
                       searchDeeply:         (BOOL)                      deep;
 
--(BOOL)         checkPermissions:           (NSString *)                permsShouldHave
-                         forPath:           (NSString *)                path;
-
--(BOOL)         configNotProtected:         (NSString *)                configFile;
-
--(OSStatus)     compareTblkShadowCopy:      (NSString *)                configurationFile;
-
 -(NSString *)   displayNameForPath:         (NSString *)                thePath;
 
 -(NSString *)   getLowerCaseStringForKey:   (NSString *)                key
@@ -76,24 +67,13 @@ enum state_t {                      // These are the "states" of the guideState 
 
 -(void)         guideState:                 (enum state_t)              state;
 
--(NSString *)   getPackageToInstall:        (NSString *)                thePath
-                            withKey:        (NSString *)                key;
+-(NSString *)   getPackageToInstall:        (NSString *)                thePath;
 
 -(BOOL)         isSampleConfigurationAtPath:(NSString *)                cfgPath;
 
--(NSString *)   makeEmptyTblk:              (NSString *)                thePath
-                      withKey:              (NSString *)                key;
+-(NSString *)   makeEmptyTblk:              (NSString *)                thePath;
 
--(BOOL)         makeSureFolderExistsAtPath: (NSString *)                folderPath
-                                 usingAuth: (AuthorizationRef)          authRef;
-
--(BOOL)         onRemoteVolume:             (NSString *)                cfgPath;
-
--(NSArray *)    checkOneDotTblkPackage:     (NSString *)                filePath
-                              withKey:      (NSString *)                key;
-
--(BOOL)         protectConfigurationFile:   (NSString *)                configFilePath
-                               usingAuth:   (AuthorizationRef)          authRef;
+-(NSArray *)    checkOneDotTblkPackage:     (NSString *)                filePath;
 
 -(NSString *)   parseString:                (NSString *)                cfgContents
                   forOption:                (NSString *)                option;
@@ -115,7 +95,7 @@ enum state_t {                      // These are the "states" of the guideState 
 //
 // First, it goes through gDeploy looking for packages,
 //           then through gDeploy looking for configs NOT in packages,
-//           then through gSharedPath looking for packages (does not look for configs that are not in packages in gSharedPath)
+//           then through L_AS_T_SHARED looking for packages (does not look for configs that are not in packages in L_AS_T_SHARED)
 //           then through gPrivatePath looking for packages,
 //           then through gPrivatePath looking for configs NOT in packages
 -(NSMutableDictionary *) getConfigurations
@@ -125,9 +105,8 @@ enum state_t {                      // These are the "states" of the guideState 
     
     noneIgnored = [self addConfigsFromPath: gDeployPath  thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
     noneIgnored = [self addConfigsFromPath: gDeployPath  thatArePackages: NO  toDict: dict searchDeeply: YES ] && noneIgnored;
-    noneIgnored = [self addConfigsFromPath: gSharedPath  thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
+    noneIgnored = [self addConfigsFromPath: L_AS_T_SHARED  thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
     noneIgnored = [self addConfigsFromPath: gPrivatePath thatArePackages: YES toDict: dict searchDeeply: YES ] && noneIgnored;
-    noneIgnored = [self addConfigsFromPath: gPrivatePath thatArePackages: NO  toDict: dict searchDeeply: YES ] && noneIgnored;
     
     if (  ! noneIgnored  ) {
         TBRunAlertPanelExtended(NSLocalizedString(@"Configuration(s) Ignored", @"Window title"),
@@ -135,7 +114,8 @@ enum state_t {                      // These are the "states" of the guideState 
                                 nil, nil, nil,
                                 @"skipWarningAboutIgnoredConfigurations",          // Preference about seeing this message again
                                 NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
-                                nil);
+                                nil,
+								NSAlertDefaultReturn);
     }
     return dict;
 }
@@ -143,7 +123,7 @@ enum state_t {                      // These are the "states" of the guideState 
 // Adds configurations to a dictionary based on input parameters
 // Returns TRUE if succeeded, FALSE if one or more configurations were ignored.
 //
-// If searching gSharedPath, looks for .ovpn and .conf and ignores them even if searching for packages (so we can complain to the user)
+// If searching L_AS_T_SHARED, looks for .ovpn and .conf and ignores them even if searching for packages (so we can complain to the user)
 -(BOOL)  addConfigsFromPath: (NSString *)               folderPath
             thatArePackages: (BOOL)                     onlyPkgs
                      toDict: (NSMutableDictionary *)    dict
@@ -160,7 +140,7 @@ enum state_t {                      // These are the "states" of the guideState 
 
     if (  deep  ) {
         // Search directory and subdirectories
-        while (file = [dirEnum nextObject]) {
+        while (  (file = [dirEnum nextObject])  ) {
             BOOL addIt = FALSE;
             NSString * fullPath = [folderPath stringByAppendingPathComponent: file];
             NSString * dispName = [lastPartOfPath(fullPath) stringByDeletingPathExtension];
@@ -186,17 +166,27 @@ enum state_t {                      // These are the "states" of the guideState 
             }
             
             if (  addIt  ) {
+                if (  invalidConfigurationName(dispName)  ) {
+                    TBRunAlertPanel(NSLocalizedString(@"Name not allowed", @"Window title"),
+                                    [NSString stringWithFormat: NSLocalizedString(@"Configuration '%@' will be ignored because its"
+                                                                                  @" name contains characters that are not allowed.\n\n"
+																				  @"Characters that are not allowed: '%s'\n\n", @"Window text"),
+									 dispName, PROHIBITED_DISPLAY_NAME_CHARACTERS_CSTRING],
+                                    nil, nil, nil);
+                } else {
                 if (  [dict objectForKey: dispName]  ) {
                     NSLog(@"SurfsafeVPN Configuration ignored: The name is already being used: %@", fullPath);
                      ignored = TRUE;
                 } else {
                     [dict setObject: fullPath forKey: dispName];
                 }
+                    
+                }
             }
         }
     } else {
         // Search directory only, not subdirectories.
-        while (file = [dirEnum nextObject]) {
+        while (  (file = [dirEnum nextObject])  ) {
             [dirEnum skipDescendents];
             BOOL addIt = FALSE;
             NSString * fullPath = [folderPath stringByAppendingPathComponent: file];
@@ -218,7 +208,7 @@ enum state_t {                      // These are the "states" of the guideState 
                         addIt = TRUE;
                     }
                 }
-                if (   [folderPath isEqualToString: gSharedPath]
+                if (   [folderPath isEqualToString: L_AS_T_SHARED]
                     && ([ext isEqualToString: @"ovpn"] || [ext isEqualToString: @"conf"])  ) {
                     NSLog(@"SurfsafeVPN Configuration ignored: Only SurfsafeVPN Configurations (.tblk packages) may be shared %@", fullPath);
                      ignored = TRUE;
@@ -299,7 +289,8 @@ enum state_t {                      // These are the "states" of the guideState 
                                                  NSLocalizedString(@"Cancel", @"Button"),                   // Other button
                                                  @"skipWarningAboutConfigFileProtectedAndAlwaysExamineIt",  // Preference about seeing this message again
                                                  NSLocalizedString(@"Do not warn about this again, always 'Examine'", @"Checkbox name"),
-                                                 nil);
+                                                 nil,
+												 NSAlertDefaultReturn);
             if (  button == NSAlertOtherReturn  ) {
                 return;
             }
@@ -326,10 +317,14 @@ enum state_t {                      // These are the "states" of the guideState 
 // Make a private configuration shared, or a shared configuration private
 -(void) shareOrPrivatizeAtPath: (NSString *) path
 {
+    NSString * source;
+    NSString * target;
+    NSString * msg;
+
     if (  [[path pathExtension] isEqualToString: @"tblk"]  ) {
         NSString * last = lastPartOfPath(path);
         NSString * name = [last stringByDeletingPathExtension];
-        if (  [path hasPrefix: gSharedPath]  ) {
+        if (  [path hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
             NSString * lastButOvpn = [name stringByAppendingPathExtension: @"ovpn"];
             NSString * lastButConf = [name stringByAppendingPathExtension: @"conf"];
             if (   [gFileMgr fileExistsAtPath: [gPrivatePath stringByAppendingPathComponent: last]]
@@ -345,37 +340,32 @@ enum state_t {                      // These are the "states" of the guideState 
                 }
             }
             
-            NSString * source = [[path copy] autorelease];
-            NSString * target = [gPrivatePath stringByAppendingPathComponent: last];
-            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"You have asked to make the '%@' configuration private, instead of shared.", @"Window text"), name];
-            AuthorizationRef authRef = [NSApplication getAuthorizationRef: msg];
-            if ( authRef == nil ) {
+            source = [[path copy] autorelease];
+            target = [gPrivatePath stringByAppendingPathComponent: last];
+            msg = [NSString stringWithFormat: NSLocalizedString(@"You have asked to make the '%@' configuration private, instead of shared.", @"Window text"), name];
+        } else if (  [path hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+            source = [[path copy] autorelease];
+            target = [L_AS_T_SHARED stringByAppendingPathComponent: last];
+            msg = [NSString stringWithFormat: NSLocalizedString(@"You have asked to make the '%@' configuration shared, instead of private.", @"Window text"), name];
+        } else {
+            NSLog(@"shareOrPrivatizeAtPath: Internal error: path is not private or shared at %@", path);
                 return;
             }
-            [self copyConfigPath: source
-                          toPath: target
-                    usingAuthRef: authRef
-                      warnDialog: YES
-                     moveNotCopy: YES];
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);
             
-        } else if (  [path hasPrefix: gPrivatePath]  ) {
-            NSString * source = [[path copy] autorelease];
-            NSString * target = [gSharedPath stringByAppendingPathComponent: last];
-            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"You have asked to make the '%@' configuration shared, instead of private.", @"Window text"), name];
             AuthorizationRef authRef = [NSApplication getAuthorizationRef: msg];
-            if ( authRef == nil ) {
+        if ( authRef == NULL ) {
                 return;
             }
+        
             [self copyConfigPath: source
                           toPath: target
-                    usingAuthRef: authRef
+             usingAuthRefPtr: &authRef
                       warnDialog: YES
                      moveNotCopy: YES];
+        
             AuthorizationFree(authRef, kAuthorizationFlagDefaults);
         }
     }
-}
 
 // Unprotect a configuration file without using authorization by replacing the root-owned
 // file with a user-owned writable copy so it can be edited (keep root-owned file as a backup)
@@ -439,11 +429,28 @@ enum state_t {                      // These are the "states" of the guideState 
         return nil;
     }
     
-    NSString * actualConfigPath = [[cfgPath copy] autorelease];
-    if (  [[cfgPath pathExtension] isEqualToString: @"tblk"]  ) {
-        actualConfigPath = [actualConfigPath stringByAppendingPathComponent: @"Contents/Resources/config.ovpn"];
+    unsigned cfgLoc;
+    NSString * cfgFile = lastPartOfPath(cfgPath);
+    if (  [cfgPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
+        cfgLoc = CFG_LOC_PRIVATE;
+    } else if (  [cfgPath hasPrefix: [gDeployPath stringByAppendingString: @"/"]]  ) {
+        cfgLoc = CFG_LOC_DEPLOY;
+    } else if (  [cfgPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
+        cfgLoc = CFG_LOC_SHARED;
+    } else {
+        cfgLoc = CFG_LOC_ALTERNATE;
     }
-    NSString * cfgContents = [[NSString alloc] initWithData: [gFileMgr contentsAtPath: actualConfigPath] encoding: NSASCIIStringEncoding];
+    
+    NSArray * arguments = [NSArray arrayWithObjects: @"printSanitizedConfigurationFile", cfgFile, [NSString stringWithFormat: @"%u", cfgLoc], nil];
+    NSString * stdOut;
+    NSString * stdErrOut;
+    OSStatus status = runOpenvpnstart(arguments, &stdOut, &stdErrOut);
+    if (  status == EXIT_FAILURE  ) {
+        NSLog(@"Internal failure of openvpnstart printSanitizedConfigurationFile %@ %d", cfgFile, cfgLoc);
+        return nil;
+    }
+    
+    NSString * cfgContents = [stdOut copy];
     
     NSString * useDownRootPluginKey = [[connection displayName] stringByAppendingString: @"-useDownRootPlugin"];
     NSString * skipWarningKey = [[connection displayName] stringByAppendingString: @"-skipWarningAboutDownroot"];
@@ -468,7 +475,8 @@ enum state_t {                      // These are the "states" of the guideState 
                                                      NSLocalizedString(@"Cancel", @"Button"), 
                                                      skipWarningKey, 
                                                      NSLocalizedString(@"Do not warn about this again for this configuration", @"Checkbox name"), 
-                                                     nil);
+                                                     nil,
+													 NSAlertDefaultReturn);
                 if (  result == NSAlertAlternateReturn  ) {
                     [gTbDefaults setBool: TRUE forKey: useDownRootPluginKey];
                 } else if (  result == NSAlertOtherReturn  ) {
@@ -489,6 +497,7 @@ enum state_t {                      // These are the "states" of the guideState 
     if (  devTypeOption  ) {
         if (   [devTypeOption isEqualToString: @"tun"]
             || [devTypeOption isEqualToString: @"tap"]  ) {
+            [cfgContents release];
             return devTypeOption;
         } else {
             NSLog(@"The configuration file for '%@' contains a 'dev-type' option, but the argument is not 'tun' or 'tap'. It has been ignored", [connection displayName]);
@@ -513,7 +522,8 @@ enum state_t {                      // These are the "states" of the guideState 
                                 nil, nil, nil,
                                 skipWarningKey, 
                                 NSLocalizedString(@"Do not warn about this again for this configuration", @"Checkbox name"), 
-                                nil);
+                                nil,
+								NSAlertDefaultReturn);
         [cfgContents release];
         return nil;
     }
@@ -604,16 +614,34 @@ enum state_t {                      // These are the "states" of the guideState 
         return;
     }
     
+    BOOL isDeployed = [gFileMgr fileExistsAtPath: gDeployPath];
+    BOOL installToPrivateOK = (   (! isDeployed)
+                               || (   [gTbDefaults boolForKey: @"usePrivateConfigurationsWithDeployedOnes"]
+                                   && ( ! [gTbDefaults canChangeValueForKey: @"usePrivateConfigurationsWithDeployedOnes"])
+                                   )  );
+    BOOL installToSharedOK = (   (! isDeployed)
+                              || (   [gTbDefaults boolForKey: @"useSharedConfigurationsWithDeployedOnes"]
+                                  && ( ! [gTbDefaults canChangeValueForKey: @"useSharedConfigurationsWithDeployedOnes"])
+                                  )  );
+    
+    if (  ! installToPrivateOK  ) {
+        if (  ! installToSharedOK  ) {
+            TBRunAlertPanel(NSLocalizedString(@"SurfSafeVPN VPN Configuration Installation Error", @"Window title"),
+                            NSLocalizedString(@"Installation of SurfSafeVPN VPN Configurations is not allowed because this is a Deployed version of Tunnelblick.", "Window text"),
+                            nil, nil, nil);
+            return;
+        }
+    }
+    
     NSMutableArray * sourceList = [NSMutableArray arrayWithCapacity: [filePaths count]];        // Paths to source of files OK to install
     NSMutableArray * targetList = [NSMutableArray arrayWithCapacity: [filePaths count]];        // Paths to destination to install them
     NSMutableArray * deleteList = [NSMutableArray arrayWithCapacity: [filePaths count]];        // Paths to delete
     NSMutableArray * errList    = [NSMutableArray arrayWithCapacity: [filePaths count]];        // Paths to files not installed
     
     // Go through the array, check each .tblk package, and add it to the install list if it is OK
-    int keyIx = 0;  // Key used to create unique temporary copies
     NSArray * dest;
     NSMutableArray * innerTblksAlreadyProcessed = [NSMutableArray arrayWithCapacity: 10];
-    int i;
+    unsigned i;
     for (i=0; i < [filePaths count]; i++) {
         NSString * path = [filePaths objectAtIndex: i];
         
@@ -623,7 +651,7 @@ enum state_t {                      // These are the "states" of the guideState 
         // will be installed into subfolders of the private or shared configurations folder.
         NSString * innerFileName;
         NSDirectoryEnumerator * dirEnum = [gFileMgr enumeratorAtPath: path];
-        while (  innerFileName = [dirEnum nextObject]  ) {
+        while (  (innerFileName = [dirEnum nextObject])  ) {
             NSString * fullInnerPath = [path stringByAppendingPathComponent: innerFileName];
             if (   [[innerFileName pathExtension] isEqualToString: @"tblk"]  ) {
                 
@@ -633,7 +661,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSString * testPath;
                 BOOL nestedTooDeeply = FALSE;
                 NSEnumerator * arrayEnum = [innerTblksAlreadyProcessed objectEnumerator];
-                while (  testPath = [arrayEnum nextObject]  ) {
+                while (  (testPath = [arrayEnum nextObject])  ) {
                     if (  [fullInnerPath hasPrefix: testPath]  ) {
                         NSLog(@".tblks nested too deeply (only one level of .tblk in a .tblk is allowed) in %@", path);
                         nestedTooDeeply = TRUE;
@@ -643,7 +671,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 if (  ! nestedTooDeeply  ) {
                     // This .tblk is not nested too deeply, so process it
-                    dest = [self checkOneDotTblkPackage: fullInnerPath withKey: [NSString stringWithFormat: @"%d", keyIx++]];
+                    dest = [self checkOneDotTblkPackage: fullInnerPath];
                     if (  dest  ) {
                         if (  [dest count] == 2  ) {
                             [sourceList addObject: [dest objectAtIndex: 0]];
@@ -651,7 +679,7 @@ enum state_t {                      // These are the "states" of the guideState 
                         } else if (  [dest count] == 1  ) {
                             [deleteList addObject: [dest objectAtIndex: 0]];
                         } else {
-                            NSLog(@"Invalid dest = %@ for .tblk %@ withKey %d", dest, fullInnerPath, keyIx);
+                            NSLog(@"Invalid dest = %@ for .tblk %@", dest, fullInnerPath);
                         }
                         
                     } else {
@@ -663,7 +691,7 @@ enum state_t {                      // These are the "states" of the guideState 
         }
         
         if (  [innerTblksAlreadyProcessed count] == 0  ) {
-            dest = [self checkOneDotTblkPackage: path withKey: [NSString stringWithFormat: @"%d", keyIx++]];
+            dest = [self checkOneDotTblkPackage: path];
             if (  dest  ) {
                 if (  [dest count] == 2  ) {
                     [sourceList addObject: [dest objectAtIndex: 0]];
@@ -671,7 +699,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 } else if (  [dest count] == 1  ) {
                     [deleteList addObject: [dest objectAtIndex: 0]];
                 } else {
-                    NSLog(@"Invalid dest = %@ for .tblk %@ withKey %d", dest, path, keyIx);
+                    NSLog(@"Invalid dest = %@ for .tblk %@", dest, path);
                 }
             } else {
                 [errList addObject: path];
@@ -774,7 +802,7 @@ enum state_t {                      // These are the "states" of the guideState 
     for (  i=0; i < [deleteList count]; i++  ) {
         NSString * target = [deleteList objectAtIndex: i];
         if (  ! [self deleteConfigPath: target
-                          usingAuthRef: localAuth
+                       usingAuthRefPtr: &localAuth
                             warnDialog: NO]  ) {
             nErrors++;
         }
@@ -785,7 +813,7 @@ enum state_t {                      // These are the "states" of the guideState 
         NSString * target = [targetList objectAtIndex: i];
         if (  ! [self copyConfigPath: source
                               toPath: target
-                        usingAuthRef: localAuth
+                     usingAuthRefPtr: &localAuth
                           warnDialog: NO
                          moveNotCopy: NO]  ) {
             nErrors++;
@@ -814,8 +842,8 @@ enum state_t {                      // These are the "states" of the guideState 
                         nil, nil, nil);
         [NSApp replyToOpenOrPrint: NSApplicationDelegateReplyFailure];
     } else {
-        int nOK = [sourceList count];
-        int nUninstalled = [deleteList count];
+        unsigned nOK = [sourceList count];
+        unsigned nUninstalled = [deleteList count];
         NSString * msg;
         if (  nUninstalled == 1  ) {
             msg = NSLocalizedString(@"One SurfSafeVPN Configuration was uninstalled successfully.", @"Window text");
@@ -856,12 +884,12 @@ enum state_t {                      // These are the "states" of the guideState 
 //     Returns an empty array if the user cancelled the installation
 //     Returns nil if an error occurred
 // If filePath is a nested .tblk (i.e., a .tblk contained within another .tblk), the destination path will be a subfolder of the private or shared configurations folder
--(NSArray *) checkOneDotTblkPackage: (NSString *) filePath withKey: (NSString *) key
+-(NSArray *) checkOneDotTblkPackage: (NSString *) filePath
 {
-    if (   [filePath hasPrefix: gPrivatePath]
-        || [filePath hasPrefix: gSharedPath]
-        || [filePath hasPrefix: gDeployPath]  ) {
-        NSLog(@"Configuration installer: SurfsafeVPN Configuration is already installed: %@", filePath);
+    if (   [filePath hasPrefix: [gPrivatePath  stringByAppendingString: @"/"]]
+        || [filePath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]
+        || [filePath hasPrefix: [gDeployPath   stringByAppendingString: @"/"]]  ) {
+        NSLog(@"Configuration installer: Tunnelblick VPN Configuration is already installed: %@", filePath);
         TBRunAlertPanel(NSLocalizedString(@"Configuration Installation Error", @"Window title"),
                         NSLocalizedString(@"You cannot install a SurfSafeVPN configuration from an installed copy.\n\nAn administrator can copy the installation and install from the copy.", @"Window text"),
                         nil, nil, nil);
@@ -885,7 +913,7 @@ enum state_t {                      // These are the "states" of the guideState 
     
     // Do some preliminary checking to see if this is a well-formed .tblk. Return with path to .tblk to use
     // (which might be a temporary file with a "fixed" version of the .tblk).
-    NSString * pathToTblk = [self getPackageToInstall: filePath withKey: key];
+    NSString * pathToTblk = [self getPackageToInstall: filePath];
     if (  ! pathToTblk  ) {
         return nil;                     // Error occured
     }
@@ -912,7 +940,6 @@ enum state_t {                      // These are the "states" of the guideState 
         pkgId = [self getLowerCaseStringForKey: @"CFBundleIdentifier" inDictionary: infoDict defaultTo: nil];
         
         pkgVersion = [self getLowerCaseStringForKey: @"CFBundleVersion" inDictionary: infoDict defaultTo: nil];
-        NSLog(@"version %@", pkgVersion);
         
         //  pkgShortVersionString = [self getLowerCaseStringForKey: @"CFBundleShortVersionString" inDictionary: infoDict defaultTo: nil];
         
@@ -953,7 +980,7 @@ enum state_t {                      // These are the "states" of the guideState 
         NSArray * validKeys = [NSArray arrayWithObjects: @"CFBundleIdentifier", @"CFBundleVersion", @"CFBundleShortVersionString",
                                @"TBPackageVersion", @"TBReplaceIdentical", @"TBSharePackage", @"TBUninstall", nil];
         NSEnumerator * e = [infoDict keyEnumerator];
-        while (  key = [e nextObject]  ) {
+        while (  (key = [e nextObject])  ) {
             if (  ! [validKeys containsObject: key]  ) {
                 if (  ! [key hasPrefix: @"TBPreference"]  ) {
                     NSLog(@"Configuration installer: Unknown key '%@' in %@", key, infoPath);
@@ -980,7 +1007,7 @@ enum state_t {                      // These are the "states" of the guideState 
     NSString * file;
     NSString * folder = [pathToTblk stringByAppendingPathComponent: @"Contents/Resources"];
     NSDirectoryEnumerator *dirEnum = [gFileMgr enumeratorAtPath: folder];
-    while (file = [dirEnum nextObject]) {
+    while (  (file = [dirEnum nextObject])  ) {
         if (  itemIsVisible([folder stringByAppendingPathComponent: file])  ) {
             NSString * ext = [file pathExtension];
             if (  [file isEqualToString: @"config.ovpn"]  ) {
@@ -1023,7 +1050,7 @@ enum state_t {                      // These are the "states" of the guideState 
     if (  pkgId  ) {
         NSString * key;
         NSEnumerator * e = [[[NSApp delegate] myConfigDictionary] keyEnumerator];
-        while (key = [e nextObject]) {
+        while (  (key = [e nextObject])  ) {
             NSString * path = [[[NSApp delegate] myConfigDictionary] objectForKey: key];
             NSString * last = lastPartOfPath(path);
             NSString * oldDisplayFirstPart = firstPathComponent(last);
@@ -1058,9 +1085,9 @@ enum state_t {                      // These are the "states" of the guideState 
                         NSString * msg;
                         replacementPath = [[[NSApp delegate] myConfigDictionary] objectForKey: key];
                         NSString * sharedPrivateDeployed;
-                        if (  [replacementPath hasPrefix: gSharedPath]  ) {
+                        if (  [replacementPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
                             sharedPrivateDeployed = NSLocalizedString(@" (Shared)", @"Window title");
-                        } else if (  [replacementPath hasPrefix: gPrivatePath]  ) {
+                        } else if (  [replacementPath hasPrefix: [gPrivatePath stringByAppendingString: @"/"]]  ) {
                             sharedPrivateDeployed = NSLocalizedString(@" (Private)", @"Window title");
                         } else {
                             sharedPrivateDeployed = NSLocalizedString(@" (Deployed)", @"Window title");
@@ -1105,7 +1132,7 @@ enum state_t {                      // These are the "states" of the guideState 
                     
                     tryDisplayName = [last stringByDeletingPathExtension];
                     replacementPath = [[[NSApp delegate] myConfigDictionary] objectForKey: key];
-                    if (  [replacementPath hasPrefix: gSharedPath]  ) {
+                    if (  [replacementPath hasPrefix: [L_AS_T_SHARED stringByAppendingString: @"/"]]  ) {
                         pkgSharePackage = @"shared";
                     } else {
                         pkgSharePackage = @"private";
@@ -1178,7 +1205,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 if (  [pkgSharePackage isEqualToString: @"private"]  ) {
                     pathPrefix = gPrivatePath;
                 } else {
-                    pathPrefix = gSharedPath;
+                    pathPrefix = L_AS_T_SHARED;
                 }
                 if (  subfolder  ) {
                     pathPrefix = [pathPrefix stringByAppendingPathComponent: subfolder];
@@ -1198,11 +1225,37 @@ enum state_t {                      // These are the "states" of the guideState 
         // Ask if it should be shared or private
         if ( ! replacementPath  ) {
             if (  [pkgSharePackage isEqualToString: @"ask"]  ) {
-                int result = TBRunAlertPanel(NSLocalizedString(@"Install Configuration For All Users?", @"Window title"),
+                BOOL isDeployed = [gFileMgr fileExistsAtPath: gDeployPath];
+                BOOL installToPrivateOK = (   (! isDeployed)
+                                           || (   [gTbDefaults boolForKey: @"usePrivateConfigurationsWithDeployedOnes"]
+                                               && ( ! [gTbDefaults canChangeValueForKey: @"usePrivateConfigurationsWithDeployedOnes"])
+                                               )  );
+                BOOL installToSharedOK = (   (! isDeployed)
+                                          || (   [gTbDefaults boolForKey: @"useSharedConfigurationsWithDeployedOnes"]
+                                              && ( ! [gTbDefaults canChangeValueForKey: @"useSharedConfigurationsWithDeployedOnes"])
+                                              )  );
+                
+                int result;
+                if (  installToPrivateOK  ) {
+                    if (  installToSharedOK  ) {
+                        result = TBRunAlertPanel(NSLocalizedString(@"Install Configuration For All Users?", @"Window title"),
                                              [NSString stringWithFormat: NSLocalizedString(@"Do you wish to install the '%@' configuration so that all users can use it, or so that only you can use it?\n\n", @"Window text"), tryDisplayName],
                                              NSLocalizedString(@"Only Me", @"Button"),      //Default button
                                              NSLocalizedString(@"All Users", @"Button"),    // Alternate button
                                              NSLocalizedString(@"Cancel", @"Button"));      // Alternate button);
+                    } else {
+                        NSLog(@"Configuration installer: Forcing install of %@ as private because Deployed version of Tunnelblick and 'useSharedConfigurationsWithDeployedOnes' preference is not forced", tryDisplayName);
+                        result = NSAlertDefaultReturn;
+                    }
+                } else {
+                    if (  installToSharedOK  ) {
+                        NSLog(@"Configuration installer: Forcing install of %@ as shared because Deployed version of Tunnelblick and 'usePrivateConfigurationsWithDeployedOnes' preference is not forced", tryDisplayName);
+                        result = NSAlertAlternateReturn;
+                    } else {
+                        NSLog(@"Configuration installer: : %@ cannot be installed as shared or private because this is a Deployed version of Tunnelblick.", tryDisplayName);
+                        return nil;
+                    }
+                }
                 if (  result == NSAlertDefaultReturn  ) {
                     pkgSharePackage = @"private";
                 } else if (  result == NSAlertAlternateReturn  ) {
@@ -1221,7 +1274,7 @@ enum state_t {                      // These are the "states" of the guideState 
         if (  [pkgSharePackage isEqualToString: @"private"]  ) {
             pathPrefix = gPrivatePath;
         } else {
-            pathPrefix = gSharedPath;
+            pathPrefix = L_AS_T_SHARED;
         }
         if (  subfolder  ) {
             pathPrefix = [pathPrefix stringByAppendingPathComponent: subfolder];
@@ -1258,7 +1311,7 @@ enum state_t {                      // These are the "states" of the guideState 
 //   * Package contains, or has a single folder which contains, one .ovpn or .conf, zero or one Info.plist, and any number of .key, .crt, etc. files:
 //          Moves the .ovpn or .conf to Contents/Resources/config.ovpn
 //          Moves the .key, .crt, etc. files to Contents/Resources
--(NSString *) getPackageToInstall: (NSString *) thePath withKey: (NSString *) key;
+-(NSString *) getPackageToInstall: (NSString *) thePath
 
 {
     NSMutableArray * pkgList = [[gFileMgr tbDirectoryContentsAtPath: thePath] mutableCopy];
@@ -1267,7 +1320,7 @@ enum state_t {                      // These are the "states" of the guideState 
     }
     
     // Remove invisible files and folders
-    int i;
+    unsigned i;
     for (i=0; i < [pkgList count]; i++) {
         if (  ! itemIsVisible([pkgList objectAtIndex: i])  ) {
             [pkgList removeObjectAtIndex: i];
@@ -1289,7 +1342,7 @@ enum state_t {                      // These are the "states" of the guideState 
         }
 
         [pkgList release];
-        return [self makeTemporarySampleTblkWithName: [thePath lastPathComponent] andKey: key];
+        return [self makeTemporarySampleTblkWithName: [thePath lastPathComponent]];
     }
     
     // If the .tblk contains only a single subfolder, "Contents", then return .tblk path
@@ -1338,9 +1391,11 @@ enum state_t {                      // These are the "states" of the guideState 
                 } else if (  [keyAndCrtExtensions containsObject: ext]  ) {
                     ;
                 } else {
+					NSLog(@"Files with the extension that %@ has may not appear in a Tunnelblick VPN Configuration (\".tblk\").", [pkgList objectAtIndex: i]);
                     nUnknown++;
                 }
             } else {
+				NSLog(@"Folders (such as %@) may not appear in a Tunnelblick VPN Configuration (\".tblk\").", [pkgList objectAtIndex: i]);
                 nUnknown++;
             }
         }
@@ -1365,7 +1420,7 @@ enum state_t {                      // These are the "states" of the guideState 
         return nil;
     }
     // Create an empty .tblk and copy stuff in the folder to its Contents/Resources (Copy Info.plist to Contents)
-    NSString * emptyTblk = [self makeEmptyTblk: thePath withKey: key];
+    NSString * emptyTblk = [self makeEmptyTblk: thePath];
     if (  ! emptyTblk  ) {
         [pkgList release];
         return nil;
@@ -1390,15 +1445,24 @@ enum state_t {                      // These are the "states" of the guideState 
             [pkgList release];
             return nil;
         }
+        
+        //temporary disable converter
+        /*if (  [[oldPath lastPathComponent] isEqualToString: @"config.ovpn"]) {
+            ConfigurationConverter * converter = [[ConfigurationConverter alloc] init];
+            if (  ! [converter convertConfigPath: newPath outputPath: nil logFile: NULL]  ) {
+                NSLog(@"Failed to parse configuration path %@", newPath);
+            }
+            [converter release];
+        }*/
     }
     
     [pkgList release];
     return emptyTblk;
 }
 
--(NSString *) makeTemporarySampleTblkWithName: (NSString *) name andKey: (NSString *) key
+-(NSString *) makeTemporarySampleTblkWithName: (NSString *) name
 {
-    NSString * emptyTblk = [self makeEmptyTblk: name withKey: key];
+    NSString * emptyTblk = [self makeEmptyTblk: name];
     if (  ! emptyTblk  ) {
         NSLog(@"Unable to create temporary .tblk");
         return nil;
@@ -1416,7 +1480,7 @@ enum state_t {                      // These are the "states" of the guideState 
 // Creates an "empty" .tblk with name taken from input argument, and with Contents/Resources created,
 // in a newly-created temporary folder
 // Returns nil on error, or with the path to the .tblk
--(NSString *) makeEmptyTblk: (NSString *) thePath withKey: (NSString *) key
+-(NSString *) makeEmptyTblk: (NSString *) thePath
 {
     NSString * tempFolder = newTemporaryDirectoryPath();
     NSString * tempTblk = [tempFolder stringByAppendingPathComponent: [thePath lastPathComponent]];
@@ -1433,162 +1497,6 @@ enum state_t {                      // These are the "states" of the guideState 
     
     return tempTblk;
 }
-
-// Given paths to a configuration (either a .conf or .ovpn file, or a .tblk package) in one of the gConfigDirs
-// (~/Library/Application Support/SurfsafeVPN/Configurations, /Library/Application Support/SurfsafeVPN/Shared, or /Resources/Deploy,
-// and an alternate config in /Library/Application Support/SurfsafeVPN/Users/<username>/
-// Returns the path to use, or nil if can't use either one
--(NSString *) getConfigurationToUse:(NSString *)cfgPath orAlt:(NSString *)altCfgPath
-{
-    if (  [[ConfigurationManager defaultManager] isSampleConfigurationAtPath: cfgPath]  ) {             // Don't use the sample configuration file
-        return nil;
-    }
-    
-    if (  ! [self configNotProtected:cfgPath]  ) {                              // If config is protected
-        if (  ! [gTbDefaults boolForKey:@"useShadowConfigurationFiles"]  ) {    //    If not using shadow configuration files
-            return cfgPath;                                                     //    Then use it
-        } else { 
-            NSString * folder = firstPartOfPath(cfgPath);                       //    Or if are using shadow configuration files
-            if (  ! [folder isEqualToString: gPrivatePath]  ) {                 //    And in Shared or Deploy (even if using shadow copies)
-                return cfgPath;                                                 //    Then use it (we don't need to shadow copy them)
-            }
-        }
-    }
-    
-    // Repair the configuration file or use the alternate
-    AuthorizationRef authRef;
-    if (   (! [self onRemoteVolume:cfgPath] )
-        && (! [gTbDefaults boolForKey:@"useShadowConfigurationFiles"] )  ) {
-        
-        // We don't use a shadow configuration file
-		NSLog(@"Configuration file %@ needs ownership/permissions repair", cfgPath);
-        authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the configuration file to secure it.", @"Window text")]; // Try to repair regular config
-        if ( authRef == nil ) {
-            NSLog(@"Repair authorization cancelled by user");
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-            return nil;
-        }
-        if( ! [[ConfigurationManager defaultManager] protectConfigurationFile:cfgPath usingAuth:authRef] ) {
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-            return nil;
-        }
-        AuthorizationFree(authRef, kAuthorizationFlagDefaults);                         // Repair worked, so return the regular conf
-        return cfgPath;
-    } else {
-        
-        // We should use a shadow configuration file
-        if ( [gFileMgr fileExistsAtPath:altCfgPath] ) {                                 // See if alt config exists
-            // Alt config exists
-            BOOL isSame;
-            if (  [[altCfgPath pathExtension] isEqualToString: @"tblk"]  ) {
-                // We must run as root to see if the two .tblk packages are identical because the permissions
-                // on any .crt files are no-access except to root.
-                NSString * displayName = [lastPartOfPath(altCfgPath) stringByDeletingPathExtension];
-                OSStatus status = [self compareTblkShadowCopy: displayName];
-                if (  status == OPENVPNSTART_COMPARE_CONFIG_SAME  ) {
-                    isSame = TRUE;
-                } else if (  status == OPENVPNSTART_COMPARE_CONFIG_DIFFERENT  ) {
-                    isSame = FALSE;
-                } else {
-                    NSLog(@"compareShadowCopy returned %ld", (long) status);
-                    return nil;
-                }
-            } else {
-                // For a .ovpn or .conf, which we have read-only access to, we can just compare running as the user
-                isSame = [gFileMgr contentsEqualAtPath: cfgPath andPath: altCfgPath];
-            }
-            if (  isSame  ) {
-                // Alt config exists and is the same as regular config
-                if ( [self configNotProtected:altCfgPath] ) {                            // Check ownership/permissions
-                    // Alt config needs repair
-                    NSLog(@"The shadow copy of configuration file %@ needs ownership/permissions repair", cfgPath);
-                    authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to repair ownership/permissions of the shadow copy of the configuration file to secure it.", @"Window text")]; // Repair if necessary
-                    if ( authRef == nil ) {
-                        NSLog(@"Repair authorization cancelled by user");
-                        AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                        return nil;
-                    }
-                    if(  ! [[ConfigurationManager defaultManager] protectConfigurationFile:altCfgPath usingAuth:authRef]  ) {
-                        AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                        return nil;                                                     // Couldn't repair alt file
-                    }
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                }
-                return altCfgPath;                                                      // Return the alt config
-            } else {
-                // Alt config exists but is different
-                NSLog(@"The shadow copy of configuration file %@ needs to be updated from the original", cfgPath);
-                authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to update the shadow copy of the configuration file from the original.", @"Window text")];// Overwrite it with the standard one and set ownership & permissions
-                if ( authRef == nil ) {
-                    NSLog(@"Authorization for update of shadow copy cancelled by user");
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-                    return nil;
-                }
-                if ( [self copyConfigPath: cfgPath toPath: altCfgPath usingAuthRef: authRef warnDialog: YES moveNotCopy: NO] ) {
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                    if (  [self configNotProtected: altCfgPath]  ) {
-                        NSLog(@"Unable to secure alternate configuration");
-                        return nil;
-                    }
-                    return altCfgPath;                                                  // And return the alt config
-                } else {
-                    AuthorizationFree(authRef, kAuthorizationFlagDefaults);             // Couldn't overwrite alt file with regular one
-                    return nil;
-                }
-            }
-        } else {
-            // Alt config doesn't exist. We must create it (and maybe the folders that contain it)
-            NSLog(@"Creating shadow copy of configuration file %@", cfgPath);
-            
-            // Folder creation code below needs alt config to be in /Library/Application Support/SurfsafeVPN/Users/<username>/xxx.conf
-            NSString * altCfgFolderPath  = [altCfgPath stringByDeletingLastPathComponent]; // Strip off xxx.conf to get path to folder that holds it
-            //                                                                             // (But leave any subfolders) 
-            if (  ! [altCfgFolderPath hasPrefix: [NSString stringWithFormat: @"/Library/Application Support/SurfsafeVPN/Users", NSUserName()]]  ) {
-                NSLog(@"Internal SurfsafeVPN error: altCfgPath\n%@\nmust be in\n/Library/Application Support/SurfsafeVPN/Users/<username>", altCfgFolderPath);
-                return nil;
-            }
-            
-            authRef = [NSApplication getAuthorizationRef: NSLocalizedString(@"SurfSafeVPN needs to create a shadow copy of the configuration file.", @"Window text")]; // Create folders if they don't exist:
-            if ( authRef == nil ) {
-                NSLog(@"Authorization to create a shadow copy of the configuration file cancelled by user.");
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);	
-                return nil;
-            }
-            if ( ! [self makeSureFolderExistsAtPath: altCfgFolderPath usingAuth: authRef] ) {     // /Library/.../<username>/[subdirs...]
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                return nil;
-            }
-            if ( [self copyConfigPath: cfgPath toPath: altCfgPath usingAuthRef: authRef warnDialog: YES moveNotCopy: NO] ) {    // Copy the config to the alt config
-                AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-                if (  [self configNotProtected: altCfgPath]  ) {
-                    NSLog(@"Unable to secure alternate configuration");
-                    return nil;
-                }
-                return altCfgPath;                                                              // Return the alt config
-            }
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);                             // Couldn't make alt file
-            return nil;
-        }
-    }
-}
-
-
-// Runs as root to compare the private and shadow copies of a .tblk
-// Used because .crt files in a .tblk are no-access except to root
--(OSStatus) compareTblkShadowCopy: (NSString *) displayName
-{
-    NSString* path = [[NSBundle mainBundle] pathForResource: @"openvpnstart" ofType: nil];
-    NSArray *arguments = [NSArray arrayWithObjects:@"compareTblkShadowCopy", displayName, nil];
-    
-    NSTask* task = [[[NSTask alloc] init] autorelease];
-    [task setLaunchPath: path]; 
-    [task setArguments:arguments];
-    [task setCurrentDirectoryPath: @"/tmp"];    // Won't be used, but we need to specify something
-    [task launch];
-    [task waitUntilExit];
-    return [task terminationStatus];
-}
-
 
 -(BOOL) isSampleConfigurationAtPath: (NSString *) cfgPath
 {
@@ -1616,216 +1524,59 @@ enum state_t {                      // These are the "states" of the guideState 
     return TRUE;
 }
 
-// Checks ownership and permisions of .tblk package, or .ovpn or .conf file
-// Returns YES if not secure, NO if secure
--(BOOL)configNotProtected:(NSString *)configFile 
-{
-    if (  [[configFile pathExtension] isEqualToString: @"tblk"]  ) {
-        BOOL isDir;
-        if (  [gFileMgr fileExistsAtPath: configFile isDirectory: &isDir]
-            && isDir  ) {
-            return folderContentsNeedToBeSecuredAtPath(configFile);
-        } else {
-            return YES;
-        }
-    }
-    
-    NSDictionary *fileAttributes = [gFileMgr tbFileAttributesAtPath:configFile traverseLink:YES];
-    unsigned long perms = [fileAttributes filePosixPermissions];
-    NSString *octalString = [NSString stringWithFormat:@"%lo",perms];
-    NSNumber *fileOwner = [fileAttributes fileOwnerAccountID];
-    
-    if ( (![octalString isEqualToString:@"644"])  || (![fileOwner isEqualToNumber:[NSNumber numberWithInt:0]])) {
-        // NSLog(@"Configuration file %@ has permissions: 0%@, is owned by %@ and needs repair",configFile,octalString,fileOwner);
-        return YES;
-    }
-    return NO;
-}
-
--(BOOL) checkPermissions: (NSString *) permsShouldHave forPath: (NSString *) path
-{
-    NSDictionary *fileAttributes = [[NSFileManager defaultManager] tbFileAttributesAtPath: path traverseLink:YES];
-    unsigned long perms = [fileAttributes filePosixPermissions];
-    NSString *octalString = [NSString stringWithFormat:@"%lo",perms];
-    
-    return [octalString isEqualToString: permsShouldHave];
-}
-
-// Returns TRUE if a file is on a remote volume or statfs on it fails, FALSE otherwise
--(BOOL) onRemoteVolume:(NSString *)cfgPath
-{
-    const char * fileName = [gFileMgr fileSystemRepresentationWithPath: cfgPath];
-    struct statfs stats_buf;
-    
-    if (  0 == statfs(fileName, &stats_buf)  ) {
-        if (  (stats_buf.f_flags & MNT_LOCAL) == MNT_LOCAL  ) {
-            return FALSE;
-        }
-    } else {
-        NSLog(@"statfs on %@ failed; assuming it is a remote volume\nError was '%s'", cfgPath, strerror(errno));
-    }
-    return TRUE;   // Network volume or error accessing the file's data.
-}
-
-// Attempts to protect a configuration file
-// Returns TRUE if succeeded, FALSE if failed, having already output an error message to the console log
--(BOOL)protectConfigurationFile: (NSString *) configFilePath usingAuth: (AuthorizationRef) authRef
-{
-    NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
-
-    NSArray * arguments = [NSArray arrayWithObjects: @"0", configFilePath, nil];
-    
-    NSLog(@"Securing configuration file %@", configFilePath);
-    
-    BOOL okNow = FALSE; // Assume failure
-    int i;
-    for (i=0; i<5; i++) {
-        if (  i != 0  ) {
-            usleep( i * 500000 );
-            NSLog(@"Retrying execution of installer");
-        }
-
-        if (  [NSApplication waitForExecuteAuthorized: launchPath withArguments: arguments withAuthorizationRef: authRef] ) {
-            // Try for up to 6.35 seconds to verify that installer succeeded -- sleeping .05 seconds first, then .1, .2, .4, .8, 1.6,
-            // and 3.2 seconds (totals 6.35 seconds) between tries as a cheap and easy throttling mechanism for a heavily loaded computer
-            useconds_t sleepTime;
-            for (sleepTime=50000; sleepTime < 7000000; sleepTime=sleepTime*2) {
-                usleep(sleepTime);
-                
-                if (  (okNow = ( ! [self configNotProtected: configFilePath] )) ) {
-                    break;
-                }
-            }
-            
-            if (  okNow  ) {
-                break;
-            } else {
-                NSLog(@"Timed out waiting for installer execution to succeed");
-            }
-        } else {
-            NSLog(@"Failed to execute %@: %@", launchPath, arguments);
-        }
-    }
-        
-    if (   ( ! okNow )
-        && [self configNotProtected: configFilePath]  ) {
-        NSLog(@"Could not change ownership and/or permissions of configuration file %@", configFilePath);
-        TBRunAlertPanel([NSString stringWithFormat:@"%@: %@",
-                         [self displayNameForPath: configFilePath],
-                         NSLocalizedString(@"Not connecting", @"Window title")],
-                        NSLocalizedString(@"SurfSafeVPN could not change ownership and permissions of the configuration file to secure it. See the Console Log for details.", @"Window text"),
-                        nil,
-                        nil,
-                        nil);
-        return FALSE;
-    }
-    
-    NSLog(@"Secured configuration file %@", configFilePath);
-    return TRUE;
-}
-
 // Copies or moves a config file or package and sets ownership and permissions on the target
 // Returns TRUE if succeeded in the copy or move -- EVEN IF THE CONFIG WAS NOT SECURED (an error message was output to the console log).
 // Returns FALSE if failed, having already output an error message to the console log
--(BOOL) copyConfigPath: (NSString *) sourcePath toPath: (NSString *) targetPath usingAuthRef: (AuthorizationRef) authRef warnDialog: (BOOL) warn moveNotCopy: (BOOL) moveInstead
+-(BOOL) copyConfigPath: (NSString *) sourcePath toPath: (NSString *) targetPath usingAuthRefPtr: (AuthorizationRef *) authRefPtr warnDialog: (BOOL) warn moveNotCopy: (BOOL) moveInstead
 {
     if (  [sourcePath isEqualToString: targetPath]  ) {
         NSLog(@"You cannot copy or move a configuration to itself. Trying to do that with %@", sourcePath);
         return FALSE;
     }
     
-    NSString * arg1 = (moveInstead ? [NSString stringWithFormat: @"%u", INSTALLER_MOVE_NOT_COPY] : @"0");
-    NSArray * arguments = [NSArray arrayWithObjects: arg1, targetPath, sourcePath, nil];
-    NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
-    
-    BOOL okNow = FALSE; // Assume failure
-    int i;
-    for (i=0; i<5; i++) {
-        if (  i != 0  ) {
-            usleep( i * 500000 );
-            NSLog(@"Retrying execution of installer");
-        }
+    unsigned firstArg = (moveInstead
+                         ? INSTALLER_MOVE_NOT_COPY
+                         : 0);
+    NSArray * arguments = [NSArray arrayWithObjects: targetPath, sourcePath, nil];
         
-        if (  ! [NSApplication waitForExecuteAuthorized: launchPath withArguments: arguments withAuthorizationRef: authRef] ) {
-            NSLog(@"Failed to execute %@: %@", launchPath, arguments);
-        }
-        
-        if (  (okNow = ( ! [self configNotProtected: targetPath] ))  ) {
-            break;
-        }
+    if (  [[NSApp delegate] runInstaller: firstArg extraArguments: arguments usingAuthRefPtr: authRefPtr message: nil]  ) {
+        return TRUE;
     }
     
-    if (   ( ! okNow )
-        && [self configNotProtected: targetPath]  ) {
-        NSString * name = [[sourcePath lastPathComponent] stringByDeletingPathExtension];
+	NSString * name = lastPartOfPath(targetPath);
         if (  ! moveInstead  ) {
-            if (  ! [gFileMgr contentsEqualAtPath: sourcePath andPath: targetPath]  ) {
                 NSLog(@"Could not copy configuration file %@ to %@", sourcePath, targetPath);
                 if (  warn  ) {
                     NSString * title = NSLocalizedString(@"Could Not Copy Configuration", @"Window title");
                     NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not copy the '%@' configuration. See the Console Log for details.", @"Window text"), name];
                     TBRunAlertPanel(title, msg, nil, nil, nil);
                 }
+        
                 return FALSE;
-            }
+        
         } else {
-            if (  ! [gFileMgr fileExistsAtPath: targetPath]  ) {
                 NSLog(@"Could not move configuration file %@ to %@", sourcePath, targetPath);
                 if (  warn  ) {
                     NSString * title = NSLocalizedString(@"Could Not Move Configuration", @"Window title");
                     NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not move the '%@' configuration. See the Console Log for details.", @"Window text"), name];
                     TBRunAlertPanel(title, msg, nil, nil, nil);
                 }
-                return FALSE;
-            }
-        }
         
-        NSLog(@"Moved or copied, but could not secure configuration file at %@", targetPath);
-        if (  warn  ) {
-            NSString * title = NSLocalizedString(@"Could Not Secure Configuration", @"Window title");
-            NSString * msg = [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN could not secure the '%@' configuration. See the Console Log for details.", @"Window text"), name];
-            TBRunAlertPanel(title, msg, nil, nil, nil);
-        }
-        return TRUE;    // Copied or moved OK, but not secured
+        return FALSE;
     }
-    
-    if (  moveInstead  ) {
-        NSLog(@"Moved configuration file %@ to %@ and secured the copy", sourcePath, targetPath);
-    } else {
-        NSLog(@"Copied configuration file %@ to %@ and secured the copy", sourcePath, targetPath);
-    }
-    
-    return TRUE;
 }
 
 // Deletes a config file or package
 // Returns TRUE if succeeded
 // Returns FALSE if failed, having already output an error message to the console log
--(BOOL) deleteConfigPath: (NSString *) targetPath usingAuthRef: (AuthorizationRef) authRef warnDialog: (BOOL) warn
+-(BOOL) deleteConfigPath: (NSString *) targetPath usingAuthRefPtr: (AuthorizationRef *) authRefPtr warnDialog: (BOOL) warn
 {
-    NSString * arg1 = [NSString stringWithFormat: @"%u", INSTALLER_DELETE];
-    NSArray * arguments = [NSArray arrayWithObjects: arg1, targetPath, nil];
-    NSString *launchPath = [[NSBundle mainBundle] pathForResource:@"installer" ofType:nil];
-    
-    BOOL okNow = FALSE; // Assume failure
-    int i;
-    for (i=0; i<5; i++) {
-        if (  i != 0  ) {
-            usleep( i * 500000 );
-            NSLog(@"Retrying execution of installer");
-        }
+    unsigned firstArg = INSTALLER_DELETE;
+    NSArray * arguments = [NSArray arrayWithObjects: targetPath, nil];
         
-        if (  ! [NSApplication waitForExecuteAuthorized: launchPath withArguments: arguments withAuthorizationRef: authRef] ) {
-            NSLog(@"Failed to execute %@: %@", launchPath, arguments);
-        }
-        
-        if (  (okNow = ( ! [gFileMgr fileExistsAtPath: targetPath] ))  ) {
-            break;
-        }
-    }
+    [[NSApp delegate] runInstaller: firstArg extraArguments: arguments usingAuthRefPtr: authRefPtr message: nil];
     
-    if (   ( ! okNow )
-        && [gFileMgr fileExistsAtPath: targetPath]  ) {
+    if ( [gFileMgr fileExistsAtPath: targetPath]  ) {
         NSString * name = [[targetPath lastPathComponent] stringByDeletingPathExtension];
         NSLog(@"Could not uninstall configuration file %@", targetPath);
         if (  warn  ) {
@@ -1838,72 +1589,6 @@ enum state_t {                      // These are the "states" of the guideState 
 
     NSLog(@"Uninstalled configuration file %@", targetPath);
     return TRUE;
-}
-
-// If the specified folder doesn't exist, uses root to create it so it is owned by root:wheel and has permissions 0755.
-// If the folder exists, ownership doesn't matter (as long as we can read/execute it).
-// Returns TRUE if the folder already existed or was created successfully, returns FALSE otherwise, having already output an error message to the console log.
--(BOOL) makeSureFolderExistsAtPath:(NSString *)folderPath usingAuth: (AuthorizationRef) authRef
-{
-    BOOL isDir;
-    
-    if (   [gFileMgr fileExistsAtPath: folderPath isDirectory: &isDir]
-        && isDir  ) {
-        return TRUE;
-    }
-    
-    NSString * parentFolderPath = [folderPath stringByDeletingLastPathComponent];
-    if (  ! [self makeSureFolderExistsAtPath: parentFolderPath usingAuth: authRef]  ) {
-        return FALSE;
-    }
-    
-    NSString *launchPath = @"/bin/mkdir";
-	NSArray *arguments = [NSArray arrayWithObject:folderPath];
-
-    BOOL okNow = FALSE; // Assume failure
-    int i;
-    for (i=0; i<5; i++) {
-        if (  i != 0  ) {
-            usleep( i * 500000 );
-            NSLog(@"Retrying execution of mkdir");
-        }
-        
-        if (  EXIT_SUCCESS == [NSApplication executeAuthorized: launchPath withArguments: arguments withAuthorizationRef: authRef]  ) {
-            // Try for up to 6.35 seconds to verify that installer succeeded -- sleeping .05 seconds first, then .1, .2, .4, .8, 1.6,
-            // and 3.2 seconds (totals 6.35 seconds) between tries as a cheap and easy throttling mechanism for a heavily loaded computer
-            useconds_t sleepTime;
-            for (sleepTime=50000; sleepTime < 7000000; sleepTime=sleepTime*2) {
-                usleep(sleepTime);
-                
-                if (  (okNow =  (   [gFileMgr fileExistsAtPath:folderPath isDirectory:&isDir] 
-                                && isDir ))   ){
-                    break;
-                }
-            }
-            
-            if (  okNow  ) {
-                break;
-            } else {
-                NSLog(@"Timed out waiting for mkdir execution to succeed");
-            }
-        } else {
-            NSLog(@"Failed to execute %@: %@", launchPath, arguments);
-        }
-    }
-    
-    if (   okNow
-        || (   [gFileMgr fileExistsAtPath: folderPath isDirectory: &isDir]
-            && isDir )  ) {
-        return TRUE;
-    }
-    
-    NSLog(@"SurfsafeVPN could not create folder %@ for the alternate configuration.", folderPath);
-    TBRunAlertPanel(NSLocalizedString(@"Not connecting", @"Window title"),
-                    NSLocalizedString(@"SurfSafeVPN could not create a folder for the alternate local configuration. See the Console Log for details.", @"Window text"),
-                    nil,
-                    nil,
-                    nil);
-    return FALSE;
 }
 
 // There are no configurations installed. Guide the user
@@ -1936,34 +1621,34 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 // No configuration files (entry from haveNoConfigurationsGuild)
                 button = TBRunAlertPanel(NSLocalizedString(@"Welcome to SurfSafeVPN", @"Window title"),
-                                         NSLocalizedString(@"There are no VPN configurations installed.\n\n"
+                                                          @"There are no VPN configurations installed.\n\n"
                                                            "SurfSafeVPN needs one or more installed configurations to connect to a VPN. "
-                                                           "Configurations are installed from files that are usually supplied to you by your network manager "
-                                                           "or VPN service provider. The files must be installed to be used.\n\n"
-                                                           "Configuration files have extensions of .tblk, .ovpn, or .conf.\n\n"
-                                                           "(There may be other files associated with the configuration that have other extensions; ignore them for now.)\n\n"
-                                                           "Do you have any configuration files?\n",
-                                                           @"Window text"),
-                                         NSLocalizedString(@"I have configuration files", @"Button"),       // Default button
+                                                           "Do you want to get configurations freom the web?\n",
+                                         NSLocalizedString(@"Get Configurations", @"Button"),       // Default button
                                          NSLocalizedString(@"Quit", @"Button"),                             // Alternate button
-                                         NSLocalizedString(@"I DO NOT have configuration files", @"Button") // Other button
+                                         nil//NSLocalizedString(@"I DO NOT have configuration files", @"Button") // Other button
                                          );
                 
                 if (  button == NSAlertAlternateReturn  ) {
                     // User selected QUIT
-                    [NSApp setAutoLaunchOnLogin: NO];
-                    [NSApp terminate: nil];
+                    [[NSApp delegate] terminateBecause: terminatingBecauseOfQuit];
                 }
-                
                 if (  button == NSAlertDefaultReturn  ) {
-                    // User has configuration files and wishes to add them
-                    nextState = stateHasConfigurations;
-                    break;
+                    if (  ! [[NSApp delegate] runInstaller: INSTALER_FORCED_GET_CONFIGS
+                                            extraArguments: nil]  ) {
+                        
+                                 TBRunAlertPanel(@"Welcome to SurfSafeVPN",
+                                                 @"Failed to get Configurations from server.\n"
+                                                 "Please, check your internet connection.",
+                                                 nil,nil,nil);
+                        [[NSApp delegate] terminateBecause: terminatingBecauseOfQuit];
+                    }
+                    return;
                 }
                 
-                // User does not have configuration files
+                /*// User does not have configuration files
                 nextState = stateHasNoConfigurations;
-                break;
+                break;*/
                 
                 
             case stateHasNoConfigurations:
@@ -2113,7 +1798,7 @@ enum state_t {                      // These are the "states" of the guideState 
                 
                 if (  button == NSAlertOtherReturn) {
                     // User selected OPEPNVPN VPN CONFIGURATION
-                    nextState = stateShowOpenVpnInstructions;
+                    nextState = stateMakeEmptyConfiguration;
                     break;
                 }
                 
@@ -2125,68 +1810,9 @@ enum state_t {                      // These are the "states" of the guideState 
             case stateShowTbInstructions:
 
                 // User selected TUNNELBLICK VPN CONFIGURATION
-                button = TBRunAlertPanel(NSLocalizedString(@"Installing a SurfSafeVPN Configuration", @"Window title"),
-                                         NSLocalizedString(@"To install a SurfSafeVPN Configuration (.tblk extension), double-click it.\n\n"
-                                                           "The new configuration will be available in SurfSafeVPN immediately.", @"Window text"),
-                                         NSLocalizedString(@"Done", @"Button"),    // Default button
-                                         NSLocalizedString(@"Back", @"Button"),  // Alternate button
-                                         nil
-                                         );
-                
-                if (  button == NSAlertAlternateReturn  ) {
-                    // User selected Back
-                    nextState = stateGoBack;
-                    break;
-                }
-                
-                return;
-                
-                
-            case stateShowOpenVpnInstructions:
-                
-                // User selected OPEPNVPN VPN CONFIGURATION
-                
-                button = TBRunAlertPanel(NSLocalizedString(@"Which Type of Configuration Do You Wish to Create?", @"Window title"),
-                                         NSLocalizedString(@"     • With one configuration file at a time, you can "
-                                                           "create a SurfSafeVPN Configuration.\n\n"
-                                                           
-                                                           "     • With multiple configuration files, you "
-                                                           "can place the configuration files (and certificate "
-                                                           "and key files if you have them) into SurfSafeVPN's private configurations folder.\n"
-                                                           "This is the traditional way OpenVPN configurations have been used.\n\n"
-                                                           
-                                                           "Note: SurfSafeVPN Configurations are preferred, because they may be shared, may be started "
-                                                           "when the computer starts, and are secured automatically.", @"Window text"),
-                                         NSLocalizedString(@"Create SurfSafeVPN Configuration", @"Button"), // Default button
-                                         NSLocalizedString(@"Back", @"Button"),                                 // Alternate button
-                                         NSLocalizedString(@"Open Private Configurations Folder", @"Button")    // Other button
-                                         );
-                
-                if (  button == NSAlertAlternateReturn  ) {
-                    // User selected Back
-                    nextState = stateGoBack;
-                    break;
-                }
-                
-                if (  button == NSAlertOtherReturn  ) {
-                    // User wants to open the private configuration folder
-                    nextState = stateOpenPrivateFolder;
-                    break;
-                }
-                // User wants to create sample configuration on Desktop and edit the OpenVPN configuration file in TextEdit
-                nextState = stateMakeEmptyConfiguration;
-                break;
-                
-                
-            case stateOpenPrivateFolder:
-            
-                // User wants to open the private configuration folder
-                [[NSWorkspace sharedWorkspace] openFile: gPrivatePath];
-
-                button = TBRunAlertPanel(NSLocalizedString(@"Private Configuration Folder is Open", @"Window title"),
-                                         NSLocalizedString(@"The private configuration folder has been opened in a Finder window.\n\n"
-                                                           "Move or copy OpenVPN configuration files and key and certificate files to the folder.\n\n"
-                                                           "The new configuration(s) will be available in SurfSafeVPN immediately.", @"Window text"),
+                button = TBRunAlertPanel(NSLocalizedString(@"Installing a SurfSafeVPN VPN Configuration", @"Window title"),
+                                         NSLocalizedString(@"To install a SurfSafeVPN VPN Configuration (.tblk extension), double-click it.\n\n"
+                                                           "The new configuration will be available in Tunnelblick immediately.", @"Window text"),
                                          NSLocalizedString(@"Done", @"Button"),    // Default button
                                          NSLocalizedString(@"Back", @"Button"),  // Alternate button
                                          nil
@@ -2270,11 +1896,11 @@ enum state_t {                      // These are the "states" of the guideState 
                 NSLog(@"guideState: Back command but no history");
                 return;
             }
-            int backState = [[history lastObject] intValue];
+            enum state_t backState = (enum state_t)[[history lastObject] intValue];
             [history removeLastObject];
             state = backState;
         } else {
-            [history addObject: [NSNumber numberWithInt: state]];
+            [history addObject: [NSNumber numberWithInt: (int) state]];
             state = nextState;
         }
     } 
