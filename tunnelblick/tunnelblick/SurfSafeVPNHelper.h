@@ -6,8 +6,6 @@
 //
 //
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
 
-@interface SurfSafeVPNHelper : NSObject
-
-@end
+NSString* gateTheWholeLog();

@@ -1287,7 +1287,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             }
         }
     }
-    
+        
     [self checkIPAddressBeforeConnected];
     
     logFilesMayExist = TRUE;
@@ -1303,6 +1303,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [self disconnectFromManagmentSocket];
 
     [self clearLog];
+    
+
     
 	NSArray * arguments = [self argumentsForOpenvpnstartForNow: YES];
     if (  arguments == nil  ) {

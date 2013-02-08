@@ -39,6 +39,7 @@
 @class SplashWindowController;
 @class StatusWindowController;
 @class MainIconView;
+@class ToolReportWindowController;
 
 #ifdef INCLUDE_VPNSERVICE
 @class VPNService;
@@ -74,6 +75,7 @@ BOOL needToCopyBundle(void);
     NSMenuItem              * vpnDetailsItem;               //    "VPN Details..." item for menu
     NSMenuItem              * addConfigurationItem;         //    "Add a VPN..." menu item
     NSMenuItem              * contactTunnelblickItem;       //    "Contact Tunnelblick..." menu item (if beta version)
+    NSMenuItem              * createReportToolTicket;        //     new item using fot create tool report
     
 #ifdef INCLUDE_VPNSERVICE
     NSMenuItem              * registerForTunnelblickItem;//    "Register for Tunnelblick..." menu item
@@ -181,6 +183,7 @@ BOOL needToCopyBundle(void);
     BOOL                      outOfDate;
     Proxy                   * currentProxy;
     VPNConnection           * currentConnection;
+    ToolReportWindowController  *toolReport;
 }
 
 // Menu actions
@@ -190,6 +193,7 @@ BOOL needToCopyBundle(void);
 -(IBAction)         quit:                                   (id)                sender;
 -(IBAction)         clearKeychain:                          (id)                sender;
 -(IBAction)         turnOnOffPhotoShield:                   (id)                sender;
+-(IBAction)         sendToolReport:                         (id)                sender;
 
 
 // General methods

@@ -819,7 +819,7 @@ static BOOL firstTimeShowingWindow = TRUE;
 -(void) hookedUpOrStartedConnection: (VPNConnection *) theConnection
 {
     if (   theConnection
-        && ( theConnection == [self selectedConnection] )  ) {
+        /*&& ( theConnection == [self selectedConnection] )*/  ) { //forced monitoring files
         [theConnection startMonitoringLogFiles];
     }
 }
