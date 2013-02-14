@@ -55,7 +55,7 @@ extern TBUserDefaults  * gTbDefaults;
 -(id) initWithConfigName:(NSString *)inConfigName
 		credentialsGroup: (NSString *)inGroup
 {
-	if (  ! inConfigName  ) return nil;
+//	if (  ! inConfigName  ) return nil;
 	
     if (  (self = [super init])  ) {
         
@@ -68,7 +68,7 @@ extern TBUserDefaults  * gTbDefaults;
 			inGroup = allUseGroup;
 		}
         
-        displayName = [inConfigName copy];
+        /*displayName = [inConfigName copy];
         group = [inGroup copy];
         
 		NSString * prefix;
@@ -78,7 +78,7 @@ extern TBUserDefaults  * gTbDefaults;
         } else {
 			prefix = @"Tunnelblick-Auth-";
             credentialsName = [displayName copy];
-        }
+        }*/
         
         //passphraseKeychain      = [[KeyChain alloc] initWithService:[prefix stringByAppendingString:[self credentialsName]] withAccountName: @"privateKey" ];
         //usernameKeychain        = [[KeyChain alloc] initWithService:[prefix stringByAppendingString:[self credentialsName]] withAccountName: @"username"   ];

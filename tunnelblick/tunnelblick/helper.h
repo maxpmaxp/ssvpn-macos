@@ -117,6 +117,8 @@ BOOL           tunnelblickTestAppInApplications(void);
 BOOL           tunnelblickTestDeployed(void);
 BOOL           tunnelblickTestHasDeployBackups(void);
 
+BOOL           NSStringIsValidEmail(NSString * checkString);
+
 
 OSStatus       MyGotoHelpPage           (CFStringRef pagePath, 
                                          CFStringRef anchorName);

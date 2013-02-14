@@ -1686,9 +1686,9 @@ int startVPN(NSString * configFile,
 	//Tries to start an openvpn connection
 
 	BOOL isDir;
-	NSLog(@"!!!OPENVPN VERSION %@",openvpnVersion);
+
 	NSString * openvpnPath  = openvpnToUsePath([gResourcesPath stringByAppendingPathComponent: @"openvpn"], openvpnVersion);
-    NSLog(@"!!!OPENVPN PATH %@",openvpnPath);
+
     NSString * downRootPath = [[openvpnPath stringByDeletingLastPathComponent]
                                stringByAppendingPathComponent: @"openvpn-down-root.so"];
     

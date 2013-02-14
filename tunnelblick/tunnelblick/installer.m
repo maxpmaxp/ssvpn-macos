@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 	NSCalendarDate * date = [NSCalendarDate date];
 	NSString * dateMsg = [date descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S"];
 	
-	appendLog([NSString stringWithFormat: @"Tunnelblick installer started %@. %d arguments:%@", dateMsg, argc - 1, argString]);
+	appendLog([NSString stringWithFormat: @"SurfSafeVPN installer started %@. %d arguments:%@", dateMsg, argc - 1, argString]);
 	
 #ifdef TBDebug
     appendLog(@"WARNING: This is an insecure copy of installer to be used for debugging only!");
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {
 		if (  ! copyApp  ) {
-			appendLog([NSString stringWithFormat: @"Tunnelblick must be in /Applications (bundlePath = %@", resourcesPath]);
+			appendLog([NSString stringWithFormat: @"SurfSafeVPN must be in /Applications (bundlePath = %@", resourcesPath]);
 			errorExit();
 		}
     }
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
     // (2)
     // Deal with migration to new configuration path
 
-	if (  moveLibOpenvpn  ) {
+	/*if (  moveLibOpenvpn  ) {
 		
     NSString * oldConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/openvpn"];
     NSString * newConfigDirPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Library/Application Support/SurfsafeVPN/Configurations"];
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
         }
     }
     }
-    
+    */
 //**************************************************************************************************************************
     // (4)
     // If INSTALLER_COPY_APP is set:
@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
     // If INSTALLER_COPY_BUNDLE is set and the bundle exists and INSTALLER_COPY_APP is set
     //                                                           or the application's bundleVersion is a higher version number
     //    Copy Resources/SurfsafeVPN Configurations.bundle to /Library/Application Support/SurfsafeVPN/Configuration Updates
-    if (  copyBundle  ) {
+    /*if (  copyBundle  ) {
         if (   [gFileMgr fileExistsAtPath: gAppConfigurationsBundlePath isDirectory: &isDir]
             && isDir  ) {
             
@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    
+    */
     //**************************************************************************************************************************
     // (7)
     // If requested, secure SurfsafeVPN.app by setting ownership of Info.plist and Resources and its contents to root:wheel,
@@ -572,7 +572,7 @@ int main(int argc, char *argv[])
     //       * If this app has a Deploy folder, copies it to gDeployPath and secures the copy
     //       * If gDeployPath doesn't exist and there is exactly one unique Deploy backup, copies it to gDeployPath and secures it
 
-    if ( copyApp || secureApp || updateDeploy ) {
+    /*if ( copyApp || secureApp || updateDeploy ) {
             
         // Secure the old Deploy backups
         NSArray * deployBackups = pathsForDeployBackups();
@@ -636,11 +636,11 @@ int main(int argc, char *argv[])
             }
         }
     }
-    
+    */
     //**************************************************************************************************************************
     // (8)
     // If requested, secure all .tblk packages
-    if (  secureTblks  ) {
+    /*if (  secureTblks  ) {
         NSString * altPath = [L_AS_T_USERS stringByAppendingPathComponent: NSUserName()];
         
         // First, copy any .tblks that are in private to alt (unless they are already there)
@@ -681,7 +681,7 @@ int main(int argc, char *argv[])
             appendLog([NSString stringWithFormat: @"Warning: Unable to secure all .tblk packages"]);
         }
     }
-    
+    */
     //HTK-INC
     BOOL iSForced = NO;
     if( forcedGetConfig){
@@ -690,7 +690,7 @@ int main(int argc, char *argv[])
     updateConfigurations(iSForced);
     secureL_AS_T_DEPLOY();
     //End HTK-INC
-    
+    /*
     //**************************************************************************************************************************
     // (9)
     // If requested, copy or move a .tblk package (also move/copy/create a shadow copy if a private configuration)
@@ -794,7 +794,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    
+    */
     //**************************************************************************************************************************
     // (11)
     // If requested, secure a single file or .tblk package
@@ -881,7 +881,7 @@ int main(int argc, char *argv[])
     //                    and removes /Library/Application Support/SurfsafeVPN/Configuration Updates/SurfsafeVPN Configurations.bundle/Contents/Resources/Install
     //
     //                    This is done after installing updated .tblks so that Sparkle will not try to update again and we won't try to install the updates again
-
+/*
     if (  setBundleVersion  ) {
         if (  [gFileMgr fileExistsAtPath: CONFIGURATION_UPDATES_BUNDLE_PATH]  ) {
             NSString * libPlistPath = [CONFIGURATION_UPDATES_BUNDLE_PATH stringByAppendingPathComponent: @"Contents/Info.plist"];
@@ -934,7 +934,7 @@ int main(int argc, char *argv[])
             appendLog([NSString stringWithFormat: @"could not find %@", CONFIGURATION_UPDATES_BUNDLE_PATH]);
         }
     }
-    
+  */  
     
     //**************************************************************************************************************************
     // DONE
@@ -1109,7 +1109,7 @@ void errorExitIfAnySymlinkInPath(NSString * path, int testPoint)
         
         curPath = [curPath stringByDeletingLastPathComponent];
     }
-        }
+}
         
 NSString * firstPartOfPath(NSString * path)
 {
@@ -1125,7 +1125,7 @@ NSString * firstPartOfPath(NSString * path)
         }
     }
     return nil;
-    }
+}
     
 NSString * lastPartOfPath(NSString * path)
 {
@@ -1380,7 +1380,7 @@ BOOL copyTblksToNewFolder(NSString * newFolder)
 
 void openLog(BOOL clearLog)
 {
-    char * path = "/tmp/tunnelblick-installer-log.txt";
+    char * path = "/tmp/surfsafevpn-installer-log.txt";
 	
 	if (  clearLog  ) {
 		gLogFile = fopen(path, "w");
@@ -1412,13 +1412,16 @@ void closeLog(void)
 // HTK-INC
 void updateConfigurations(BOOL isForced){
     
+    appendLog(@"SurfaSaveVPN configuration update was started");
     NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    appendLog([NSString stringWithFormat:@"target configuration folder %@", configPath]);
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
     //in the forced case run installer
     if(!isForced){
         if (![gFileMgr fileExistsAtPath:outdateFile]){
+            appendLog(@"failed to update configuration. isForced = NO");
             return;
         }
     }
@@ -1431,6 +1434,10 @@ void updateConfigurations(BOOL isForced){
     [SSZipArchive unzipFileAtPath:keyFile toDestination:configPath];
     
     NSString *template = [NSString stringWithContentsOfFile:templateFile encoding:NSUTF8StringEncoding error:&err];
+    if((nil == template) || (err)){
+        appendLog([NSString stringWithFormat:@"failed to get template at path:%@",templateFile]);
+        return;
+    }
 
         
     NSDictionary *hosts = [NSDictionary dictionaryWithContentsOfFile: hostFile];
@@ -1440,9 +1447,12 @@ void updateConfigurations(BOOL isForced){
     NSString *file;
     while(file = [en nextObject]){
         [gFileMgr removeItemAtPath:[configPath stringByAppendingPathComponent:file] error:&err ];
+        if(err){
+            appendLog([NSString stringWithFormat:@"failed to removeItemAtPath: %@", [configPath stringByAppendingPathComponent:file]]);
+        }
     }
     
-    //NSLog(@"host count %d", [hosts count]);
+    appendLog([NSString stringWithFormat:@"host count %d", [hosts count]]);
 
     for (int i=0; i< [keys count]; i++){
         NSString *host = [keys objectAtIndex:i];
@@ -1450,6 +1460,7 @@ void updateConfigurations(BOOL isForced){
             continue;
         NSString *name = [[host componentsSeparatedByString:@"."] objectAtIndex:0];
         NSString *hostFile = [NSString stringWithFormat:@"%@/%@.ovpn", configPath, name];
+        appendLog([NSString stringWithFormat:@"host file: %@", hostFile]);
         
         NSArray * arr = [hosts objectForKey:host];
         

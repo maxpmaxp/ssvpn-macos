@@ -38,7 +38,7 @@
     if (  ![super initWithWindowNibName:@"LoginWindow"]  ) {
         return nil;
     }
-    
+        
     delegate = [theDelegate retain];    
     return self;
 }

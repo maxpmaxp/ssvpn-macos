@@ -69,6 +69,7 @@
 #define CONFIGURATION_PATH @"Library/Application Support/SurfsafeVPN/Configurations"
 #define UPDATE_PATH @"Library/Application Support/SurfSafeVPN/Updates"
 #define BACKUP_PATH @"Library/Application Support/SurfSafeVPN/Backups"
+#define GLOBAL_LOG_PATH @"Library/Application Support/SurfSafeVPN/Log"
 //End HTK-INC
 
 //*************************************************************************************************

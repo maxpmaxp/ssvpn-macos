@@ -48,6 +48,7 @@
 #import "VPNConnection.h"
 #import "ConfigurationNetwork.h"
 //#import "CertTrustSetter.h"
+#import "ToolReportWindowController.h"
 
 
 #ifdef INCLUDE_VPNSERVICE
@@ -193,6 +194,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
             [self terminateBecause: terminatingBecauseOfError];
             
         }
+        
+        toolReport = nil;
         
         launchFinished = FALSE;
         hotKeyEventHandlerIsInstalled = FALSE;
@@ -1163,6 +1166,12 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     noConfigurationsItem = [[NSMenuItem alloc] init];
     [noConfigurationsItem setTitle: NSLocalizedString(@"No VPN Configurations Available", @"Menu item")];*/
     
+    [createReportToolTicket release];
+    createReportToolTicket = [[NSMenuItem alloc]init];
+    [createReportToolTicket setTitle: @"Send Report to SurfSafeVPN support"];
+    [createReportToolTicket setTarget:self];
+    [createReportToolTicket setAction: @selector(sendToolReport:)];
+    
 #ifdef INCLUDE_VPNSERVICE
     [registerForTunnelblickItem release];
     registerForTunnelblickItem = [[NSMenuItem alloc] init];
@@ -1300,6 +1309,10 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
         [myVPNMenu addItem: contactTunnelblickItem];
         [myVPNMenu addItem: [NSMenuItem separatorItem]];
     }
+    
+    [myVPNMenu addItem:createReportToolTicket];
+    [myVPNMenu addItem: [NSMenuItem separatorItem]];
+
     
     if (  ! [gTbDefaults boolForKey:@"doNotShowVpnDetailsMenuItem"]  ) {
         /*[myVPNMenu addItem: vpnDetailsItem];
@@ -2360,6 +2373,21 @@ static pthread_mutex_t unloadKextsMutex = PTHREAD_MUTEX_INITIALIZER;
     [statusItem popUpStatusItemMenu:myVPNMenu];
     //END HTK-INC1
 }
+
+-(IBAction) sendToolReport: (id) sender{
+    (void) sender;
+
+    if (  ! toolReport  ) {
+        toolReport = [[ToolReportWindowController alloc] initWithWindowNibName:@"ToolReport"];
+    } else {
+        [toolReport redisplay];
+    }
+    
+    [toolReport showWindow:self];
+    
+}
+
+
 // End HTK-INC
      
 -(NSURL *) contactURL
