@@ -106,7 +106,7 @@
     
     
     //check e-mail
-    if(![self NSStringIsValidEmail: emailstr]){
+    if(!NSStringIsValidEmail(emailstr)){
         TBRunAlertPanel(@"Incorrect Email address", @"Please, enter valid email address.", @"OK", nil, nil);
         [NSApp activateIgnoringOtherApps: YES];
         return;
@@ -146,8 +146,18 @@
     NSHTTPURLResponse * response = nil;
     NSError * error = nil;
     NSData * responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
-    NSLog(@"%@", responseString);
+    int responseStatusCode = [response statusCode];
+    /*NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
+    NSLog(@"%@", responseString);*/
+    
+    if (!((responseStatusCode >= 200) && (responseStatusCode < 300))){
+        TBRunAlertPanel(@"Failed to send log.", [NSString stringWithFormat:@"Failed to send your log report.\nError code: %d\nError info: %@\nPlease try again later",
+                                                 responseStatusCode, [NSHTTPURLResponse localizedStringForStatusCode:responseStatusCode]], @"OK", nil, nil);
+        [request release];
+        [NSApp activateIgnoringOtherApps: YES];
+        return;
+    }
+
     [request release];
     [self close];
     
@@ -162,14 +172,5 @@
     }
 }
 
--(BOOL) NSStringIsValidEmail:(NSString *)checkString
-{
-    BOOL stricterFilter = YES; // Discussion http://blog.logichigh.com/2010/09/02/validating-an-e-mail-address/
-    NSString *stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
-    NSString *laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
-    NSString *emailRegex = stricterFilter ? stricterFilterString : laxString;
-    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
-    return [emailTest evaluateWithObject:checkString];
-}
 
 @end
