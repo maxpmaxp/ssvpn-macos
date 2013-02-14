@@ -1287,7 +1287,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             }
         }
     }
-    
+        
     [self checkIPAddressBeforeConnected];
     
     logFilesMayExist = TRUE;
@@ -1303,6 +1303,8 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
     [self disconnectFromManagmentSocket];
 
     [self clearLog];
+    
+
     
 	NSArray * arguments = [self argumentsForOpenvpnstartForNow: YES];
     if (  arguments == nil  ) {
@@ -1962,14 +1964,22 @@ static pthread_mutex_t areDisconnectingMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) tellUserAboutDisconnectWait
 {
-    TBRunAlertPanel(NSLocalizedString(@"OpenVPN Not Responding", @"Window title"),
+    /*TBRunAlertPanel(NSLocalizedString(@"OpenVPN Not Responding", @"Window title"),
                     [NSString stringWithFormat: NSLocalizedString(@"OpenVPN is not responding to disconnect requests.\n\n"
                                                                   "There is a known bug in OpenVPN version 2.1 that sometimes"
                                                                   " causes a delay of one or two minutes before it responds to such requests.\n\n"
                                                                   "SurfSafeVPN will continue to try to disconnect for up to %d seconds.\n\n"
                                                                   "The connection will be unavailable until OpenVPN disconnects or %d seconds elapse,"
                                                                   " whichever comes first.", @"Window text"), forceKillTimeout, forceKillTimeout],
+                    nil, nil, nil);*/
+    TBRunAlertPanel(NSLocalizedString(@"OpenVPN Not Responding", @"Window title"),
+                    [NSString stringWithFormat: NSLocalizedString(@"SurfSafeVPN is not responding to disconnect requests.\n\n"
+                                                                  "Please wait for correct finalization of disconnection proces.\n"
+                                                                  "SurfSafeVPN will continue to try to disconnect for up to %d seconds.\n\n"
+                                                                  "The connection will be unavailable until SurfSafeVPN disconnects or %d seconds elapse,"
+                                                                  " whichever comes first.", @"Window text"), forceKillTimeout, forceKillTimeout],
                     nil, nil, nil);
+
 }    
 
 -(void) forceKillWatchdogHandler

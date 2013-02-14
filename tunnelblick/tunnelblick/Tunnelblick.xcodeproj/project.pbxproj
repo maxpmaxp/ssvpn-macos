@@ -12,10 +12,17 @@
 		184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		184CB7451696D258006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		184CB7491696FB6B006541D4 /* easyRsa.m in Sources */ = {isa = PBXBuildFile; fileRef = 184CB7471696FB65006541D4 /* easyRsa.m */; };
+		1856C5CD16BEA66A001E83D8 /* SurfSafeToolReport.m in Sources */ = {isa = PBXBuildFile; fileRef = 1856C5CC16BEA66A001E83D8 /* SurfSafeToolReport.m */; };
+		1856C5D016BFB8C6001E83D8 /* SurfSafeVPNHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1856C5CF16BFB8C6001E83D8 /* SurfSafeVPNHelper.m */; };
+		1856C5D316BFF6E8001E83D8 /* CPSystemInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1856C5D216BFF6E8001E83D8 /* CPSystemInformation.m */; };
+		1856C5D516C00F12001E83D8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856C5D416C00F12001E83D8 /* IOKit.framework */; };
+		1856C5D716C01111001E83D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856C5D616C01111001E83D8 /* SystemConfiguration.framework */; };
 		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */ = {isa = PBXBuildFile; fileRef = 188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */; };
 		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
+		18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18CE9BF316C2DB8A00660764 /* ToolReport.xib */; };
+		18CE9BF716C2E5A900660764 /* ToolReportWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CE9BF616C2E5A900660764 /* ToolReportWindowController.m */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -262,11 +269,22 @@
 		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
 		184CB7461696FB65006541D4 /* easyRsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easyRsa.h; sourceTree = "<group>"; };
 		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
+		1856C5CB16BEA66A001E83D8 /* SurfSafeToolReport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfSafeToolReport.h; sourceTree = "<group>"; };
+		1856C5CC16BEA66A001E83D8 /* SurfSafeToolReport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SurfSafeToolReport.m; sourceTree = "<group>"; };
+		1856C5CE16BFB8C6001E83D8 /* SurfSafeVPNHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfSafeVPNHelper.h; sourceTree = "<group>"; };
+		1856C5CF16BFB8C6001E83D8 /* SurfSafeVPNHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SurfSafeVPNHelper.m; sourceTree = "<group>"; };
+		1856C5D116BFF6E8001E83D8 /* CPSystemInformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPSystemInformation.h; sourceTree = "<group>"; };
+		1856C5D216BFF6E8001E83D8 /* CPSystemInformation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CPSystemInformation.m; sourceTree = "<group>"; };
+		1856C5D416C00F12001E83D8 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		1856C5D616C01111001E83D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		1883BA01167772A500D7FC26 /* ConfigurationNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationNetwork.h; sourceTree = "<group>"; };
 		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
 		188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
 		18A4C32416847276006F3BC0 /* sharedRoutines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedRoutines.h; sourceTree = "<group>"; };
 		18A4C32516847276006F3BC0 /* sharedRoutines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sharedRoutines.m; sourceTree = "<group>"; };
+		18CE9BF316C2DB8A00660764 /* ToolReport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ToolReport.xib; sourceTree = "<group>"; };
+		18CE9BF516C2E5A800660764 /* ToolReportWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ToolReportWindowController.h; sourceTree = "<group>"; };
+		18CE9BF616C2E5A900660764 /* ToolReportWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ToolReportWindowController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -530,6 +548,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1856C5D716C01111001E83D8 /* SystemConfiguration.framework in Frameworks */,
+				1856C5D516C00F12001E83D8 /* IOKit.framework in Frameworks */,
 				CEB1B1F815527278000BC247 /* libz.dylib in Frameworks */,
 				CE8E6D581550E5F80087E9D2 /* Cocoa.framework in Frameworks */,
 				CE8E6D591550E5F80087E9D2 /* CoreFoundation.framework in Frameworks */,
@@ -599,6 +619,12 @@
 				63ABFE901349E370003DEB64 /* UI */,
 				61BC4B880E2F9EDA00F24255 /* UKKQueue */,
 				6311305E11041B89003435F1 /* UKLoginItemRegistry */,
+				1856C5CB16BEA66A001E83D8 /* SurfSafeToolReport.h */,
+				1856C5CC16BEA66A001E83D8 /* SurfSafeToolReport.m */,
+				1856C5CE16BFB8C6001E83D8 /* SurfSafeVPNHelper.h */,
+				1856C5CF16BFB8C6001E83D8 /* SurfSafeVPNHelper.m */,
+				1856C5D116BFF6E8001E83D8 /* CPSystemInformation.h */,
+				1856C5D216BFF6E8001E83D8 /* CPSystemInformation.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -642,6 +668,8 @@
 		29B97314FDCFA39411CA2CEA /* Tunnelblick */ = {
 			isa = PBXGroup;
 			children = (
+				1856C5D616C01111001E83D8 /* SystemConfiguration.framework */,
+				1856C5D416C00F12001E83D8 /* IOKit.framework */,
 				CEB1B1F715527278000BC247 /* libz.dylib */,
 				CEB1B1DB15526E58000BC247 /* SSZipArchive */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -775,6 +803,8 @@
 				6388563D134B7E1C008DF8C1 /* PassphraseWindowController.m */,
 				639A10FF132AC9D800754C2A /* StatusWindowController.h */,
 				639A10FE132AC9D800754C2A /* StatusWindowController.m */,
+				18CE9BF516C2E5A800660764 /* ToolReportWindowController.h */,
+				18CE9BF616C2E5A900660764 /* ToolReportWindowController.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -895,6 +925,7 @@
 				6388569F134B8056008DF8C1 /* PassphraseWindow.xib */,
 				639A10EA132AC74B00754C2A /* StatusWindow.xib */,
 				63E56EB71384813C007E39AB /* VPNService xibs */,
+				18CE9BF316C2DB8A00660764 /* ToolReport.xib */,
 			);
 			name = xibs;
 			sourceTree = "<group>";
@@ -1165,6 +1196,7 @@
 				CEB1B1F315526E58000BC247 /* Readme.markdown in Resources */,
 				CEC3830515537C4B0036B237 /* SurfSafe-Info.plist in Resources */,
 				188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */,
+				18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1313,6 +1345,10 @@
 				CEB1B1F415526E58000BC247 /* SSZipArchive.m in Sources */,
 				CECE45D7155A6F5700779AA0 /* SurfSafeUpdater.m in Sources */,
 				18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */,
+				1856C5CD16BEA66A001E83D8 /* SurfSafeToolReport.m in Sources */,
+				1856C5D016BFB8C6001E83D8 /* SurfSafeVPNHelper.m in Sources */,
+				1856C5D316BFF6E8001E83D8 /* CPSystemInformation.m in Sources */,
+				18CE9BF716C2E5A900660764 /* ToolReportWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

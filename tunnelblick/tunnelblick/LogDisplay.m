@@ -95,6 +95,10 @@ extern BOOL                   gShuttingDownWorkspace;
    receivedNotification:                (NSString *)            nm
                 forPath:                (NSString *)            fpath;
 
+-(int) createNewGlobalLogFile;
+-(void) writeToGlobalLogFileString: (NSString *) msg;
+
+
 // Getters and Setters:
 TBPROPERTY(NSMutableString *,    tbLog,                 setTbLog)
 TBPROPERTY(NSAttributedString *, savedLog,              setSavedLog)
@@ -176,6 +180,8 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
         return;
     }
     
+
+    
     NSCalendarDate * date = [NSCalendarDate date];
     NSString * dateText = [NSString stringWithFormat:@"%@ %@\n",[date descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S"], text];
     
@@ -183,6 +189,8 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
     
     BOOL fromTunnelblick = [text hasPrefix: @"*Tunnelblick: "];
     BOOL fromSurfSafeVPN = [text hasPrefix:@"*SurfSafeVPN: "];
+    
+    [self writeToGlobalLogFileString: dateText];
     
     if (  [self logStorage]  ) {
         [self insertLine: dateText beforeTunnelblickEntries: NO beforeOpenVPNEntries: NO fromOpenVPNLog: NO fromTunnelblickLog: (fromTunnelblick || fromSurfSafeVPN)];
@@ -230,6 +238,9 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  logStore  ) {
         [self doLogScrolling];
     }
+    
+    //create newLogFile
+    [self createNewGlobalLogFile];
 }
 
 -(void) doLogScrolling
@@ -810,7 +821,6 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  gShuttingDownWorkspace  ) {
         return;
     }
-    
     OSStatus status = pthread_mutex_lock( &logStorageMutex );
     if (  status != EXIT_SUCCESS  ) {
         NSLog(@"pthread_mutex_lock( &logStorageMutex ) failed; status = %ld", (long) status);
@@ -862,7 +872,6 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
     // Find the tenth LF, and remove starting after that, to preserve the first ten lines of the log
-
     OSStatus status = pthread_mutex_lock( &logStorageMutex );
     if (  status != EXIT_SUCCESS  ) {
         NSLog(@"pthread_mutex_lock( &logStorageMutex ) failed; status = %ld", (long) status);
@@ -897,7 +906,6 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
             
         [logStore endEditing];
     }
-    
     pthread_mutex_unlock( &logStorageMutex );
     
     [self doLogScrolling];
@@ -981,7 +989,6 @@ static pthread_mutex_t logStorageMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  gShuttingDownWorkspace  ) {
         return;
     }
-    
     // Return without doing anything if log file doesn't exist
     if (   ( ! logPath )
         || ( ! [gFileMgr fileExistsAtPath: logPath])  ) {
@@ -1049,7 +1056,6 @@ beforeTunnelblickEntries: (BOOL) beforeTunnelblickEntries
     if (  gShuttingDownWorkspace  ) {
         return;
     }
-    
     OSStatus status = pthread_mutex_lock( &logStorageMutex );
     if (  status != EXIT_SUCCESS  ) {
         NSLog(@"pthread_mutex_lock( &logStorageMutex ) failed; status = %ld", (long) status);
@@ -1198,7 +1204,9 @@ beforeTunnelblickEntries: (BOOL) beforeTunnelblickEntries
             
         }
     }
-    
+    //write to text file in any case
+    [self writeToGlobalLogFileString: line];
+    pthread_mutex_unlock( &logStorageMutex );
     [self didAddLineToLogDisplay];
 }
 
@@ -1317,6 +1325,86 @@ beforeTunnelblickEntries: (BOOL) beforeTunnelblickEntries
     
     return nil;
 }
+
+
+//surfsafeVPN specific loggingToFile
+
+-(int) createNewGlobalLogFile
+{
+    NSString * logsPath = [NSHomeDirectory() stringByAppendingPathComponent:GLOBAL_LOG_PATH];
+    BOOL isDir = NO, isExist = NO;
+    isExist = [gFileMgr fileExistsAtPath:logsPath isDirectory:&isDir];
+    
+    NSError* err = nil;
+    int res = -1; 
+    if(isExist && isDir){
+        [gFileMgr removeItemAtPath:logsPath error:&err];
+        if(err){
+            NSLog(@"Failed to remove directory at path: %@", logsPath);
+            return 0;
+        }
+        res = createDir(logsPath, 0755);
+        if (res == -1){
+            return 0;
+        }
+    }
+    else if (!isExist){
+        res = createDir(logsPath, 0755);
+        if (res == -1){
+            return 0;
+        }
+    }
+    
+    //remove all logs from folder because we need to store only the last one
+    NSDirectoryEnumerator* en = [gFileMgr enumeratorAtPath:logsPath];
+
+    BOOL bRes;
+
+    NSString* file;
+    while (file = [en nextObject]) {
+        bRes = [gFileMgr removeItemAtPath:[logsPath stringByAppendingPathComponent:file] error:&err];
+        if (!bRes && err) {
+            NSLog(@"removeItemAtPath failed for file: %@", [logsPath stringByAppendingPathComponent:file]);
+            return 0;
+        }
+    }
+    
+    //create new empty file
+    
+    NSString *globalLogPath = [logsPath stringByAppendingPathComponent:@"last_connection.log"];
+    if (  ! [gFileMgr createFileAtPath: globalLogPath contents:nil attributes: nil]  ) {
+        NSLog( @"Warning: Failed to create global log file at %@", globalLogPath);
+
+        return 0;
+    }
+
+    //success
+    return  1;
+    
+}
+
+-(void) writeToGlobalLogFileString: (NSString *) msg
+{
+    BOOL result = YES;
+    //construct logpath
+    NSString * logsPath = [NSHomeDirectory() stringByAppendingPathComponent:GLOBAL_LOG_PATH];
+    NSString *globalLogPath = [logsPath stringByAppendingPathComponent:@"last_connection.log"];
+    
+    //[msg writeToFile:globalLogPath atomically: NO encoding:NSUTF8StringEncoding error: nil];
+    
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:globalLogPath];
+    
+    @try {
+        [fileHandle seekToEndOfFile];
+        [fileHandle writeData:[msg dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    @catch (NSException * e) {
+        result = NO;
+    }
+
+    [fileHandle closeFile];
+}
+
 
 
 TBSYNTHESIZE_OBJECT(retain, NSMutableString *,      tbLog,                  setTbLog)
