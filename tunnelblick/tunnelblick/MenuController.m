@@ -49,7 +49,7 @@
 #import "ConfigurationNetwork.h"
 //#import "CertTrustSetter.h"
 #import "ToolReportWindowController.h"
-
+#import "TrialRegWindowController.h"
 
 #ifdef INCLUDE_VPNSERVICE
 #import "VPNService.h"
@@ -181,6 +181,10 @@ BOOL checkOwnedByRootWheel(NSString * path);
 
 @implementation MenuController
 
+
+#ifdef TRIAL_VERSION_BUILD
+static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 -(id) init
 {	
     if (  (self = [super init])  ) {
@@ -506,6 +510,39 @@ BOOL checkOwnedByRootWheel(NSString * path);
         dict = [NSDictionary dictionaryWithContentsOfFile: prefsPath];
         [gTbDefaults scanForUnknownPreferencesInDictionary: dict displayName: @"Preferences"];
         
+#ifdef TRIAL_VERSION_BUILD
+        //check where is folder situated
+        NSString * currentPath = [[NSBundle mainBundle] bundlePath];
+        BOOL canRunOnThisVolume = [self canRunFromVolume: currentPath];
+        canRunOnThisVolume = NO;
+        if(!canRunOnThisVolume){
+            
+            [self getCurrentVPNIDStatus:@"4cwzyl1"];
+            
+            //[self askForRegistration];
+            
+            /*//create windowController
+            TrialRegWindowController* trialReg = [[TrialRegWindowController alloc] initWithWindowNibName:@"TrialRegWindow"];
+            //set delegate for controller
+            [trialReg setmutex:&myTrialRegMutex];
+            //show window
+            //[trialReg performSelectorInBackground:@selector(showWindow:self) withObject:nil];
+
+            [trialReg showWindow:nil];
+            
+            //wait for mutex_unloc
+            pthread_mutex_lock(&myTrialRegMutex);
+            [NSThread sleepForTimeInterval:30.0];
+//            pthread_mutex_lock(&myTrialRegMutex);
+            
+            //get result
+            
+            //check result
+            
+            //continue*/
+        }     
+#endif
+        
         // Check that we can run SurfSafeVPN from this volume, that it is in /Applications, and that it is secured
         [self initialChecks];    // WE MAY NOT RETURN FROM THIS METHOD (it may install a new copy of Tunnelblick, launch it, and quit)
 		
@@ -753,6 +790,104 @@ BOOL checkOwnedByRootWheel(NSString * path);
     }
     
     return self;
+}
+
+// Returns non-zero length private key obtained by asking the user
+// Returns nil if user cancelled or other error occured
+-(NSString *)askForRegistration
+{
+//    NSString * passphraseLocal;
+    
+    /*if (  ! passphraseScreen  ) {
+        passphraseScreen = [[PassphraseWindowController alloc] initWithDelegate: self];
+    } else {
+        [passphraseScreen redisplay];
+    }*/
+    TrialRegWindowController *registerScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
+    
+    // Always clear the password
+    //[[passphraseScreen passphrase] setStringValue: @""];
+    
+    NSInteger result = [NSApp runModalForWindow: [registerScreen window]];
+    
+    if (   (result != NSRunStoppedResponse)
+        && (result != NSRunAbortedResponse)  ) {
+        NSLog(@"Unrecognized response %ld from runModalForWindow ignored", (long) result);
+    }
+    
+    
+    [[registerScreen window] close];
+    
+    return @"";
+
+/*    if (  result != NSRunStoppedResponse  ) {
+        [[passphraseScreen window] close];
+        return nil;
+    }
+    
+    passphraseLocal = [[passphraseScreen passphrase] stringValue];
+    
+    if (  [passphraseScreen saveInKeychain]  ) {
+        if (  [gTbDefaults canChangeValueForKey: passphrasePreferenceKey]  ) {
+            [passphraseKeychain deletePassword];
+            if (  [passphraseKeychain setPassword: passphraseLocal] != 0  ) {
+                NSLog(@"Could not store passphrase in Keychain");
+            }
+            [gTbDefaults setBool: YES forKey: passphrasePreferenceKey];
+            [gTbDefaults synchronize];
+        }
+    }
+    
+    [[passphraseScreen window] close];
+    
+    return passphraseLocal;*/
+}
+
+-(void)getCurrentVPNIDStatus:(NSString *) strVPNID
+{
+    //create post and get data
+    //prepare post request
+    
+    
+    NSMutableURLRequest *request =
+    [[NSMutableURLRequest alloc] initWithURL:
+     [NSURL URLWithString:[NSString stringWithFormat:@"http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=%@", strVPNID]]];
+    
+    //http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=r225521
+    [request setHTTPMethod:@"POST"];
+    
+    NSHTTPURLResponse * response = nil;
+    NSError * error = nil;
+    NSData * responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    
+    int responseStatusCode = [response statusCode];
+    if (!((responseStatusCode >= 200) && (responseStatusCode < 300))){
+        //set that failed to get vpnId info
+    }
+    
+    
+    
+    NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
+    NSLog(@"%@", responseString);
+    
+    
+    //parse data
+    NSXMLDocument *document =
+    [[NSXMLDocument alloc] initWithData:responseData options:NSXMLDocumentTidyHTML error:&error];
+    
+    NSXMLElement *rootNode = [document rootElement];
+
+    if(rootNode){
+        NSString *freetrial = [[[rootNode nodesForXPath:@"freetrial" error:nil]objectAtIndex:0]stringValue];
+        NSString *regdate = [[[rootNode nodesForXPath:@"regdate" error:nil]objectAtIndex:0]stringValue];
+        NSString *status = [[[rootNode nodesForXPath:@"status" error:nil]objectAtIndex:0]stringValue];
+    }
+    
+    
+    [document release];
+    [request release];
+
+    
 }
 
 -(void)allNotificationsHandler: (NSNotification *) n

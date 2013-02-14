@@ -302,5 +302,10 @@ typedef enum
 
 //*************************************************************************************************
 // Section for enable debug mode
-//#define TBDebug 1
+#define TBDebug 1
+
+
+//*************************************************************************************************
+// Section for enable trial version build
+#define TRIAL_VERSION_BUILD 1
 
