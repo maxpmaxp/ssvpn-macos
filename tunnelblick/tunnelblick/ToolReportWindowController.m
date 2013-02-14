@@ -68,7 +68,7 @@
     
     [vpnid setTitleWithMnemonic:[SurfSafeToolReport getUserNameFromKeyChain]];
     
-    [mainLogText setString:gateTheWholeLog()];
+    [mainLogText setString:getCompleteLog()];
     [mainLogText setNeedsDisplay:TRUE];
     
     [[self window] center];

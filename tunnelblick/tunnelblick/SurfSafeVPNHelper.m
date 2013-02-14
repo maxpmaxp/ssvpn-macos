@@ -15,8 +15,8 @@
 #include <stdio.h>
 #include <sys/sysctl.h>
 #include <Carbon/Carbon.h>
-#include "defines.h";
-
+#include "defines.h"
+#import "SurfSafeToolReport.h"
 #import "CPSystemInformation.h"
 
 typedef struct kinfo_proc kinfo_proc;
@@ -26,7 +26,17 @@ const int max_processes = 1024;
 static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount);
 NSString* getLogFromFile(NSString *strLogPath);
 
-NSString* gateTheWholeLog() {
+NSString* getCompleteLog() {
+    
+    NSString* headerLog = @"SurfSafeVPN Client for MAC OS X Log:\n--------------\n\n";
+    
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    
+    headerLog = [headerLog stringByAppendingFormat:@"Product name: %@\nProduct version: %@\n%@\n",
+                                                    [infoDict objectForKey:@"CFBundleName"],
+                                                    [infoDict objectForKey:@"CFBundleVersion"],
+                                                    [SurfSafeToolReport osVer]];
+    
     NSString* kextStat = @"kextstat:\n--------------\n\n";
     
     kextStat = [kextStat stringByAppendingString: [CPSystemInformation getKextstat]];
@@ -80,7 +90,7 @@ NSString* gateTheWholeLog() {
     applicationLog = [applicationLog stringByAppendingString: getLogFromFile(globalLogPath)];
     
     results = NULL;
-    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@", systemString,ifconfig, kextStat, processList, installerLog, applicationLog];
+    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@",headerLog, systemString, ifconfig, kextStat, processList, installerLog, applicationLog];
 }
 
 NSString* getLogFromFile(NSString *strLogPath){

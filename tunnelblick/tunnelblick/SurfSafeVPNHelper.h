@@ -8,4 +8,4 @@
 
 //#import <Foundation/Foundation.h>
 
-NSString* gateTheWholeLog();
+NSString* getCompleteLog();
