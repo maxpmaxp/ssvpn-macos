@@ -217,9 +217,10 @@ extern NSFileManager  * gFileMgr;
     [root addChild:vpnid_elem];
     [vpnid_elem release];
     
+
     if([[self strDate] isEqualToString:@""]){
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"YYYY-MM-DD"];
+        [formatter setDateFormat:@"YYYY-MM-dd"];
         NSString *stringFromDate = [formatter stringFromDate:[NSDate date]];
         [formatter release];
         [self setstrDate: stringFromDate];
@@ -227,7 +228,7 @@ extern NSFileManager  * gFileMgr;
     
     //encode last string with vpnid
     NSString* encrypted_date = [FBEncryptorAES encryptBase64String:[self strDate]
-                                                         keyString:[self vpnId]
+                                                         keyString:[self strVPNId]
                                                      separateLines:NO];
     
     NSXMLElement *passphrase = [[NSXMLElement alloc] initWithName:@"passphrase"];

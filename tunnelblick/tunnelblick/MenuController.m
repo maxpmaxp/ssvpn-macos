@@ -51,6 +51,7 @@
 #import "ToolReportWindowController.h"
 #import "TrialRegWindowController.h"
 #import "TrialOverNotificationWindowController.h"
+#import "TrialVersionSecureStorage.h"
 
 #ifdef INCLUDE_VPNSERVICE
 #import "VPNService.h"
@@ -183,9 +184,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
 @implementation MenuController
 
 
-#ifdef TRIAL_VERSION_BUILD
-static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
+
 -(id) init
 {	
     if (  (self = [super init])  ) {
@@ -510,37 +509,69 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
                                 stringByAppendingPathExtension: @"plist"];
         dict = [NSDictionary dictionaryWithContentsOfFile: prefsPath];
         [gTbDefaults scanForUnknownPreferencesInDictionary: dict displayName: @"Preferences"];
-        
+        trialVersionSecureStorage = nil;
 #ifdef TRIAL_VERSION_BUILD
+        trialVersionSecureStorage = [[TrialVersionSecureStorage alloc] init];
         //check where is folder situated
         NSString * currentPath = [[NSBundle mainBundle] bundlePath];
         BOOL canRunOnThisVolume = [self canRunFromVolume: currentPath];
+            
+#ifdef TBDebug
         canRunOnThisVolume = NO;
+#endif
+
         if(!canRunOnThisVolume){
             
-            //[self getCurrentVPNIDStatus:@"4cwzyl1"];
-            [self showTrialOverModalWindow];
-            //[self askForRegistration];
+            //hello from installer
             
-            /*//create windowController
-            TrialRegWindowController* trialReg = [[TrialRegWindowController alloc] initWithWindowNibName:@"TrialRegWindow"];
-            //set delegate for controller
-            [trialReg setmutex:&myTrialRegMutex];
-            //show window
-            //[trialReg performSelectorInBackground:@selector(showWindow:self) withObject:nil];
-
-            [trialReg showWindow:nil];
+            //check is exist FULLVersion
+            NSString * targetPath = @"/Applications/SurfSafeVPN.app";
+            if([gFileMgr fileExistsAtPath:targetPath]){
+                //set message that it's impossible to install trial client
+                TBRunAlertPanel(@"Failed to install SurfSafeVPN trial.", @"Installer detected existing non-trial version\n"
+                                "of SurfSafeVPN client in your \"Applications\" folder.\n"
+                                "Please remove full version of SurfSafeVPN client\n"
+                                "before using SurfsafeVPN Trial."
+                                , nil, nil, nil);
+                //close app
+                [self terminateBecause: terminatingBecauseOfQuit];
+            }
+            //check for existing/expired trial key
             
-            //wait for mutex_unloc
-            pthread_mutex_lock(&myTrialRegMutex);
-            [NSThread sleepForTimeInterval:30.0];
-//            pthread_mutex_lock(&myTrialRegMutex);
-            
-            //get result
-            
-            //check result
-            
-            //continue*/
+            if([trialVersionSecureStorage isTrialKeyExist]){
+                if(![trialVersionSecureStorage isValidTrialKey]){
+                    //exist but not valid
+                    [self showTrialOverModalWindow];
+                    //close app
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+            else{
+                //try to register and check result
+                if(![self isRegistrationSucceed]){
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+        }
+        else{
+            //just check is
+            if([trialVersionSecureStorage isTrialKeyExist]){
+                if(![trialVersionSecureStorage isValidTrialKey]){
+                    //exist but not valid
+                    [self showTrialOverModalWindow];
+                    //close app
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+            else{
+                //failed to run without trial key file
+                //as sdvice - reinstall
+                TBRunAlertPanel(@"Failed to start SurfSafeVPN trial.", @"Your Trial Key was Lost.\n"
+                                "Try to reinstall Trial version of app.\n"
+                                , nil, nil, nil);
+                //close app
+                [self terminateBecause: terminatingBecauseOfQuit];
+            }
         }     
 #endif
         
@@ -803,7 +834,7 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
     
 }
 
--(NSString *)askForRegistration
+-(BOOL *)isRegistrationSucceed
 {
     
     TrialRegWindowController *registerScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
@@ -817,9 +848,20 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
     }
     
     
+    if(([registerScreen alreadyHaveVPNID] == NO) && (result == NSRunStoppedResponse)){
+        
+        //create new secure storage
+        [trialVersionSecureStorage updateWithFirstName:[[registerScreen firstName] stringValue] LastName:[[registerScreen lastName] stringValue] andEmail:[[registerScreen email] stringValue]];
+    }
+    
     [[registerScreen window] close];
     
-    return @"";
+    [registerScreen release];
+    
+    if(result == NSRunStoppedResponse)
+        return true;
+    else
+        return false;
 
 }
 
@@ -984,6 +1026,8 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
     
     //HTK-INC
     [ssUpdater release];
+    
+    [trialVersionSecureStorage release];
 
     //[myConfigUpdater release];
     [customMenuScripts release];
@@ -5907,6 +5951,11 @@ static pthread_mutex_t threadIdsMutex = PTHREAD_MUTEX_INITIALIZER;
 {
     //return [[updater retain] autorelease];
     return nil;
+}
+
+-(TrialVersionSecureStorage *)trialVersionSecureStorage
+{
+    return trialVersionSecureStorage;
 }
 
 -(NSArray *) connectionsToRestoreOnUserActive

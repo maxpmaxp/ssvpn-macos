@@ -40,6 +40,7 @@
 @class StatusWindowController;
 @class MainIconView;
 @class ToolReportWindowController;
+@class TrialVersionSecureStorage;
 
 #ifdef INCLUDE_VPNSERVICE
 @class VPNService;
@@ -184,6 +185,8 @@ BOOL needToCopyBundle(void);
     Proxy                   * currentProxy;
     VPNConnection           * currentConnection;
     ToolReportWindowController  *toolReport;
+    
+    TrialVersionSecureStorage * trialVersionSecureStorage;
 }
 
 // Menu actions
@@ -275,6 +278,7 @@ BOOL needToCopyBundle(void);
 -(void)             startOrStopDurationsTimer;
 -(BOOL)             terminatingAtUserRequest;
 -(SUUpdater *)      updater;
+-(TrialVersionSecureStorage *)trialVersionSecureStorage;
 
 #ifdef INCLUDE_VPNSERVICE
 // VPNService support

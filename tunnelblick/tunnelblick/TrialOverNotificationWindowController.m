@@ -7,7 +7,6 @@
 //
 
 #import "TrialOverNotificationWindowController.h"
-#import "TrialVersionSecureStorage.h"
 
 @interface TrialOverNotificationWindowController ()
 
@@ -68,8 +67,12 @@
 
 -(IBAction)     huperLinkButtonWasClicked: (id)            sender
 {
-    NSURL *url = [[NSURL alloc] initWithString:[TrialVersionSecureStorage getURLstringforPurchase]];
+    NSString * strPurchaseUrl = [[delegate trialVersionSecureStorage] getPurchaseURL];
+    NSURL *url = [[NSURL alloc] initWithString:strPurchaseUrl];
     [[NSWorkspace sharedWorkspace] openURL:url];
+    
+    //exit after click
+    [self OKButtonWasClicked:sender];
 }
 
 -(IBAction)     OKButtonWasClicked:     (id)            sender
