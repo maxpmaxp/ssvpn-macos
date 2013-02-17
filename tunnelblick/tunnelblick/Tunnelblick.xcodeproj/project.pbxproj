@@ -22,7 +22,6 @@
 		1883BA03167772A500D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		1883BA04167772EE00D7FC26 /* ConfigurationNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */; };
 		188441BC16CCE02300AD3877 /* TrialVersionSecureStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 188441BB16CCE02300AD3877 /* TrialVersionSecureStorage.m */; };
-		188441BE16CD527400AD3877 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 188441BD16CD527400AD3877 /* libcrypto.a */; };
 		188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */ = {isa = PBXBuildFile; fileRef = 188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */; };
 		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18CE9BF316C2DB8A00660764 /* ToolReport.xib */; };
@@ -271,14 +270,6 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		182837DE16CB874500F4D675 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		182837E216CB874600F4D675 /* register-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "register-Info.plist"; sourceTree = "<group>"; };
-		182837E416CB874600F4D675 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		182837E616CB874600F4D675 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		182837E816CB874600F4D675 /* register-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "register-Prefix.pch"; sourceTree = "<group>"; };
-		182837EA16CB874600F4D675 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		182837EC16CB874600F4D675 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		182837ED16CB874600F4D675 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		182837F016CB874600F4D675 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
 		184CB7461696FB65006541D4 /* easyRsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easyRsa.h; sourceTree = "<group>"; };
 		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
@@ -297,7 +288,6 @@
 		1883BA02167772A500D7FC26 /* ConfigurationNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigurationNetwork.m; sourceTree = "<group>"; };
 		188441BA16CCE02300AD3877 /* TrialVersionSecureStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrialVersionSecureStorage.h; sourceTree = "<group>"; };
 		188441BB16CCE02300AD3877 /* TrialVersionSecureStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrialVersionSecureStorage.m; sourceTree = "<group>"; };
-		188441BD16CD527400AD3877 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "../third_party/openssl-1.0.1c/libcrypto.a"; sourceTree = "<group>"; };
 		188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "easy-rsa-SurfSafeVPN"; sourceTree = "<group>"; };
 		18A4C32416847276006F3BC0 /* sharedRoutines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedRoutines.h; sourceTree = "<group>"; };
 		18A4C32516847276006F3BC0 /* sharedRoutines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sharedRoutines.m; sourceTree = "<group>"; };
@@ -567,7 +557,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				188441BE16CD527400AD3877 /* libcrypto.a in Frameworks */,
 				1856C5D716C01111001E83D8 /* SystemConfiguration.framework in Frameworks */,
 				1856C5D516C00F12001E83D8 /* IOKit.framework in Frameworks */,
 				CEB1B1F815527278000BC247 /* libz.dylib in Frameworks */,
@@ -674,29 +663,6 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		182837E016CB874500F4D675 /* register */ = {
-			isa = PBXGroup;
-			children = (
-				182837EC16CB874600F4D675 /* AppDelegate.h */,
-				182837ED16CB874600F4D675 /* AppDelegate.m */,
-				182837EF16CB874600F4D675 /* MainMenu.xib */,
-				182837E116CB874600F4D675 /* Supporting Files */,
-			);
-			path = register;
-			sourceTree = "<group>";
-		};
-		182837E116CB874600F4D675 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				182837E216CB874600F4D675 /* register-Info.plist */,
-				182837E316CB874600F4D675 /* InfoPlist.strings */,
-				182837E616CB874600F4D675 /* main.m */,
-				182837E816CB874600F4D675 /* register-Prefix.pch */,
-				182837E916CB874600F4D675 /* Credits.rtf */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -713,7 +679,6 @@
 		29B97314FDCFA39411CA2CEA /* Tunnelblick */ = {
 			isa = PBXGroup;
 			children = (
-				188441BD16CD527400AD3877 /* libcrypto.a */,
 				1856C5D616C01111001E83D8 /* SystemConfiguration.framework */,
 				1856C5D416C00F12001E83D8 /* IOKit.framework */,
 				CEB1B1F715527278000BC247 /* libz.dylib */,
@@ -721,7 +686,6 @@
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
-				182837E016CB874500F4D675 /* register */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				6165CC8A0E9072A5007312DC /* RouteManager.h */,
@@ -1449,30 +1413,6 @@
 				089C165DFE840E0CC02AAC07 /* English */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		182837E316CB874600F4D675 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				182837E416CB874600F4D675 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		182837E916CB874600F4D675 /* Credits.rtf */ = {
-			isa = PBXVariantGroup;
-			children = (
-				182837EA16CB874600F4D675 /* en */,
-			);
-			name = Credits.rtf;
-			sourceTree = "<group>";
-		};
-		182837EF16CB874600F4D675 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				182837F016CB874600F4D675 /* en */,
-			);
-			name = MainMenu.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
