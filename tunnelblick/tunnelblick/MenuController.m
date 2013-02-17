@@ -50,6 +50,7 @@
 //#import "CertTrustSetter.h"
 #import "ToolReportWindowController.h"
 #import "TrialRegWindowController.h"
+#import "TrialOverNotificationWindowController.h"
 
 #ifdef INCLUDE_VPNSERVICE
 #import "VPNService.h"
@@ -517,8 +518,8 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
         canRunOnThisVolume = NO;
         if(!canRunOnThisVolume){
             
-            [self getCurrentVPNIDStatus:@"4cwzyl1"];
-            
+            //[self getCurrentVPNIDStatus:@"4cwzyl1"];
+            [self showTrialOverModalWindow];
             //[self askForRegistration];
             
             /*//create windowController
@@ -792,21 +793,21 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
     return self;
 }
 
-// Returns non-zero length private key obtained by asking the user
-// Returns nil if user cancelled or other error occured
+-(void)showTrialOverModalWindow
+{
+    TrialOverNotificationWindowController *trialOverScreen = [[TrialOverNotificationWindowController alloc] initWithDelegate:self];
+    
+    NSInteger result = [NSApp runModalForWindow: [trialOverScreen window]];
+    [[trialOverScreen window] close];
+    [trialOverScreen release];
+    
+}
+
 -(NSString *)askForRegistration
 {
-//    NSString * passphraseLocal;
     
-    /*if (  ! passphraseScreen  ) {
-        passphraseScreen = [[PassphraseWindowController alloc] initWithDelegate: self];
-    } else {
-        [passphraseScreen redisplay];
-    }*/
     TrialRegWindowController *registerScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
     
-    // Always clear the password
-    //[[passphraseScreen passphrase] setStringValue: @""];
     
     NSInteger result = [NSApp runModalForWindow: [registerScreen window]];
     
@@ -820,27 +821,6 @@ static pthread_mutex_t myTrialRegMutex = PTHREAD_MUTEX_INITIALIZER;
     
     return @"";
 
-/*    if (  result != NSRunStoppedResponse  ) {
-        [[passphraseScreen window] close];
-        return nil;
-    }
-    
-    passphraseLocal = [[passphraseScreen passphrase] stringValue];
-    
-    if (  [passphraseScreen saveInKeychain]  ) {
-        if (  [gTbDefaults canChangeValueForKey: passphrasePreferenceKey]  ) {
-            [passphraseKeychain deletePassword];
-            if (  [passphraseKeychain setPassword: passphraseLocal] != 0  ) {
-                NSLog(@"Could not store passphrase in Keychain");
-            }
-            [gTbDefaults setBool: YES forKey: passphrasePreferenceKey];
-            [gTbDefaults synchronize];
-        }
-    }
-    
-    [[passphraseScreen window] close];
-    
-    return passphraseLocal;*/
 }
 
 -(void)getCurrentVPNIDStatus:(NSString *) strVPNID

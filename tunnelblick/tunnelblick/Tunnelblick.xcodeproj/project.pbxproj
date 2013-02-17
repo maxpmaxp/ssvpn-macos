@@ -26,6 +26,8 @@
 		18A4C32716847276006F3BC0 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18CE9BF316C2DB8A00660764 /* ToolReport.xib */; };
 		18CE9BF716C2E5A900660764 /* ToolReportWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CE9BF616C2E5A900660764 /* ToolReportWindowController.m */; };
+		18E6E92716D1554E00467BA0 /* TrialOverNotificationWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E6E92516D1554E00467BA0 /* TrialOverNotificationWindowController.m */; };
+		18E6E92916D1556D00467BA0 /* TrialOverNotificationWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18E6E92816D1556D00467BA0 /* TrialOverNotificationWindow.xib */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -294,6 +296,9 @@
 		18CE9BF316C2DB8A00660764 /* ToolReport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ToolReport.xib; sourceTree = "<group>"; };
 		18CE9BF516C2E5A800660764 /* ToolReportWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ToolReportWindowController.h; sourceTree = "<group>"; };
 		18CE9BF616C2E5A900660764 /* ToolReportWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ToolReportWindowController.m; sourceTree = "<group>"; };
+		18E6E92516D1554E00467BA0 /* TrialOverNotificationWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrialOverNotificationWindowController.m; sourceTree = "<group>"; };
+		18E6E92616D1554E00467BA0 /* TrialOverNotificationWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrialOverNotificationWindowController.h; sourceTree = "<group>"; };
+		18E6E92816D1556D00467BA0 /* TrialOverNotificationWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TrialOverNotificationWindow.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -804,6 +809,8 @@
 		63ABFE901349E370003DEB64 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				18E6E92516D1554E00467BA0 /* TrialOverNotificationWindowController.m */,
+				18E6E92616D1554E00467BA0 /* TrialOverNotificationWindowController.h */,
 				635ECCF71378886E00F67F8D /* Preferences */,
 				63F0A8AF1507D13700526AF9 /* MainIconView.h */,
 				63F0A8B01507D13700526AF9 /* MainIconView.m */,
@@ -931,6 +938,7 @@
 		63EA8CE713A3DC5D0034F47C /* xibs */ = {
 			isa = PBXGroup;
 			children = (
+				18E6E92816D1556D00467BA0 /* TrialOverNotificationWindow.xib */,
 				635ECD061378B4A900F67F8D /* Preferences.xib */,
 				637A871B13B74DFB003C1871 /* SplashWindow.xib */,
 				6375FB4A1387F0E20034CB78 /* SettingsSheet.xib */,
@@ -1214,6 +1222,7 @@
 				188DE0C816B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN in Resources */,
 				18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */,
 				182837FA16CB8E5400F4D675 /* TrialRegWindow.xib in Resources */,
+				18E6E92916D1556D00467BA0 /* TrialOverNotificationWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1368,6 +1377,7 @@
 				18CE9BF716C2E5A900660764 /* ToolReportWindowController.m in Sources */,
 				186B62D816CA425D00DCED1A /* TrialRegWindowController.m in Sources */,
 				188441BC16CCE02300AD3877 /* TrialVersionSecureStorage.m in Sources */,
+				18E6E92716D1554E00467BA0 /* TrialOverNotificationWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

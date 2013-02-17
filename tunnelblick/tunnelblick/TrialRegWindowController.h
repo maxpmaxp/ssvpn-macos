@@ -34,6 +34,7 @@
 -(NSTextField *)email;
 -(NSTextField *)firstName;
 -(NSTextField *)lastName;
+-(BOOL) alreadyHaveVPNID;
 
 -(id)           delegate;
 

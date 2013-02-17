@@ -71,7 +71,7 @@
     if([alreadyHaveVPNIdCheckbox state] == NSOnState){
         [cancelButton setEnabled: NO];
         [OKButton setEnabled: NO];
-        [NSApp stopModalWithCode:3];
+        [NSApp stopModal];
         
     }
     else{
@@ -125,8 +125,8 @@
         [NSApp activateIgnoringOtherApps: YES];
         return;
     }
-    NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
-    NSLog(@"%@", responseString);
+    //NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
+    //NSLog(@"%@", responseString);
     
     //parse data
     NSXMLDocument *document =
@@ -209,71 +209,17 @@
     return [[firstName retain] autorelease];
 }
 
-/*-(NSTextField *) passphrase
-{
-    return [[passphrase retain] autorelease];
+-(BOOL) alreadyHaveVPNID{
+    if([alreadyHaveVPNIdCheckbox state] == NSOnState)
+        return YES;
+    else
+        return NO;
 }
-
--(void) setPassphrase: (NSTextField *) newValue
-{
-    if (  passphrase != newValue  ) {
-        [passphrase release];
-        passphrase = (NSSecureTextField *) [newValue retain];
-    }
-}
-
--(BOOL) saveInKeychain
-{
-    if (  [saveInKeychainCheckbox state] == NSOnState  ) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}*/
 
 -(id) delegate
 {
     return [[delegate retain] autorelease];
 }
 
-/*- (id)initWithWindow:(NSWindow *)window
-{
-    self = [super initWithWindow:window];
-    if (self) {
-        regTrialMutex = nil;
-        // Initialization code here.
-    }
-    
-    return self;
-}
-
--(void) setmutex: (pthread_mutex_t *) newMutex
-{
-    if(newMutex){
-        regTrialMutex = newMutex;
-    }
-    
-}
-
--(IBAction)     cancelButtonWasClicked: (id)            sender
-{
-    pthread_mutex_unlock(regTrialMutex);
-    [self close];
-}
-
--(void) awakeFromNib
-{
-    NSLog(@"awakeFromNib");
-
-    [super awakeFromNib];
-}
-
-- (void)windowDidLoad
-{
-    [super windowDidLoad];
-        NSLog(@"windowDidLoad");
-    
-    // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
-}*/
 
 @end
