@@ -70,6 +70,8 @@
 #define UPDATE_PATH @"Library/Application Support/SurfSafeVPN/Updates"
 #define BACKUP_PATH @"Library/Application Support/SurfSafeVPN/Backups"
 #define GLOBAL_LOG_PATH @"Library/Application Support/SurfSafeVPN/Log"
+#define TRIAL_KEY_PATH @"Library/Application Support/SurfSafeVPN/Trial"
+#define TRIAL_DAYS 7
 //End HTK-INC
 
 //*************************************************************************************************
