@@ -499,7 +499,7 @@
 		CE8E6CBB1550E4B20087E9D2 /* SurfSafeVPN_32x32_active.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SurfSafeVPN_32x32_active.icns; sourceTree = "<group>"; };
 		CE8E6CBD1550E4B20087E9D2 /* SurfSafeVPN_32x32_desible.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SurfSafeVPN_32x32_desible.icns; sourceTree = "<group>"; };
 		CE8E6CC71550E5560087E9D2 /* SurfSafeVPN.sdef */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = SurfSafeVPN.sdef; sourceTree = "<group>"; };
-		CE8E6D6F1550E5F90087E9D2 /* SurfSafeFreeTrial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SurfSafeFreeTrial.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE8E6D6F1550E5F90087E9D2 /* SurfSafeVPN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SurfSafeVPN.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE8E6D7915511A2F0087E9D2 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		CEB1B1E015526E58000BC247 /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
 		CEB1B1E115526E58000BC247 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
@@ -688,7 +688,7 @@
 				6317943E118D7E820057ACAF /* atsystemstart */,
 				638A1FFC135CC35100FB932C /* standardize-scutil-output */,
 				63AA8E581492C75200C791C9 /* process-network-changes */,
-				CE8E6D6F1550E5F90087E9D2 /* SurfSafeFreeTrial.app */,
+				CE8E6D6F1550E5F90087E9D2 /* SurfSafeVPN.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1092,9 +1092,9 @@
 			productReference = 63AA8E581492C75200C791C9 /* process-network-changes */;
 			productType = "com.apple.product-type.tool";
 		};
-		CE8E6CC91550E5F80087E9D2 /* SurfSafeFreeTrial */ = {
+		CE8E6CC91550E5F80087E9D2 /* SurfSafeVPN */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CE8E6D691550E5F80087E9D2 /* Build configuration list for PBXNativeTarget "SurfSafeFreeTrial" */;
+			buildConfigurationList = CE8E6D691550E5F80087E9D2 /* Build configuration list for PBXNativeTarget "SurfSafeVPN" */;
 			buildPhases = (
 				CE8E6CD61550E5F80087E9D2 /* ShellScript */,
 				CE8E6CD71550E5F80087E9D2 /* Resources */,
@@ -1114,10 +1114,10 @@
 				CE8E6CD21550E5F80087E9D2 /* PBXTargetDependency */,
 				CE8E6CD41550E5F80087E9D2 /* PBXTargetDependency */,
 			);
-			name = SurfSafeFreeTrial;
+			name = SurfSafeVPN;
 			productInstallPath = "$(HOME)/Applications";
 			productName = Tunnelblick;
-			productReference = CE8E6D6F1550E5F90087E9D2 /* SurfSafeFreeTrial.app */;
+			productReference = CE8E6D6F1550E5F90087E9D2 /* SurfSafeVPN.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1148,7 +1148,7 @@
 				638A1FFB135CC35100FB932C /* standardize-scutil-output */,
 				63AA8E571492C75200C791C9 /* process-network-changes */,
 				635BF17E1501CCDF00D87717 /* ExternalBuildCleanScript */,
-				CE8E6CC91550E5F80087E9D2 /* SurfSafeFreeTrial */,
+				CE8E6CC91550E5F80087E9D2 /* SurfSafeVPN */,
 			);
 		};
 /* End PBXProject section */
@@ -1267,7 +1267,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "# Touch the build folder to get it to the top of listings sorted by modification date\ntouch build\n\n#PROJECT_NAME=SurfSafeVPN\nDMG_SETUP=SurfSafeTrialSetup\n\n# Copy the tun and tap kexts\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext\"\ncp -R \"../third_party/tap-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext\"\ncp -R \"../third_party/tun-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext\"\ncp -R \"../third_party/tap.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext\"\ncp -R \"../third_party/tun.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext\"\n\n# Set the build number in Info.plist for the app and for the kexts\n# Replaces all occurances of \"TBBUILDNUMBER\" in an Info.plist with the contents of TBBuildNumber.txt\n# If an \"Unsigned\" build, appends \" Unsigned\" to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# If an \"Debug\" build,    appends \" Debug\"    to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# @param String, path to Info.plist file that should be modified\nsetBuildNumber()\n{\n\ttbbn=\"$(cat \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/TBBuildNumber.txt\")\"\n\tif [ \"${CONFIGURATION}\" = \"Unsigned Release\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Unsigned|g\" \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Debug|g\"    \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telse\n    sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" \"${@}\" > \"${@}.tmp\"\n\tfi\n\trm \"${@}\"\n\tmv \"${@}.tmp\" \"${@}\"\n}\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext/Contents/Info.plist\"\n\n# Create the openvpn directory structure:\n# ...Contents/Resources/openvpn contains a folder for each version of OpenVPN.\n# The folder for each vesion of OpenVPN is named \"openvpn-x.x.x\".\n# Each \"openvpn-x.x.x\"folder contains the openvpn binary and the openvpn-down-root.so binary\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn\"\nfor d in `ls \"../third_party/openvpn\"`\ndo\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}\"\ncp \"../third_party/openvpn/${d}/openvpn/openvpn\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn\"\ncp \"../third_party/openvpn/${d}/openvpn/plugin/down-root/openvpn-down-root.so\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn-down-root.so\"\ndone\n\n# Remove extra files that are not needed\n\nrm \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/TBBuildNumber.txt\"\n\n# Remove NeedsTranslation.strings and Removed.strings from all .lproj folders\nshopt -s nullglob\nfor f in \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/*.lproj\"\ndo\nif test -f \"${f}/NeedsTranslation.strings\"\nthen\nrm \"${f}/NeedsTranslation.strings\"\nfi\nif test -f \"${f}/Removed.strings\"\nthen\nrm \"${f}/Removed.strings\"\nfi\ndone\n\n# Sign the app and its tools except if Unsigned Release\nif [ \"${CONFIGURATION}\" != \"Unsigned Release\" ]; then\n# Sign the binary tools and the Tunnelblick application itself\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/atsystemstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/installer\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/openvpnstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/process-network-changes\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/standardize-scutil-output\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH\"\nfi\n\n# Create a .dmg except if Debug\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n\n# Staging folder\nTMPDMG=\"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}\"\n\n# Folder with files for the .dmg (.DS_Store and background folder which contains background.png background image)\nDMG_FILES=\"dmgFiles\"\n\n#try to sign app\ncodesign -f -s \"Developer ID Application: Sunpeaks Management Inc\" -v \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app\"\n\n# Remove the existing \"staging\" folder and copy the application into it\nrm -r -f \"$TMPDMG\"\nmkdir -p \"$TMPDMG\"\ncp -p -R \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app\" \"$TMPDMG\"\n\n\n\n# Copy link to documentation to the staging folder\ncp -p \"Online Documentation.webloc\" \"$TMPDMG\"\n\n# Copy the background folder and its background.png file, then make the folder invisible in the Finder\ncp -p -R \"$DMG_FILES/background\" \"$TMPDMG\"\nsetfile -a V \"$TMPDMG/background\"\n\n# Copy dotDS_Store to .DS_Store and make it invisible in the Finder\ncp -p -R \"$DMG_FILES/dotDS_Store\" \"$TMPDMG/.DS_Store\"\nsetfile -a V \"$TMPDMG/.DS_Store\"\n\n#getv version from plist file\nBUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Info.plist\")\n\n# Remove any existing .dmg and create a new one. Specify \"-noscrub\" so that .DS_Store is copied to the image\nrm -r -f \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}.dmg\"\nhdiutil create -noscrub -srcfolder \"$TMPDMG\" \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}-${BUNDLE_VERSION}.dmg\"\n\n# Leave the staging folder so customized .dmgs can be easily created\n\nfi";
+			shellScript = "# Touch the build folder to get it to the top of listings sorted by modification date\ntouch build\n\n#PROJECT_NAME=SurfSafeVPN\nDMG_SETUP=SurfSafeSetup\n\n# Copy the tun and tap kexts\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext\"\ncp -R \"../third_party/tap-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext\"\ncp -R \"../third_party/tun-20090913.kext/\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext\"\ncp -R \"../third_party/tap.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext\"\n\nrm -r -f                                  \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext\"\ncp -R \"../third_party/tun.kext/\"          \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext\"\n\n# Set the build number in Info.plist for the app and for the kexts\n# Replaces all occurances of \"TBBUILDNUMBER\" in an Info.plist with the contents of TBBuildNumber.txt\n# If an \"Unsigned\" build, appends \" Unsigned\" to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# If an \"Debug\" build,    appends \" Debug\"    to CFBundleShortVersionString, which is detected by the \")\" after \"TBBUILDNUMBER\"\n# @param String, path to Info.plist file that should be modified\nsetBuildNumber()\n{\n\ttbbn=\"$(cat \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/TBBuildNumber.txt\")\"\n\tif [ \"${CONFIGURATION}\" = \"Unsigned Release\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Unsigned|g\" \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n    sed -e \"s|TBBUILDNUMBER)|TBBUILDNUMBER) Debug|g\"    \"${@}\" | sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" > \"${@}.tmp\"\n\telse\n    sed -e \"s|TBBUILDNUMBER|${tbbn}|g\" \"${@}\" > \"${@}.tmp\"\n\tfi\n\trm \"${@}\"\n\tmv \"${@}.tmp\" \"${@}\"\n}\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap-20090913.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tun.kext/Contents/Info.plist\"\nsetBuildNumber \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/tap.kext/Contents/Info.plist\"\n\n# Create the openvpn directory structure:\n# ...Contents/Resources/openvpn contains a folder for each version of OpenVPN.\n# The folder for each vesion of OpenVPN is named \"openvpn-x.x.x\".\n# Each \"openvpn-x.x.x\"folder contains the openvpn binary and the openvpn-down-root.so binary\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn\"\nfor d in `ls \"../third_party/openvpn\"`\ndo\nmkdir -p \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}\"\ncp \"../third_party/openvpn/${d}/openvpn/openvpn\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn\"\ncp \"../third_party/openvpn/${d}/openvpn/plugin/down-root/openvpn-down-root.so\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/openvpn/${d}/openvpn-down-root.so\"\ndone\n\n# Remove extra files that are not needed\n\nrm \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/TBBuildNumber.txt\"\n\n# Remove NeedsTranslation.strings and Removed.strings from all .lproj folders\nshopt -s nullglob\nfor f in \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Resources/*.lproj\"\ndo\nif test -f \"${f}/NeedsTranslation.strings\"\nthen\nrm \"${f}/NeedsTranslation.strings\"\nfi\nif test -f \"${f}/Removed.strings\"\nthen\nrm \"${f}/Removed.strings\"\nfi\ndone\n\n# Sign the app and its tools except if Unsigned Release\nif [ \"${CONFIGURATION}\" != \"Unsigned Release\" ]; then\n# Sign the binary tools and the Tunnelblick application itself\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/atsystemstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/installer\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/openvpnstart\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/process-network-changes\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH/Contents/Resources/standardize-scutil-output\"\ncodesign -s TunnelblickSigning \"$CODESIGNING_FOLDER_PATH\"\nfi\n\n# Create a .dmg except if Debug\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n\n# Staging folder\nTMPDMG=\"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}\"\n\n# Folder with files for the .dmg (.DS_Store and background folder which contains background.png background image)\nDMG_FILES=\"dmgFiles\"\n\n#try to sign app\ncodesign -f -s \"Developer ID Application: Sunpeaks Management Inc\" -v \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app\"\n\n# Remove the existing \"staging\" folder and copy the application into it\nrm -r -f \"$TMPDMG\"\nmkdir -p \"$TMPDMG\"\ncp -p -R \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app\" \"$TMPDMG\"\n\n\n\n# Copy link to documentation to the staging folder\ncp -p \"Online Documentation.webloc\" \"$TMPDMG\"\n\n# Copy the background folder and its background.png file, then make the folder invisible in the Finder\ncp -p -R \"$DMG_FILES/background\" \"$TMPDMG\"\nsetfile -a V \"$TMPDMG/background\"\n\n# Copy dotDS_Store to .DS_Store and make it invisible in the Finder\ncp -p -R \"$DMG_FILES/dotDS_Store\" \"$TMPDMG/.DS_Store\"\nsetfile -a V \"$TMPDMG/.DS_Store\"\n\n#getv version from plist file\nBUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"${BUILD_DIR}/${CONFIGURATION}/${PRODUCT_NAME}.app/Contents/Info.plist\")\n\n# Remove any existing .dmg and create a new one. Specify \"-noscrub\" so that .DS_Store is copied to the image\nrm -r -f \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}.dmg\"\nhdiutil create -noscrub -srcfolder \"$TMPDMG\" \"${BUILD_DIR}/${CONFIGURATION}/${DMG_SETUP}-${BUNDLE_VERSION}.dmg\"\n\n# Leave the staging folder so customized .dmgs can be easily created\n\nfi";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2138,7 +2138,7 @@
 					"\"$(SRCROOT)/../third_party/openssl-1.0.1c\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				PRODUCT_NAME = SurfSafeFreeTrial;
+				PRODUCT_NAME = SurfSafeVPN;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2168,7 +2168,7 @@
 					"\"$(SRCROOT)/../third_party/openssl-1.0.1c\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				PRODUCT_NAME = SurfSafeFreeTrial;
+				PRODUCT_NAME = SurfSafeVPN;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2197,7 +2197,7 @@
 					"\"$(SRCROOT)/../third_party/openssl-1.0.1c\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				PRODUCT_NAME = SurfSafeFreeTrial;
+				PRODUCT_NAME = SurfSafeVPN;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2229,7 +2229,7 @@
 					"\"$(SRCROOT)/../third_party/openssl-1.0.1c\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				PRODUCT_NAME = SurfSafeFreeTrial;
+				PRODUCT_NAME = SurfSafeVPN;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2262,7 +2262,7 @@
 					"\"$(SRCROOT)/../third_party/openssl-1.0.1c\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				PRODUCT_NAME = SurfSafeFreeTrial;
+				PRODUCT_NAME = SurfSafeVPN;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2359,7 +2359,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CE8E6D691550E5F80087E9D2 /* Build configuration list for PBXNativeTarget "SurfSafeFreeTrial" */ = {
+		CE8E6D691550E5F80087E9D2 /* Build configuration list for PBXNativeTarget "SurfSafeVPN" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE8E6D6A1550E5F80087E9D2 /* Debug */,
