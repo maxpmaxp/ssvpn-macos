@@ -6132,8 +6132,10 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
             }
         }
     }
+#ifndef TRIAL_VERSION_BUILD
     if (update)
         outOfDate = YES;
+#endif
 }
 
 
