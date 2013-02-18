@@ -309,7 +309,7 @@ typedef enum
 
 //*************************************************************************************************
 // Section for enable trial version build
-//#define TRIAL_VERSION_BUILD 1
+#define TRIAL_VERSION_BUILD 1
 
 //*************************************************************************************************
 // Section for setting application name
