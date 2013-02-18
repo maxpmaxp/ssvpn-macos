@@ -27,6 +27,7 @@
 -(NSString *) getDaysLeftString;
 -(void) updateWithVpnId: (NSString *)vpnId andDate: (NSString *)regDate;
 -(void) updateWithFirstName: (NSString *)fName LastName: (NSString *) lName andEmail: (NSString *) email;
+-(void) updateWithNothing;
 -(BOOL) isVPNIdNotNull;
 -(BOOL) isTrialKeyExist;
 

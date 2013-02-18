@@ -72,6 +72,7 @@
         [cancelButton setEnabled: NO];
         [OKButton setEnabled: NO];
         [NSApp stopModal];
+        return;
         
     }
     else{
@@ -178,9 +179,7 @@
 
 - (void) dealloc
 {
-    [email               release];
-    [lastName               release];
-    [firstName               release];
+
     [cancelButton           release];
     [OKButton               release];
     [alreadyHaveVPNIdCheckbox             release];

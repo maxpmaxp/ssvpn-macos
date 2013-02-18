@@ -354,6 +354,14 @@ extern NSFileManager  * gFileMgr;
     [self checkIsTrialKeyValid];
 }
 
+-(void) updateWithNothing
+{
+    //write only installing date
+    [self writeTrialKeyToFile];
+    
+    [self checkIsTrialKeyValid];
+}
+
 -(BOOL) isVPNIdNotNull
 {
     if([[self strVPNId] isEqualToString:@""]){

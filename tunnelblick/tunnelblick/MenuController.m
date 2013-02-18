@@ -53,6 +53,7 @@
 #import "TrialOverNotificationWindowController.h"
 #import "TrialVersionSecureStorage.h"
 
+
 #ifdef INCLUDE_VPNSERVICE
 #import "VPNService.h"
 #endif
@@ -837,10 +838,24 @@ BOOL checkOwnedByRootWheel(NSString * path);
 -(BOOL *)isRegistrationSucceed
 {
     
-    TrialRegWindowController *registerScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
+    registrationScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
+    
+    //if(pAbtCtrl == nil)
+    //    pAbtCtrl = [[AboutWindowController alloc] initWithWindowNibName:@"About"];
+    
+    NSWindow *regWindow = [registrationScreen window];
+    
+    //pAbtWindow = [pAbtCtrl window];
+    
+    //[NSApp runModalForWindow: pAbtWindow];
     
     
-    NSInteger result = [NSApp runModalForWindow: [registerScreen window]];
+    
+    NSInteger result = [NSApp runModalForWindow: [registrationScreen window]];
+    
+    [NSApp endSheet: regWindow];
+    
+    [regWindow orderOut: self];
     
     if (   (result != NSRunStoppedResponse)
         && (result != NSRunAbortedResponse)  ) {
@@ -848,15 +863,21 @@ BOOL checkOwnedByRootWheel(NSString * path);
     }
     
     
-    if(([registerScreen alreadyHaveVPNID] == NO) && (result == NSRunStoppedResponse)){
-        
-        //create new secure storage
-        [trialVersionSecureStorage updateWithFirstName:[[registerScreen firstName] stringValue] LastName:[[registerScreen lastName] stringValue] andEmail:[[registerScreen email] stringValue]];
+    if(result == NSRunStoppedResponse){
+        if([registrationScreen alreadyHaveVPNID] == NO){
+            //create new secure storage
+            [trialVersionSecureStorage updateWithFirstName:[[registrationScreen firstName] stringValue] LastName:[[registrationScreen lastName] stringValue] andEmail:[[registrationScreen email] stringValue]];
+        }
+        else{
+            //just save date
+            [trialVersionSecureStorage updateWithNothing];
+        }
     }
+
     
-    [[registerScreen window] close];
+    [[registrationScreen window] close];
     
-    [registerScreen release];
+    //[registerScreen release];
     
     if(result == NSRunStoppedResponse)
         return true;
@@ -1050,6 +1071,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
     [vpnService release];
     [registerForTunnelblickItem release];
 #endif
+    
+    [registrationScreen release];
     
     [super dealloc];
 }

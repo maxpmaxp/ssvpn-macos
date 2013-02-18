@@ -30,6 +30,7 @@
 		18E6E92916D1556D00467BA0 /* TrialOverNotificationWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18E6E92816D1556D00467BA0 /* TrialOverNotificationWindow.xib */; };
 		18E6E92C16D1895800467BA0 /* FBEncryptorAES.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E6E92B16D1895600467BA0 /* FBEncryptorAES.m */; };
 		18E6E92F16D18B5300467BA0 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E6E92E16D18B5100467BA0 /* NSData+Base64.m */; };
+		18E6E93116D19EA200467BA0 /* 02_baner_min2.gif in Resources */ = {isa = PBXBuildFile; fileRef = 18E6E93016D19EA200467BA0 /* 02_baner_min2.gif */; };
 		61BC4CDF0E2F9FFA00F24255 /* openvpnstart.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4B670E2F9EBC00F24255 /* openvpnstart.m */; };
 		61BC4CE10E2FA02800F24255 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		61BC4D9E0E2FA2F300F24255 /* installer.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC4D9D0E2FA2F300F24255 /* installer.m */; };
@@ -305,6 +306,7 @@
 		18E6E92B16D1895600467BA0 /* FBEncryptorAES.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBEncryptorAES.m; sourceTree = "<group>"; };
 		18E6E92D16D18B5100467BA0 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
 		18E6E92E16D18B5100467BA0 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		18E6E93016D19EA200467BA0 /* 02_baner_min2.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = 02_baner_min2.gif; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -881,6 +883,7 @@
 		63EA8CD913A3DB1E0034F47C /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				18E6E93016D19EA200467BA0 /* 02_baner_min2.gif */,
 				CE8E6D7915511A2F0087E9D2 /* logo.png */,
 				CE8E6CBD1550E4B20087E9D2 /* SurfSafeVPN_32x32_desible.icns */,
 				63D39BF114F9ED13002D1297 /* Configurations.png */,
@@ -1233,6 +1236,7 @@
 				18CE9BF416C2DB8A00660764 /* ToolReport.xib in Resources */,
 				182837FA16CB8E5400F4D675 /* TrialRegWindow.xib in Resources */,
 				18E6E92916D1556D00467BA0 /* TrialOverNotificationWindow.xib in Resources */,
+				18E6E93116D19EA200467BA0 /* 02_baner_min2.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

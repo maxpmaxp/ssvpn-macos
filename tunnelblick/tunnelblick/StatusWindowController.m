@@ -26,6 +26,7 @@
 #import "MenuController.h"
 #import "TBUserDefaults.h"
 #import "helper.h"
+#import "TrialVersionSecureStorage.h"
 
 
 TBUserDefaults * gTbDefaults;         // Our preferences
@@ -79,6 +80,8 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     
     delegate = [theDelegate retain];
     
+    trialVersionSecureStorage = [[TrialVersionSecureStorage alloc] init];
+    
     [[NSNotificationCenter defaultCenter] addObserver: self 
                                              selector: @selector(NSWindowWillCloseNotification:) 
                                                  name: NSWindowWillCloseNotification 
@@ -111,6 +114,13 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
 
 -(void) restore
 {
+#ifdef TRIAL_VERSION_BUILD
+    [bannerButton setEnabled:YES];
+    [bannerButton setHidden:NO];
+    [trialInfoTF setEnabled:YES];
+    [trialInfoTF setHidden:NO];
+    //[trialInfoTF setStringValue:[TrialVersionSecureStorage getNumberOfDaysTrialLast]];
+#endif
     [cancelButton setEnabled: YES];
     [self startMouseTracking];
     [self setSizeAndPosition];
@@ -293,6 +303,20 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
                                      assumeInside: NO];
     
 
+
+    
+#ifdef TRIAL_VERSION_BUILD
+    [bannerButton setEnabled:YES];
+    [bannerButton setHidden:NO];
+    [trialInfoTF setEnabled:YES];
+    [trialInfoTF setHidden:NO];
+    NSString *strTrialDasLef = [trialVersionSecureStorage getDaysLeftString];
+    [trialInfoTF setStringValue: strTrialDasLef];
+    NSLog(@"awakeFromNib %@, %@", NSStringFromRect([bannerButton bounds]), NSStringFromRect([trialInfoTF bounds]));
+    [bannerButton addCursorRect:[bannerButton bounds] cursor:[NSCursor pointingHandCursor]];
+    [trialInfoTF addCursorRect:[trialInfoTF bounds] cursor:[NSCursor pointingHandCursor]];
+#endif
+    
     [self showWindow: self];
     [self initialiseAnim];
     haveLoadedFromNib = TRUE;
@@ -478,6 +502,12 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
                               forDisplayName: [self name]];
 }
 
+- (IBAction)openBannerURL:(id)sender
+{
+    NSURL *myURL = [NSURL URLWithString:[trialVersionSecureStorage getPurchaseURL]];
+    [[NSWorkspace sharedWorkspace] openURL:myURL];
+}
+
 - (void) dealloc
 {
     [self stopMouseTracking];
@@ -487,6 +517,9 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     [[NSNotificationCenter defaultCenter] removeObserver: self]; 
 
     [cancelButton   release];
+    [bannerButton   release];
+    [trialInfoTF    release];
+    
     
     [statusTFC      release];
     [animationIV    release];
@@ -496,6 +529,8 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     
     [theAnim        release];    
     [delegate       release];
+    
+    [trialVersionSecureStorage release];
     
 	[super dealloc];
 }

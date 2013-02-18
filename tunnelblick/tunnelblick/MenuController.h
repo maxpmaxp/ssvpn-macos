@@ -41,6 +41,7 @@
 @class MainIconView;
 @class ToolReportWindowController;
 @class TrialVersionSecureStorage;
+@class TrialRegWindowController;
 
 #ifdef INCLUDE_VPNSERVICE
 @class VPNService;
@@ -187,6 +188,7 @@ BOOL needToCopyBundle(void);
     ToolReportWindowController  *toolReport;
     
     TrialVersionSecureStorage * trialVersionSecureStorage;
+    TrialRegWindowController * registrationScreen;
 }
 
 // Menu actions
