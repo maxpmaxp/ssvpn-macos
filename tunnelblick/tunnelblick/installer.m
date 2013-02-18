@@ -160,7 +160,6 @@ int main(int argc, char *argv[])
 	BOOL updateDeploy     = (arg1 & INSTALLER_UPDATE_DEPLOY) != 0;
     
     BOOL forcedGetConfig = (arg1 & INSTALER_FORCED_GET_CONFIGS) != 0;
-    NSLog(@"!!!!! forcedGetConfig %d",forcedGetConfig);
 	
     BOOL setBundleVersion = (arg1 & INSTALLER_SET_VERSION) != 0;
     BOOL moveNotCopy      = (arg1 & INSTALLER_MOVE_NOT_COPY) != 0;
@@ -224,7 +223,6 @@ int main(int argc, char *argv[])
     } else {
         appResourcesPath = [[gFileMgr stringWithFileSystemRepresentation: argv[0] length: strlen(argv[0])] stringByDeletingLastPathComponent];
     }
-    NSLog(@"!!!!! appResourcesPath: %@", appResourcesPath);
     gAppConfigurationsBundlePath    = [appResourcesPath stringByAppendingPathComponent:@"SurfSafeVPN Configurations.bundle"];
     
     gRealUserID  = getuid();
@@ -385,6 +383,25 @@ int main(int argc, char *argv[])
         } else {
             appendLog([NSString stringWithFormat: @"Copied %@ to %@", currentPath, targetPath]);
         }
+        
+#ifndef TRIAL_VERSION_BUILD
+        //for full version looking for trial version and move it to the trash
+        NSString *trialPath = TRIAL_APP_PATH;
+        if (  [gFileMgr fileExistsAtPath: trialPath]  ) {
+            errorExitIfAnySymlinkInPath(trialPath, 1);
+            if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
+                                                               source: @"/Applications"
+                                                          destination: @""
+                                                                files: [NSArray arrayWithObject:TRIAL_APP_NAME]
+                                                                  tag: nil]  ) {
+                appendLog([NSString stringWithFormat: @"Moved %@ to the Trash", trialPath]);
+            } else {
+                appendLog([NSString stringWithFormat: @"Unable to move %@ to the Trash", trialPath]);
+                errorExit();
+            }
+        }
+        
+#endif
     }
     
     //**************************************************************************************************************************
@@ -687,7 +704,6 @@ int main(int argc, char *argv[])
     BOOL iSForced = NO;
     if( forcedGetConfig){
         iSForced = YES;
-        NSLog(@"!!!!! forcedGetConfig %d",iSForced);
     }
     updateConfigurations(iSForced);
     secureL_AS_T_DEPLOY();

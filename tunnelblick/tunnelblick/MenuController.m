@@ -4381,7 +4381,18 @@ BOOL anyNonTblkConfigs(void)
                              NSLocalizedString(@" Do you wish to replace\n    %@\n    in %@\nwith %@%@?\n\n", @"Window text"),
                              previousVersion, applicationsDisplayName, appVersion, tblksMsg];
         launchWindowText = NSLocalizedString(@"SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?", @"Window text");
-        } else {
+        }
+#ifndef TRIAL_VERSION_BUILD
+        else if([gFileMgr fileExistsAtPath: TRIAL_APP_PATH]){
+            NSBundle * previousBundle = [NSBundle bundleWithPath: TRIAL_APP_PATH];
+            NSString * previousVersion = surfsafevpnVersion(previousBundle);
+            authorizationText = [NSString stringWithFormat:
+                                 @" Do you wish to replace\n Trial Version of %@\n    in %@\nwith %@%@?\n\n",
+                                 previousVersion, applicationsDisplayName, appVersion, tblksMsg];
+            launchWindowText = @"SurfSafeVPN Free Trial was successfully replaced.\n\nDo you wish to launch the new full version of SurfSafeVPN now?";    
+            }
+#endif
+        else {
             authorizationText = [NSString stringWithFormat:
                              NSLocalizedString(@" Do you wish to install %@ to %@%@?\n\n", @"Window text"),
                              appVersion, applicationsDisplayName, tblksMsg];
