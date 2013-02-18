@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
 	BOOL updateDeploy     = (arg1 & INSTALLER_UPDATE_DEPLOY) != 0;
     
     BOOL forcedGetConfig = (arg1 & INSTALER_FORCED_GET_CONFIGS) != 0;
+    NSLog(@"!!!!! forcedGetConfig %d",forcedGetConfig);
 	
     BOOL setBundleVersion = (arg1 & INSTALLER_SET_VERSION) != 0;
     BOOL moveNotCopy      = (arg1 & INSTALLER_MOVE_NOT_COPY) != 0;
@@ -219,11 +220,11 @@ int main(int argc, char *argv[])
     // If we copy the .app to /Applications, other changes to the .app affect THAT copy, otherwise they affect the currently running copy
     NSString * appResourcesPath;
     if (  copyApp  ) {
-        appResourcesPath = @"/Applications/SurfSafeVPN.app/Contents/Resources";
+        appResourcesPath = [NSString stringWithFormat:@"/Applications/%@/Contents/Resources", CURRENT_BUILD_APP_NAME];
     } else {
         appResourcesPath = [[gFileMgr stringWithFileSystemRepresentation: argv[0] length: strlen(argv[0])] stringByDeletingLastPathComponent];
     }
-    
+    NSLog(@"!!!!! appResourcesPath: %@", appResourcesPath);
     gAppConfigurationsBundlePath    = [appResourcesPath stringByAppendingPathComponent:@"SurfSafeVPN Configurations.bundle"];
     
     gRealUserID  = getuid();
@@ -363,13 +364,13 @@ int main(int argc, char *argv[])
 
     if (  copyApp  ) {
         NSString * currentPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-        NSString * targetPath = @"/Applications/SurfSafeVPN.app";
+        NSString * targetPath = CURRENT_BUILD_APP_PATH;
         if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
             errorExitIfAnySymlinkInPath(targetPath, 1);
             if (  [[NSWorkspace sharedWorkspace] performFileOperation: NSWorkspaceRecycleOperation
                                                                source: @"/Applications"
                                                           destination: @""
-                                                                files: [NSArray arrayWithObject:@"SurfSafeVPN.app"]
+                                                                files: [NSArray arrayWithObject:CURRENT_BUILD_APP_NAME]
                                                                   tag: nil]  ) {
                 appendLog([NSString stringWithFormat: @"Moved %@ to the Trash", targetPath]);
             } else {
@@ -686,6 +687,7 @@ int main(int argc, char *argv[])
     BOOL iSForced = NO;
     if( forcedGetConfig){
         iSForced = YES;
+        NSLog(@"!!!!! forcedGetConfig %d",iSForced);
     }
     updateConfigurations(iSForced);
     secureL_AS_T_DEPLOY();
@@ -1171,7 +1173,18 @@ void secureL_AS_T_DEPLOY()
 
 void secureCONFIG_PATH()
 {
-    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    NSBundle * ourBundle = [NSBundle mainBundle];
+	NSString * resourcesPath = [ourBundle bundlePath];
+    NSArray  * execComponents = [resourcesPath pathComponents];
+    if (  [execComponents count] < 3  ) {
+        appendLog([NSString stringWithFormat: @"too few execComponents; resourcesPath = %@", resourcesPath]);
+        errorExit();
+    }
+	NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 3];
+	if (  [ourAppName hasSuffix: @".app"]  ) {
+		ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+	}
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
     appendLog([NSString stringWithFormat: @"Securing %@", configPath]);
     if (  checkSetOwnership(configPath, YES, 0, 0)  ) {
         if (  checkSetPermissions(configPath, 0755, YES)  ) {
@@ -1413,7 +1426,18 @@ void closeLog(void)
 void updateConfigurations(BOOL isForced){
     
     appendLog(@"SurfaSaveVPN configuration update was started");
-    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    NSBundle * ourBundle = [NSBundle mainBundle];
+	NSString * resourcesPath = [ourBundle bundlePath];
+    NSArray  * execComponents = [resourcesPath pathComponents];
+    if (  [execComponents count] < 3  ) {
+        appendLog([NSString stringWithFormat: @"too few execComponents; resourcesPath = %@", resourcesPath]);
+        errorExit();
+    }
+	NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 3];
+	if (  [ourAppName hasSuffix: @".app"]  ) {
+		ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+	}
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
     appendLog([NSString stringWithFormat:@"target configuration folder %@", configPath]);
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];

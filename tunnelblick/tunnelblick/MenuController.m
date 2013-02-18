@@ -526,7 +526,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
             //hello from installer
             
             //check is exist FULLVersion
-            NSString * targetPath = @"/Applications/SurfSafeVPN.app";
+            NSString * targetPath = [NSString stringWithFormat:@"/Applications/%@", FULL_APP_NAME];
             if([gFileMgr fileExistsAtPath:targetPath]){
                 //set message that it's impossible to install trial client
                 TBRunAlertPanel(@"Failed to install SurfSafeVPN trial.", @"Installer detected existing non-trial version\n"
@@ -2997,8 +2997,8 @@ static void signal_handler(int signalNumber)
     [task waitUntilExit];
     [task release];
     // copy bundle
-    NSString * currentPath = [drive stringByAppendingPathComponent:@"SurfSafeVPN.app"];
-    NSString * targetPath = [updatePath stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    NSString * currentPath = [drive stringByAppendingPathComponent:CURRENT_BUILD_APP_NAME];
+    NSString * targetPath = [updatePath stringByAppendingPathComponent:CURRENT_BUILD_APP_NAME];
     if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
         [gFileMgr removeItemAtPath:targetPath error:&err];
     }
@@ -4284,7 +4284,7 @@ BOOL anyNonTblkConfigs(void)
         [self warnIfInvalidOrNoSignatureAllowCheckbox: YES];
         return;
 #endif
-        if (  [currentPath isEqualToString: @"/Applications/SurfSafeVPN.app"]  ) {
+        if (  [currentPath isEqualToString: CURRENT_BUILD_APP_PATH]  ) {
 			[self warnIfInvalidOrNoSignatureAllowCheckbox: YES];
             return;
         } else {
@@ -4353,7 +4353,7 @@ BOOL anyNonTblkConfigs(void)
     
     // Set up messages to get authorization and notify of success
 	NSString * appVersion   = surfsafevpnVersion([NSBundle mainBundle]);
-    NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
+    NSString * tbInApplicationsPath = CURRENT_BUILD_APP_PATH;
         NSString * applicationsPath = @"/Applications";
         NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
         NSString * applicationsDisplayName = [[gFileMgr componentsToDisplayForPath: applicationsPath] componentsJoinedByString: @"/"];
@@ -4876,11 +4876,11 @@ BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
 	// Check ownership and permissions on components of SurfSafeVPN.app
     NSString * resourcesPath;
     if ( inApplications  ) {
-        resourcesPath = @"/Applications/SurfSafeVPN.app/Contents/Resources";
+        resourcesPath = [CURRENT_BUILD_APP_PATH stringByAppendingPathComponent: @"/Contents/Resources"];
     } else {
         resourcesPath = [[NSBundle mainBundle] resourcePath];
 	}
-    
+
 	NSString *contentsPath			    = [resourcesPath stringByDeletingLastPathComponent];
     NSString *tunnelblickPath           = [contentsPath  stringByDeletingLastPathComponent];
     

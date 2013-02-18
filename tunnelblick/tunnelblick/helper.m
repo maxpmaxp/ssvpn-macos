@@ -1253,7 +1253,7 @@ BOOL tunnelblickTestPrivateOnlyHasTblks(void)
 BOOL tunnelblickTestAppInApplications(void)
 {
     NSString * appPath = [[NSBundle mainBundle] bundlePath];
-    return [appPath isEqualToString: @"/Applications/SurfSafeVPN.app"];
+    return [appPath isEqualToString: CURRENT_BUILD_APP_PATH];
 }
 
 BOOL tunnelblickTestDeployed(void)

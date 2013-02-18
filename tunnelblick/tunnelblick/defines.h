@@ -311,3 +311,18 @@ typedef enum
 // Section for enable trial version build
 #define TRIAL_VERSION_BUILD 1
 
+//*************************************************************************************************
+// Section for setting application name
+#define TRIAL_APP_NAME @"SurfSafeFreeTrial.app"
+#define TRIAL_APP_PATH @"/Applications/SurfSafeFreeTrial.app"
+#define FULL_APP_NAME @"SurfSafeVPN.app"
+#define FULL_APP_PATH @"/Applications/SurfSafeVPN.app"
+
+#ifdef TRIAL_VERSION_BUILD
+    #define CURRENT_BUILD_APP_NAME TRIAL_APP_NAME
+    #define CURRENT_BUILD_APP_PATH TRIAL_APP_PATH
+#else
+    #define CURRENT_BUILD_APP_NAME FULL_APP_NAME
+    #define CURRENT_BUILD_APP_PATH FULL_APP_PATH
+#endif
+
