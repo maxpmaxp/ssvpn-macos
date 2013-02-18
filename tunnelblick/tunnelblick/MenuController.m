@@ -829,7 +829,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
 {
     TrialOverNotificationWindowController *trialOverScreen = [[TrialOverNotificationWindowController alloc] initWithDelegate:self];
     
-    NSInteger result = [NSApp runModalForWindow: [trialOverScreen window]];
+    [NSApp runModalForWindow: [trialOverScreen window]];
     [[trialOverScreen window] close];
     [trialOverScreen release];
     
@@ -884,53 +884,6 @@ BOOL checkOwnedByRootWheel(NSString * path);
     else
         return false;
 
-}
-
--(void)getCurrentVPNIDStatus:(NSString *) strVPNID
-{
-    //create post and get data
-    //prepare post request
-    
-    
-    NSMutableURLRequest *request =
-    [[NSMutableURLRequest alloc] initWithURL:
-     [NSURL URLWithString:[NSString stringWithFormat:@"http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=%@", strVPNID]]];
-    
-    //http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=r225521
-    [request setHTTPMethod:@"POST"];
-    
-    NSHTTPURLResponse * response = nil;
-    NSError * error = nil;
-    NSData * responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    
-    int responseStatusCode = [response statusCode];
-    if (!((responseStatusCode >= 200) && (responseStatusCode < 300))){
-        //set that failed to get vpnId info
-    }
-    
-    
-    
-    NSString * responseString = [[[NSString alloc] initWithData:responseData encoding:NSASCIIStringEncoding] autorelease];
-    NSLog(@"%@", responseString);
-    
-    
-    //parse data
-    NSXMLDocument *document =
-    [[NSXMLDocument alloc] initWithData:responseData options:NSXMLDocumentTidyHTML error:&error];
-    
-    NSXMLElement *rootNode = [document rootElement];
-
-    if(rootNode){
-        NSString *freetrial = [[[rootNode nodesForXPath:@"freetrial" error:nil]objectAtIndex:0]stringValue];
-        NSString *regdate = [[[rootNode nodesForXPath:@"regdate" error:nil]objectAtIndex:0]stringValue];
-        NSString *status = [[[rootNode nodesForXPath:@"status" error:nil]objectAtIndex:0]stringValue];
-    }
-    
-    
-    [document release];
-    [request release];
-
-    
 }
 
 -(void)allNotificationsHandler: (NSNotification *) n

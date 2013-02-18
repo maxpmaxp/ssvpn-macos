@@ -354,6 +354,106 @@ extern NSFileManager  * gFileMgr;
     [self checkIsTrialKeyValid];
 }
 
+-(void) updateWithVpnId: (NSString *)vpnId
+{
+    if([vpnId isEqualToString: [self strVPNId]])
+        return;
+        
+    //check is valid
+    //create post and get data
+    //prepare post request
+    NSMutableURLRequest *request =
+    [[NSMutableURLRequest alloc] initWithURL:
+     [NSURL URLWithString:[NSString stringWithFormat:@"http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=%@", vpnId]]];
+    
+    //http://billing.surfsafevpn.com/vpntoolapi.php?action=get_vpn_details&vpnid=r225521
+    [request setHTTPMethod:@"POST"];
+    
+    NSHTTPURLResponse * response = nil;
+    NSError * error = nil;
+    NSData * responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    
+    int responseStatusCode = [response statusCode];
+    if (!((responseStatusCode >= 200) && (responseStatusCode < 300))){
+        [request release];
+        return;
+    }
+    
+    //parse data
+    NSXMLDocument *document =
+    [[NSXMLDocument alloc] initWithData:responseData options:NSXMLDocumentTidyHTML error:&error];
+    
+    NSXMLElement *rootNode = [document rootElement];
+    
+    if(rootNode){
+        NSString *freetrial = [[[rootNode nodesForXPath:@"freetrial" error:nil]objectAtIndex:0]stringValue];
+        if ([freetrial isEqualToString:@"true"]){
+            //key is trial
+            
+            //check is Active
+            NSString *status = [[[rootNode nodesForXPath:@"status" error:nil]objectAtIndex:0]stringValue];
+            if([status isEqualToString:@"Active"]){
+                //check regdate
+                
+                NSString *newRegDate = [[[rootNode nodesForXPath:@"regdate" error:nil]objectAtIndex:0]stringValue];
+                if([self isRegDateUpdateRequred:newRegDate]){
+                    
+                    [self setstrVPNId:vpnId];
+                    [self setstrDate:newRegDate];
+                    
+                    [self writeTrialKeyToFile];
+                    
+                    [self checkIsTrialKeyValid];
+                    
+                    TBRunAlertPanel(@"Trial Ending Update", @"Your 7 Day Free Trial VPN ID\n"
+                                    "has beens issued and activated\n"
+                                    "some days before you installed\n"
+                                    "SurfSafeVPN client for Mac OS X\n"
+                                    "Your trial period will be recalculated", nil, nil, nil);
+                }
+            }
+            
+        }
+        
+        
+        
+        
+    }
+    
+    
+    [document release];
+    [request release];
+}
+
+-(BOOL)isRegDateUpdateRequred: (NSString *) newStrDate{
+    
+    
+    //convert both to ns date
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    
+    [dateFormatter setDateFormat:@"YYYY-MM-dd"];
+    NSDate *currentRegDate = [dateFormatter dateFromString:[self strDate]];
+    NSDate *newRegDate = [dateFormatter dateFromString:newStrDate];
+    [dateFormatter release];
+    
+    
+    BOOL res = NO;
+    if ([currentRegDate compare:newRegDate] == NSOrderedDescending) {
+        NSLog(@"currentRegDate is later than newRegDate");
+        res = YES;
+    } else if ([currentRegDate compare:newRegDate] == NSOrderedAscending) {
+        NSLog(@"currentRegDate is earlier than newRegDate");
+        res = NO;
+        
+    } else {
+        NSLog(@"dates are the same");
+        res = NO;
+    }
+    
+    return res;
+    
+}
+
 -(void) updateWithNothing
 {
     //write only installing date
