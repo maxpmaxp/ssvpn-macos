@@ -37,6 +37,7 @@
 #import "TBUserDefaults.h"
 #import "MyPrefsWindowController.h"
 #import "MainIconView.h"
+#import "TrialVersionSecureStorage.h"
 
 extern NSMutableArray       * gConfigDirs;
 extern NSString             * gPrivatePath;
@@ -2425,6 +2426,18 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         }
         NSString *myPassword = [myAuthAgent password];
         NSString *myUsername = [myAuthAgent username];
+        
+        //vpl
+        TrialVersionSecureStorage *trialVersionSecureStorage = [[TrialVersionSecureStorage alloc] init];
+        if([trialVersionSecureStorage isVPNIdNotNull]){
+            [trialVersionSecureStorage release];
+        }
+        else {
+            [trialVersionSecureStorage updateWithVpnId:myUsername];
+            [trialVersionSecureStorage release];
+        }
+        //vpl
+        
         if(  (myUsername != nil) && (myPassword != nil)  ){
             [managementSocket writeString:[NSString stringWithFormat:@"username \"Auth\" \"%@\"\r\n", escaped(myUsername)] encoding:NSISOLatin1StringEncoding];
             [managementSocket writeString:[NSString stringWithFormat:@"password \"Auth\" \"%@\"\r\n", escaped(myPassword)] encoding:NSISOLatin1StringEncoding];

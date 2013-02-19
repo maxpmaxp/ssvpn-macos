@@ -1379,6 +1379,7 @@ beforeTunnelblickEntries: (BOOL) beforeTunnelblickEntries
     }
 
     //success
+
     return  1;
     
 }

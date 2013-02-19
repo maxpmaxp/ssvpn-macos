@@ -534,7 +534,7 @@ void exitIfRunExecutableIsNotGood(NSString * path)
 	if (  ! [path isEqualToString: @"INVALID"]  ) {
 
 		if (  [path hasPrefix: @"/A"]  ) {
-            if (  (   [path hasPrefix: @"/Applications/SurfSafeVPN.app/Contents/Resources/openvpn/openvpn-"]
+            if (  (   [path hasPrefix: [NSString stringWithFormat: @"/Applications/%@/Contents/Resources/openvpn/openvpn-", CURRENT_BUILD_APP_NAME]]
 				   && [path hasSuffix: @"/openvpn"] )
                 ) {
                 notOk = FALSE;
