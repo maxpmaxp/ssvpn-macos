@@ -39,9 +39,4 @@
     return [NSString stringWithFormat:@"Mac OS X version: %d.%d.%d", (int)versionMajor, (int)versionMinor, (int)versionBugFix];
 }
 
-NSString *networkInfo()
-{
-    
-}
-
 @end

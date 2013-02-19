@@ -177,7 +177,6 @@ BOOL checkSetPermissions(NSString * path, mode_t permsShouldHave, BOOL fileMustE
 	// Changes permissions on a file or folder (but not the folder's contents) to specified values if necessary
 	// Returns YES on success, NO on failure
 	// Also returns YES if no such file or folder and 'fileMustExist' is FALSE
-
     if (  ! [[NSFileManager defaultManager] fileExistsAtPath: path]  ) {
         if (  fileMustExist  ) {
             return NO;

@@ -49,6 +49,9 @@
 #import "ConfigurationNetwork.h"
 //#import "CertTrustSetter.h"
 #import "ToolReportWindowController.h"
+#import "TrialRegWindowController.h"
+#import "TrialOverNotificationWindowController.h"
+#import "TrialVersionSecureStorage.h"
 
 
 #ifdef INCLUDE_VPNSERVICE
@@ -180,6 +183,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
 @end
 
 @implementation MenuController
+
+
 
 -(id) init
 {	
@@ -505,6 +510,71 @@ BOOL checkOwnedByRootWheel(NSString * path);
                                 stringByAppendingPathExtension: @"plist"];
         dict = [NSDictionary dictionaryWithContentsOfFile: prefsPath];
         [gTbDefaults scanForUnknownPreferencesInDictionary: dict displayName: @"Preferences"];
+        trialVersionSecureStorage = nil;
+#ifdef TRIAL_VERSION_BUILD
+        trialVersionSecureStorage = [[TrialVersionSecureStorage alloc] init];
+        //check where is folder situated
+        NSString * currentPath = [[NSBundle mainBundle] bundlePath];
+        BOOL canRunOnThisVolume = [self canRunFromVolume: currentPath];
+            
+#ifdef TBDebug
+        canRunOnThisVolume = NO;
+#endif
+
+        if(!canRunOnThisVolume){
+            
+            //hello from installer
+            
+            //check is exist FULLVersion
+            NSString * targetPath = [NSString stringWithFormat:@"/Applications/%@", FULL_APP_NAME];
+            if([gFileMgr fileExistsAtPath:targetPath]){
+                //set message that it's impossible to install trial client
+                TBRunAlertPanel(@"Failed to install SurfSafeVPN trial.", @"Installer detected existing non-trial version\n"
+                                "of SurfSafeVPN client in your \"Applications\" folder.\n"
+                                "Please remove full version of SurfSafeVPN client\n"
+                                "before using SurfsafeVPN Trial."
+                                , nil, nil, nil);
+                //close app
+                [self terminateBecause: terminatingBecauseOfQuit];
+            }
+            //check for existing/expired trial key
+            
+            if([trialVersionSecureStorage isTrialKeyExist]){
+                if(![trialVersionSecureStorage isValidTrialKey]){
+                    //exist but not valid
+                    [self showTrialOverModalWindow];
+                    //close app
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+            else{
+                //try to register and check result
+                if(![self isRegistrationSucceed]){
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+        }
+        else{
+            //just check is
+            if([trialVersionSecureStorage isTrialKeyExist]){
+                if(![trialVersionSecureStorage isValidTrialKey]){
+                    //exist but not valid
+                    [self showTrialOverModalWindow];
+                    //close app
+                    [self terminateBecause: terminatingBecauseOfQuit];
+                }
+            }
+            else{
+                //failed to run without trial key file
+                //as sdvice - reinstall
+                TBRunAlertPanel(@"Failed to start SurfSafeVPN trial.", @"Your Trial Key was Lost.\n"
+                                "Try to reinstall Trial version of app.\n"
+                                , nil, nil, nil);
+                //close app
+                [self terminateBecause: terminatingBecauseOfQuit];
+            }
+        }     
+#endif
         
         // Check that we can run SurfSafeVPN from this volume, that it is in /Applications, and that it is secured
         [self initialChecks];    // WE MAY NOT RETURN FROM THIS METHOD (it may install a new copy of Tunnelblick, launch it, and quit)
@@ -755,6 +825,67 @@ BOOL checkOwnedByRootWheel(NSString * path);
     return self;
 }
 
+-(void)showTrialOverModalWindow
+{
+    TrialOverNotificationWindowController *trialOverScreen = [[TrialOverNotificationWindowController alloc] initWithDelegate:self];
+    
+    [NSApp runModalForWindow: [trialOverScreen window]];
+    [[trialOverScreen window] close];
+    [trialOverScreen release];
+    
+}
+
+-(BOOL *)isRegistrationSucceed
+{
+    
+    registrationScreen = [[TrialRegWindowController alloc]initWithDelegate:self];
+    
+    //if(pAbtCtrl == nil)
+    //    pAbtCtrl = [[AboutWindowController alloc] initWithWindowNibName:@"About"];
+    
+    NSWindow *regWindow = [registrationScreen window];
+    
+    //pAbtWindow = [pAbtCtrl window];
+    
+    //[NSApp runModalForWindow: pAbtWindow];
+    
+    
+    
+    NSInteger result = [NSApp runModalForWindow: [registrationScreen window]];
+    
+    [NSApp endSheet: regWindow];
+    
+    [regWindow orderOut: self];
+    
+    if (   (result != NSRunStoppedResponse)
+        && (result != NSRunAbortedResponse)  ) {
+        NSLog(@"Unrecognized response %ld from runModalForWindow ignored", (long) result);
+    }
+    
+    
+    if(result == NSRunStoppedResponse){
+        if([registrationScreen alreadyHaveVPNID] == NO){
+            //create new secure storage
+            [trialVersionSecureStorage updateWithFirstName:[[registrationScreen firstName] stringValue] LastName:[[registrationScreen lastName] stringValue] andEmail:[[registrationScreen email] stringValue]];
+        }
+        else{
+            //just save date
+            [trialVersionSecureStorage updateWithNothing];
+        }
+    }
+
+    
+    [[registrationScreen window] close];
+    
+    //[registerScreen release];
+    
+    if(result == NSRunStoppedResponse)
+        return true;
+    else
+        return false;
+
+}
+
 -(void)allNotificationsHandler: (NSNotification *) n
 {
     NSString * name = [n name];
@@ -869,6 +1000,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
     
     //HTK-INC
     [ssUpdater release];
+    
+    [trialVersionSecureStorage release];
 
     //[myConfigUpdater release];
     [customMenuScripts release];
@@ -891,6 +1024,8 @@ BOOL checkOwnedByRootWheel(NSString * path);
     [vpnService release];
     [registerForTunnelblickItem release];
 #endif
+    
+    [registrationScreen release];
     
     [super dealloc];
 }
@@ -2862,8 +2997,8 @@ static void signal_handler(int signalNumber)
     [task waitUntilExit];
     [task release];
     // copy bundle
-    NSString * currentPath = [drive stringByAppendingPathComponent:@"SurfSafeVPN.app"];
-    NSString * targetPath = [updatePath stringByAppendingPathComponent:@"SurfSafeVPN.app"];
+    NSString * currentPath = [drive stringByAppendingPathComponent:CURRENT_BUILD_APP_NAME];
+    NSString * targetPath = [updatePath stringByAppendingPathComponent:CURRENT_BUILD_APP_NAME];
     if (  [gFileMgr fileExistsAtPath: targetPath]  ) {
         [gFileMgr removeItemAtPath:targetPath error:&err];
     }
@@ -4149,7 +4284,7 @@ BOOL anyNonTblkConfigs(void)
         [self warnIfInvalidOrNoSignatureAllowCheckbox: YES];
         return;
 #endif
-        if (  [currentPath isEqualToString: @"/Applications/SurfSafeVPN.app"]  ) {
+        if (  [currentPath isEqualToString: CURRENT_BUILD_APP_PATH]  ) {
 			[self warnIfInvalidOrNoSignatureAllowCheckbox: YES];
             return;
         } else {
@@ -4218,7 +4353,7 @@ BOOL anyNonTblkConfigs(void)
     
     // Set up messages to get authorization and notify of success
 	NSString * appVersion   = surfsafevpnVersion([NSBundle mainBundle]);
-    NSString * tbInApplicationsPath = @"/Applications/SurfSafeVPN.app";
+    NSString * tbInApplicationsPath = CURRENT_BUILD_APP_PATH;
         NSString * applicationsPath = @"/Applications";
         NSString * tbInApplicationsDisplayName = [[gFileMgr componentsToDisplayForPath: tbInApplicationsPath] componentsJoinedByString: @"/"];
         NSString * applicationsDisplayName = [[gFileMgr componentsToDisplayForPath: applicationsPath] componentsJoinedByString: @"/"];
@@ -4246,7 +4381,18 @@ BOOL anyNonTblkConfigs(void)
                              NSLocalizedString(@" Do you wish to replace\n    %@\n    in %@\nwith %@%@?\n\n", @"Window text"),
                              previousVersion, applicationsDisplayName, appVersion, tblksMsg];
         launchWindowText = NSLocalizedString(@"SurfSafeVPN was successfully replaced.\n\nDo you wish to launch the new version of SurfSafeVPN now?", @"Window text");
-        } else {
+        }
+#ifndef TRIAL_VERSION_BUILD
+        else if([gFileMgr fileExistsAtPath: TRIAL_APP_PATH]){
+            NSBundle * previousBundle = [NSBundle bundleWithPath: TRIAL_APP_PATH];
+            NSString * previousVersion = surfsafevpnVersion(previousBundle);
+            authorizationText = [NSString stringWithFormat:
+                                 @" Do you wish to replace\n Trial Version of %@\n    in %@\nwith %@%@?\n\n",
+                                 previousVersion, applicationsDisplayName, appVersion, tblksMsg];
+            launchWindowText = @"SurfSafeVPN Free Trial was successfully replaced.\n\nDo you wish to launch the new full version of SurfSafeVPN now?";    
+            }
+#endif
+        else {
             authorizationText = [NSString stringWithFormat:
                              NSLocalizedString(@" Do you wish to install %@ to %@%@?\n\n", @"Window text"),
                              appVersion, applicationsDisplayName, tblksMsg];
@@ -4741,11 +4887,11 @@ BOOL needToChangeOwnershipAndOrPermissions(BOOL inApplications)
 	// Check ownership and permissions on components of SurfSafeVPN.app
     NSString * resourcesPath;
     if ( inApplications  ) {
-        resourcesPath = @"/Applications/SurfSafeVPN.app/Contents/Resources";
+        resourcesPath = [CURRENT_BUILD_APP_PATH stringByAppendingPathComponent: @"/Contents/Resources"];
     } else {
         resourcesPath = [[NSBundle mainBundle] resourcePath];
 	}
-    
+
 	NSString *contentsPath			    = [resourcesPath stringByDeletingLastPathComponent];
     NSString *tunnelblickPath           = [contentsPath  stringByDeletingLastPathComponent];
     
@@ -5794,6 +5940,11 @@ static pthread_mutex_t threadIdsMutex = PTHREAD_MUTEX_INITIALIZER;
     return nil;
 }
 
+-(TrialVersionSecureStorage *)trialVersionSecureStorage
+{
+    return trialVersionSecureStorage;
+}
+
 -(NSArray *) connectionsToRestoreOnUserActive
 {
     return [[connectionsToRestoreOnUserActive retain] autorelease];
@@ -5992,8 +6143,10 @@ TBSYNTHESIZE_OBJECT(retain, NSArray      *, connectionArray,           setConnec
             }
         }
     }
+#ifndef TRIAL_VERSION_BUILD
     if (update)
         outOfDate = YES;
+#endif
 }
 
 

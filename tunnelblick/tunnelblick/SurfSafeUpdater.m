@@ -78,7 +78,18 @@ extern NSFileManager        * gFileMgr;
 
 -(void) generateFiles{
     NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
-    NSString * configPath2 = [[L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"] copy];
+    NSBundle * ourBundle   = [NSBundle mainBundle];
+    NSString * ourBundlePath = [ourBundle bundlePath];
+    NSArray  * execComponents = [ourBundlePath pathComponents];
+    if (  [execComponents count] < 1  ) {
+        NSLog(@"Too few execComponents; ourBundlePath = %@", ourBundlePath);
+        exit(1);
+    }
+    NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 1];
+    if (  [ourAppName hasSuffix: @".app"]  ) {
+        ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+    }
+    NSString * configPath2 = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
@@ -175,7 +186,17 @@ extern NSFileManager        * gFileMgr;
         //}
     }   
     else if ([elementName isEqualToString:@"host"]){
-        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"];
+        NSBundle * ourBundle   = [NSBundle mainBundle];
+        NSString * ourBundlePath = [ourBundle bundlePath];
+        NSArray  * execComponents = [ourBundlePath pathComponents];
+        if (  [execComponents count] < 1  ) {
+            NSLog(@"Too few execComponents; ourBundlePath = %@", ourBundlePath);
+            exit(1);
+        }
+        NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 1];
+		if (  [ourAppName hasSuffix: @".app"]  ) {
+			ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+		}        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName];
         //NSString *updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
         NSString *hostname, *displayname, *location, *proxy, *photoshieldEnabled;
         
@@ -251,8 +272,18 @@ extern NSFileManager        * gFileMgr;
         NSUInteger hostCount = [hosts count];
         //hosts has object VERSION it's not a real host
         hostCount -= 1;
-    
-        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: @"SurfSafeVPN"];
+    NSBundle * ourBundle   = [NSBundle mainBundle];
+    NSString * ourBundlePath = [ourBundle bundlePath];
+    NSArray  * execComponents = [ourBundlePath pathComponents];
+    if (  [execComponents count] < 1  ) {
+        NSLog(@"Too few execComponents; ourBundlePath = %@", ourBundlePath);
+        exit(1);
+    }
+    NSString * ourAppName = [execComponents objectAtIndex: [execComponents count] - 1];
+    if (  [ourAppName hasSuffix: @".app"]  ) {
+        ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
+    }
+        NSString *configPath = [L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName];
     
         NSUInteger configCount = [[gFileMgr contentsOfDirectoryAtPath: configPath error: nil] count];
     

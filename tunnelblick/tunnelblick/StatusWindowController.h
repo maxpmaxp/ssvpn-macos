@@ -21,6 +21,7 @@
 
 
 #import <Cocoa/Cocoa.h>
+@class TrialVersionSecureStorage;
 
 @interface StatusWindowController : NSWindowController <NSAnimationDelegate,NSWindowDelegate>
 {
@@ -55,6 +56,9 @@
     IBOutlet NSTextField     * outTotalTF;
     IBOutlet NSTextField     * outTotalUnitsTF;
     
+    IBOutlet NSButton        * bannerButton;
+    IBOutlet NSTextField     * trialInfoTF;
+    
     NSUInteger                 statusScreenPosition; // Position of status window (0, 1, 2...)
                                                      // Corresponds to bit in statusScreenPositionsInUse
     
@@ -76,11 +80,14 @@
     BOOL                       haveLoadedFromNib;
     
     id                         delegate;
+    TrialVersionSecureStorage *trialVersionSecureStorage;
 }
 
 -(id)         initWithDelegate:       (id)         theDelegate;
 
 -(IBAction)   cancelButtonWasClicked: (id)         sender;
+-(IBAction)   openBannerURL:            (id)         sender;
+
 
 -(id)         delegate;
 
