@@ -314,11 +314,14 @@ extern NSString * lastPartOfPath(NSString * thePath);
 {
     NSArray * openvpnstartArgs = [openvpnstartArgString componentsSeparatedByString: @"_"];
     
-    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] unsignedIntValue];
+    //vpl: NSString doesn't respond to unsignedIntValue selector by default
+    //vpl: use integer instead. In this case it's safe and shouldn't lead to
+    //vpl: incorrect signed/unsigned conversion.
+    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] integerValue];
     //  unsigned skipScrSec = [[openvpnstartArgs objectAtIndex: 1] unsignedIntValue];  // Skip - no preference for this
-    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] unsignedIntValue];
-    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] unsignedIntValue];
-    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] unsignedIntValue];
+    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] integerValue];
+    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] integerValue];
+    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] integerValue];
     
     BOOL configPathBad = FALSE;
     switch (  cfgLocCode & 0x3  ) {
