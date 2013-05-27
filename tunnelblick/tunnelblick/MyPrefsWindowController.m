@@ -2499,7 +2499,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedLeftNavListIndex)
 	}
     
     // Start using the new setting
-    [[NSApp delegate] createStatusItem];
+    [[NSApp delegate] createNormalStatusItem];
     [[NSApp delegate] createMenu];
     [[NSApp delegate] updateUI];
 }
