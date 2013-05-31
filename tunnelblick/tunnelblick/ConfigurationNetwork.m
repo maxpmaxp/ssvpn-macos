@@ -32,7 +32,9 @@ extern NSFileManager        * gFileMgr;
     [mHost release];
     [mPort release];
     [mEnabled release];
+    [super dealloc];
 }
+
 @end
 @interface ConfigurationNetwork(Private)
 - (NSString *) dotask: (NSArray*) args;

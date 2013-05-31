@@ -210,6 +210,7 @@ BOOL needToCopyBundle(void);
 -(BOOL)             cleanup;
 -(void)             createMenu;
 -(void)             createStatusItem;
+-(void)             createNormalStatusItem;
 -(unsigned)         decrementTapCount;
 -(NSURL *)          getIPCheckURL;
 -(void)             installConfigurationsUpdateInBundleAtPathHandler: (NSString *)path;

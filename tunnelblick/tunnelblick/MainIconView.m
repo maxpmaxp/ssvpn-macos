@@ -44,14 +44,17 @@ extern BOOL              gShuttingDownWorkspace;
 	//        First click comes here and pops up the menu
 	//        Second click pops the menu back (it does not come here)
 	//        Third click comes here and (if within 1 second of first click) opens VPN Details… window
+
+    //vpl: disable triple click and show unused in surfsafevpm client preference window
+
 	NSTimeInterval thisTime = [theEvent timestamp];
-	if (  (mainIconLastClickTime + 1.0) > thisTime  ) {
+/*	if (  (mainIconLastClickTime + 1.0) > thisTime  ) {
 		[[NSApp delegate] openPreferencesWindow: self];
-	} else {
+	} else {*/
 		NSStatusItem * statusI = [[NSApp delegate] statusItem];
 		NSMenu       * menu    = [[NSApp delegate] myVPNMenu];
 		[statusI popUpStatusItemMenu: menu];
-	}
+//	}
         
 	mainIconLastClickTime = thisTime;
 }

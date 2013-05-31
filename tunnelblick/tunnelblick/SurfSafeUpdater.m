@@ -77,7 +77,7 @@ extern NSFileManager        * gFileMgr;
 }
 
 -(void) generateFiles{
-    NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
+    //NSString * configPath = [NSHomeDirectory() stringByAppendingPathComponent:CONFIGURATION_PATH];
     NSBundle * ourBundle   = [NSBundle mainBundle];
     NSString * ourBundlePath = [ourBundle bundlePath];
     NSArray  * execComponents = [ourBundlePath pathComponents];
@@ -89,7 +89,7 @@ extern NSFileManager        * gFileMgr;
     if (  [ourAppName hasSuffix: @".app"]  ) {
         ourAppName = [ourAppName substringToIndex: [ourAppName length] - 4];
     }
-    NSString * configPath2 = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
+    NSString * configPath = [[L_AS_T_DEPLOY stringByAppendingPathComponent: ourAppName] copy];
     NSString * updatePath = [NSHomeDirectory() stringByAppendingPathComponent:UPDATE_PATH];
     NSString * outdateFile = [updatePath stringByAppendingPathComponent:@"update_config"];
     
