@@ -447,6 +447,11 @@ extern NSString * lastPartOfPath(NSString * thePath);
     return TRUE;
 }
 
+-(void) setLogFilesMayExist:(BOOL)newState
+{
+    logFilesMayExist = newState;
+}
+
 -(BOOL) hasLaunchDaemon
 {
     NSString * daemonPath = [NSString stringWithFormat: @"/Library/LaunchDaemons/net.tunnelblick.startup.%@.plist", encodeSlashesAndPeriods([self displayName])];
@@ -469,14 +474,14 @@ extern NSString * lastPartOfPath(NSString * thePath);
                               [self displayName],
                               gHookupTimeout];
             NSString * prefKey = [NSString stringWithFormat: @"%@-skipWarningUnableToToEstablishOpenVPNLink", [self displayName]];
-            
-            TBRunAlertPanelExtended(NSLocalizedString(@"Unable to Establish Communication", @"Window text"),
+            //vpl disable alert screen as useless for user
+            /*TBRunAlertPanelExtended(NSLocalizedString(@"Unable to Establish Communication", @"Window text"),
                                     msg,
                                     nil, nil, nil,
                                     prefKey,
                                     NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
                                     nil,
-									NSAlertDefaultReturn);
+									NSAlertDefaultReturn);*/
         }
     }
 }
@@ -834,7 +839,6 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                 } else {
                     [statusScreen restore];
                 }
-                
                 [statusScreen setStatus: lastState forName: displayName connectedSince: [self timeString]];
                 [statusScreen fadeIn];
                 showingStatusWindow = TRUE;
@@ -2328,7 +2332,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             } else {
                 // credentialsHaveBeenAskedFor has handled things
             }
-        } else {
+        } else if ([self isConnected]){
+            //stop connecting loop on succesfull connect
+            return;
+        }
+        else{
             // Wait until either credentials have been asked for or tunnel is disconnected
             [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
                                              target: self
@@ -2769,7 +2777,6 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 -(void) updateStatisticsDisplay {
-    
     // Update the connection time string
     [statusScreen setStatus: [self state] forName: [self displayName] connectedSince: [self timeString]];
     
@@ -2982,6 +2989,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         if (  okToFade  ) {
             [statusScreen fadeOut];
             showingStatusWindow = FALSE;
+        }
+        else{
+            if([[[NSApp delegate] getLastState] isEqualToString:(@"CONNECTED")]){
+                    [[NSApp delegate]  showStatisticsWindows];
+            }
         }
     }
 }

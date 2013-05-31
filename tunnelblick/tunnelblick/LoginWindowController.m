@@ -45,8 +45,6 @@
 
 -(void) awakeFromNib
 {
-    NSString * title = [NSString stringWithFormat:NSLocalizedString(@"SurfSafeVPN %@: Login Required", @"Window title"),surfsafevpnVersion([NSBundle mainBundle])];
-    [[self window] setTitle: title];
     
     [iconIV setImage: [NSApp applicationIconImage]];
     
@@ -85,6 +83,11 @@
 
 -(void) redisplay
 {
+    NSString * text = [NSString stringWithFormat:
+                       NSLocalizedString(@"A VPN ID and Activation code are required to connect to\n  %@", @"Window text"),
+                       [[self delegate] displayName]];
+    [mainText setTitle: text];
+    
     [cancelButton setEnabled: YES];
     [OKButton setEnabled: YES];
     if (IsEnabledProxy())

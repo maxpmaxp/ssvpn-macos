@@ -5618,7 +5618,11 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
     while (  connection = [e nextObject]  ) {
         if (  [connection logFilesMayExist]  ) {
             if (  showThem  ) {
-                //vpl changes
+                if (( ! [connection isDisconnected])  ) {
+                    [connection showStatusWindow];
+                    showingAny = TRUE;
+                }
+                /*//vpl changes
                 if([lastState isEqualToString:(@"CONNECTED")]){
                     VPNConnection *tmp = (VPNConnection *)[connectionArray objectAtIndex:0];
                     if([[tmp displayName] isEqualToString:([connection displayName])]){
@@ -5626,7 +5630,7 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
                         showingAny = TRUE;
                     }
                     else{
-                        [connection setLogFilesMayExist:NO];
+                        [connection setLogFilesMayExist: NO];
                     }
                 }
                 else if([lastState isEqualToString:(@"ANIMATED")]){
@@ -5636,10 +5640,10 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
                     [connection showStatusWindow];
                     showingAny = TRUE;
                 }
-                //vpl changes end
+                //vpl changes end*/
             } else {
-                /*if (   [connection isConnected]
-                    || [connection isDisconnected]  )*/ {
+                if (   [connection isConnected]
+                    || [connection isDisconnected]  ) {
                     [connection fadeAway];
                 }
             }
@@ -5667,7 +5671,6 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
 }
 
 -(void) hideStatisticsWindows {
-    
     [self statisticsWindowsShow: NO];
 }
 
