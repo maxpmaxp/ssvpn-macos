@@ -314,11 +314,14 @@ extern NSString * lastPartOfPath(NSString * thePath);
 {
     NSArray * openvpnstartArgs = [openvpnstartArgString componentsSeparatedByString: @"_"];
     
-    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] unsignedIntValue];
+    //vpl: NSString doesn't respond to unsignedIntValue selector by default
+    //vpl: use integer instead. In this case it's safe and shouldn't lead to
+    //vpl: incorrect signed/unsigned conversion.
+    unsigned useScripts = [[openvpnstartArgs objectAtIndex: 0] integerValue];
     //  unsigned skipScrSec = [[openvpnstartArgs objectAtIndex: 1] unsignedIntValue];  // Skip - no preference for this
-    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] unsignedIntValue];
-    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] unsignedIntValue];
-    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] unsignedIntValue];
+    unsigned cfgLocCode = [[openvpnstartArgs objectAtIndex: 2] integerValue];
+    unsigned noMonitor  = [[openvpnstartArgs objectAtIndex: 3] integerValue];
+    unsigned bitMask    = [[openvpnstartArgs objectAtIndex: 4] integerValue];
     
     BOOL configPathBad = FALSE;
     switch (  cfgLocCode & 0x3  ) {
@@ -444,6 +447,11 @@ extern NSString * lastPartOfPath(NSString * thePath);
     return TRUE;
 }
 
+-(void) setLogFilesMayExist:(BOOL)newState
+{
+    logFilesMayExist = newState;
+}
+
 -(BOOL) hasLaunchDaemon
 {
     NSString * daemonPath = [NSString stringWithFormat: @"/Library/LaunchDaemons/net.tunnelblick.startup.%@.plist", encodeSlashesAndPeriods([self displayName])];
@@ -466,14 +474,14 @@ extern NSString * lastPartOfPath(NSString * thePath);
                               [self displayName],
                               gHookupTimeout];
             NSString * prefKey = [NSString stringWithFormat: @"%@-skipWarningUnableToToEstablishOpenVPNLink", [self displayName]];
-            
-            TBRunAlertPanelExtended(NSLocalizedString(@"Unable to Establish Communication", @"Window text"),
+            //vpl disable alert screen as useless for user
+            /*TBRunAlertPanelExtended(NSLocalizedString(@"Unable to Establish Communication", @"Window text"),
                                     msg,
                                     nil, nil, nil,
                                     prefKey,
                                     NSLocalizedString(@"Do not warn about this again", @"Checkbox name"),
                                     nil,
-									NSAlertDefaultReturn);
+									NSAlertDefaultReturn);*/
         }
     }
 }
@@ -831,7 +839,6 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                 } else {
                     [statusScreen restore];
                 }
-                
                 [statusScreen setStatus: lastState forName: displayName connectedSince: [self timeString]];
                 [statusScreen fadeIn];
                 showingStatusWindow = TRUE;
@@ -1270,7 +1277,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             }
         }
         
-        if (  numConnections != 1  ) {
+        if (  numConnections != 1  ) {/*vpl forced disable multiconnection
             int button = TBRunAlertPanelExtended(NSLocalizedString(@"Do you wish to connect?", @"Window title"),
                                                  [NSString stringWithFormat:NSLocalizedString(@"Multiple simultaneous connections would be created (%d with 'Set nameserver', %d without 'Set nameserver').", @"Window text"), numConnectionsWithModifyNameserver, (numConnections-numConnectionsWithModifyNameserver) ],
                                                  NSLocalizedString(@"Connect", @"Button"),  // Default button
@@ -1285,7 +1292,12 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                     requestedState = oldRequestedState;
                 }
                 return;
+            }*/
+            //vpl
+            if (  userKnows  ) {
+                requestedState = oldRequestedState;
             }
+            return;
         }
     }
         
@@ -2325,7 +2337,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
             } else {
                 // credentialsHaveBeenAskedFor has handled things
             }
-        } else {
+        } else if ([self isConnected]){
+            //stop connecting loop on succesfull connect
+            return;
+        }
+        else{
             // Wait until either credentials have been asked for or tunnel is disconnected
             [NSTimer scheduledTimerWithTimeInterval: (NSTimeInterval) 0.5   // Wait for time to process new credentials request or disconnect
                                              target: self
@@ -2766,7 +2782,6 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 -(void) updateStatisticsDisplay {
-    
     // Update the connection time string
     [statusScreen setStatus: [self state] forName: [self displayName] connectedSince: [self timeString]];
     
@@ -2979,6 +2994,11 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         if (  okToFade  ) {
             [statusScreen fadeOut];
             showingStatusWindow = FALSE;
+        }
+        else{
+            if([[[NSApp delegate] getLastState] isEqualToString:(@"CONNECTED")]){
+                    [[NSApp delegate] statisticsWindowsShow: YES];
+            }
         }
     }
 }

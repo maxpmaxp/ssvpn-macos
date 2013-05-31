@@ -23,7 +23,7 @@
 // Misc:
 
 // Set to TRUE to allow Tunnelblick to use openvpnstart's kill and killall subcommands
-#define ALLOW_OPENVPNSTART_KILL FALSE
+#define ALLOW_OPENVPNSTART_KILL TRUE
 
 // The maximum length of a display name for openvpnstart
 #define DISPLAY_NAME_LENGTH_MAX 512
@@ -304,12 +304,12 @@ typedef enum
 
 //*************************************************************************************************
 // Section for enable debug mode
-//#define TBDebug 1
+#define TBDebug 1
 
 
 //*************************************************************************************************
 // Section for enable trial version build
-//#define TRIAL_VERSION_BUILD 1
+//#define TRIAL_VERSION_BUILD 0
 
 //*************************************************************************************************
 // Section for setting application name

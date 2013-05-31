@@ -2099,7 +2099,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedLeftNavListIndex)
         NSString * listValue = [dict objectForKey: @"value"];
         unsigned listValueSize;
         if (  [listValue respondsToSelector:@selector(intValue)]  ) {
-            listValueSize = [listValue unsignedIntValue];
+            listValueSize = [listValue integerValue];
         } else {
             NSLog(@"'value' entry in %@ is invalid.", dict);
             listValueSize = UINT_MAX;
@@ -2499,7 +2499,7 @@ TBSYNTHESIZE_NONOBJECT_GET(NSUInteger, selectedLeftNavListIndex)
 	}
     
     // Start using the new setting
-    [[NSApp delegate] createStatusItem];
+    [[NSApp delegate] createNormalStatusItem];
     [[NSApp delegate] createMenu];
     [[NSApp delegate] updateUI];
 }

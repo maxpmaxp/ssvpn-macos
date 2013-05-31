@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		180C630516DBDE79005B1FA3 /* icon.iconset in Resources */ = {isa = PBXBuildFile; fileRef = 180C630416DBDE79005B1FA3 /* icon.iconset */; };
 		182837FA16CB8E5400F4D675 /* TrialRegWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 186B62D416C9650E00DCED1A /* TrialRegWindow.xib */; };
-		183661781675C86C00143582 /* Ico.icns in Resources */ = {isa = PBXBuildFile; fileRef = 183661761675C84B00143582 /* Ico.icns */; };
 		184CB7421696CC80006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		184CB7441696CCA2006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
 		184CB7451696D258006541D4 /* sharedRoutines.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A4C32516847276006F3BC0 /* sharedRoutines.m */; };
@@ -274,8 +274,8 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		180C630416DBDE79005B1FA3 /* icon.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = icon.iconset; sourceTree = "<group>"; };
 		182837DE16CB874500F4D675 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		183661761675C84B00143582 /* Ico.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Ico.icns; sourceTree = "<group>"; };
 		184CB7461696FB65006541D4 /* easyRsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easyRsa.h; sourceTree = "<group>"; };
 		184CB7471696FB65006541D4 /* easyRsa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = easyRsa.m; sourceTree = "<group>"; };
 		1856C5CB16BEA66A001E83D8 /* SurfSafeToolReport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfSafeToolReport.h; sourceTree = "<group>"; };
@@ -737,8 +737,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				180C630416DBDE79005B1FA3 /* icon.iconset */,
 				188DE0C716B7DAF200D6DD75 /* easy-rsa-SurfSafeVPN */,
-				183661761675C84B00143582 /* Ico.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				63EA8CD913A3DB1E0034F47C /* Images */,
 				63EA8CDC13A3DBD50034F47C /* Scripts */,
@@ -1158,7 +1158,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				183661781675C86C00143582 /* Ico.icns in Resources */,
 				CE8E6CD81550E5F80087E9D2 /* InfoPlist.strings in Resources */,
 				CE8E6CD91550E5F80087E9D2 /* MainMenu.xib in Resources */,
 				CE8E6CDA1550E5F80087E9D2 /* openvpn.conf in Resources */,
@@ -1237,6 +1236,7 @@
 				182837FA16CB8E5400F4D675 /* TrialRegWindow.xib in Resources */,
 				18E6E92916D1556D00467BA0 /* TrialOverNotificationWindow.xib in Resources */,
 				18E6E93116D19EA200467BA0 /* 02_baner_min2.gif in Resources */,
+				180C630516DBDE79005B1FA3 /* icon.iconset in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

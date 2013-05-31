@@ -671,7 +671,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
             [self terminateBecause: terminatingBecauseOfError];
         }
         
-		[self createStatusItem];
+		[self createNormalStatusItem];
 		
         myConfigDictionary = [[[ConfigurationManager defaultManager] getConfigurations] copy];
         
@@ -1080,6 +1080,35 @@ BOOL checkOwnedByRootWheel(NSString * path);
     }
 }
 
+//vpl: try to set ststus item in usual position
+- (void) createNormalStatusItem
+{
+    [statusItem release];
+    statusItem = nil;
+    
+    statusItem = [[[NSStatusBar systemStatusBar]
+                   statusItemWithLength:NSVariableStatusItemLength] retain];
+    
+    //commented block can be used to shift icon right close to system icons
+    
+    /*int priority = 1001;
+    if (   [[NSStatusBar systemStatusBar] respondsToSelector:
+            @selector(_statusItemWithLength:withPriority:)]
+        && [[NSStatusBar systemStatusBar] respondsToSelector:
+            @selector(_insertStatusItem:withPriority:)] ){
+        statusItem = [[[NSStatusBar systemStatusBar]
+                       _statusItemWithLength:NSVariableStatusItemLength
+                       withPriority:priority] retain];
+        [[NSStatusBar systemStatusBar] removeStatusItem: statusItem];
+        [[NSStatusBar systemStatusBar] _insertStatusItem: statusItem
+                                            withPriority: priority];
+    }
+    else {
+        statusItem = [[[NSStatusBar systemStatusBar]
+                       statusItemWithLength:NSVariableStatusItemLength] retain];
+    }*/
+}
+
 - (void) menuExtrasWereAddedHandler: (NSNotification*) n
 {
 	(void) n;
@@ -1094,7 +1123,7 @@ BOOL checkOwnedByRootWheel(NSString * path);
 
 - (void) menuExtrasWereAdded
 {
-    [self createStatusItem];
+    [self createNormalStatusItem];
     [self createMenu];
     [self updateUI];
 }
@@ -1689,7 +1718,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
 
 -(void) changedDisplayConnectionSubmenusSettings
 {
-    [self createStatusItem];
+    [self createNormalStatusItem];
     [self createMenu];
     [self updateUI];
 }
@@ -5589,7 +5618,11 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
     while (  connection = [e nextObject]  ) {
         if (  [connection logFilesMayExist]  ) {
             if (  showThem  ) {
-                //vpl changes
+                if (( ! [connection isDisconnected])  ) {
+                    [connection showStatusWindow];
+                    showingAny = TRUE;
+                }
+                /*//vpl changes
                 if([lastState isEqualToString:(@"CONNECTED")]){
                     VPNConnection *tmp = (VPNConnection *)[connectionArray objectAtIndex:0];
                     if([[tmp displayName] isEqualToString:([connection displayName])]){
@@ -5597,7 +5630,7 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
                         showingAny = TRUE;
                     }
                     else{
-                        [connection setLogFilesMayExist:NO];
+                        [connection setLogFilesMayExist: NO];
                     }
                 }
                 else if([lastState isEqualToString:(@"ANIMATED")]){
@@ -5607,10 +5640,10 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
                     [connection showStatusWindow];
                     showingAny = TRUE;
                 }
-                //vpl changes end
+                //vpl changes end*/
             } else {
-                /*if (   [connection isConnected]
-                    || [connection isDisconnected]  )*/ {
+                if (   [connection isConnected]
+                    || [connection isDisconnected]  ) {
                     [connection fadeAway];
                 }
             }
@@ -5638,7 +5671,6 @@ OSStatus hotKeyPressed(EventHandlerCallRef nextHandler,EventRef theEvent, void *
 }
 
 -(void) hideStatisticsWindows {
-    
     [self statisticsWindowsShow: NO];
 }
 
