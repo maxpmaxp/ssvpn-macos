@@ -2992,7 +2992,7 @@ static pthread_mutex_t lastStateMutex = PTHREAD_MUTEX_INITIALIZER;
         }
         else{
             if([[[NSApp delegate] getLastState] isEqualToString:(@"CONNECTED")]){
-                    [[NSApp delegate]  showStatisticsWindows];
+                    [[NSApp delegate] statisticsWindowsShow: YES];
             }
         }
     }
