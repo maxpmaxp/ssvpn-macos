@@ -1277,7 +1277,7 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
             }
         }
         
-        if (  numConnections != 1  ) {
+        if (  numConnections != 1  ) {/*vpl forced disable multiconnection
             int button = TBRunAlertPanelExtended(NSLocalizedString(@"Do you wish to connect?", @"Window title"),
                                                  [NSString stringWithFormat:NSLocalizedString(@"Multiple simultaneous connections would be created (%d with 'Set nameserver', %d without 'Set nameserver').", @"Window text"), numConnectionsWithModifyNameserver, (numConnections-numConnectionsWithModifyNameserver) ],
                                                  NSLocalizedString(@"Connect", @"Button"),  // Default button
@@ -1292,7 +1292,12 @@ static pthread_mutex_t deleteLogsMutex = PTHREAD_MUTEX_INITIALIZER;
                     requestedState = oldRequestedState;
                 }
                 return;
+            }*/
+            //vpl
+            if (  userKnows  ) {
+                requestedState = oldRequestedState;
             }
+            return;
         }
     }
         
