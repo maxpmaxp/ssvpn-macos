@@ -68,8 +68,8 @@ extern TBUserDefaults  * gTbDefaults;
 			inGroup = allUseGroup;
 		}
         
-        /*displayName = [inConfigName copy];
-        group = [inGroup copy];
+        displayName = [inConfigName copy];
+        /*group = [inGroup copy];
         
 		NSString * prefix;
         if (  inGroup  ) {
